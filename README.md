@@ -345,13 +345,20 @@ This looks like as follows:
 source/robot_lab/assets/
 ├── __init__.py
 └── unitree.py  # <- this is where we define robot assets
+└── zsibot.py  # <- including urdf...
 
 source/robot_lab/tasks/manager_based/locomotion/
 ├── __init__.py
 └── velocity
-    ├── config
+    ├── config/quadruped
     │   └── unitree_a1
     │       ├── agent  # <- this is where we store the learning agent configurations
+    │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
+    │       ├── flat_env_cfg.py
+    │       └── rough_env_cfg.py
+    │   └── qzsibot_zsl1
+    │       ├── agent  # <- this is where we store the learning agent configurations
+    |           └── rsl_rl_ppo_cfg.py
     │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
     │       ├── flat_env_cfg.py
     │       └── rough_env_cfg.py
