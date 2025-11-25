@@ -344,7 +344,7 @@ This looks like as follows:
 ```tree
 source/robot_lab/assets/
 ├── __init__.py
-└── unitree.py  # <- this is where we define robot assets
+|── unitree.py  # <- this is where we define robot assets
 └── zsibot.py  # <- including urdf...
 
 source/robot_lab/tasks/manager_based/locomotion/
