@@ -342,12 +342,20 @@ itself. However, its various instances are included in directories within the en
 This looks like as follows:
 
 ```tree
-source/robot_lab/assets/
+source/robot_lab/data/Robots
+├── unitree/a1_description/mesh
+├── unitree/a1_description/urdf
+    └──a1.urdf
+├── zsibot/zsl1_description/mesh
+├── zsibot/zsl1_description/urdf
+    └──zsl1.urdf
+
+source/robot_lab/robot_lab/assets/
 ├── __init__.py
 |── unitree.py  # <- this is where we define robot assets
 └── zsibot.py  # <- including urdf...
 
-source/robot_lab/tasks/manager_based/locomotion/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/
 ├── __init__.py
 └── velocity
     ├── config/quadruped
@@ -361,7 +369,7 @@ source/robot_lab/tasks/manager_based/locomotion/
     |           └── rsl_rl_ppo_cfg.py
     │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
     │       ├── flat_env_cfg.py
-    │       └── rough_env_cfg.py
+    │       └── rough_env_cfg.py  # <- Observations/Actions/Events/Rewards, look into its parent class: velocity_env_cfg.py
     ├── __init__.py
     └── velocity_env_cfg.py  # <- this is the base task configuration
 ```
