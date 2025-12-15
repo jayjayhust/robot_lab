@@ -198,6 +198,7 @@ RSL-RL:
 
 ```bash
 # Train
+# <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # Play
