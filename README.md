@@ -201,6 +201,8 @@ RSL-RL:
 # <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
+# pt files(e.g.: robot 'zsibot_zsl1' using 'rough' env): robot_lab/logs/rsl_rl/zsibot_zsl1_rough
+
 # Play
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<ENV_NAME>
 ```
