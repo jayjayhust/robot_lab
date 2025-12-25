@@ -199,6 +199,7 @@ RSL-RL:
 ```bash
 # Train
 # <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Opendoge-Apx-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):
