@@ -368,7 +368,7 @@ source/robot_lab/robot_lab/tasks/manager_based/locomotion/
     │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
     │       ├── flat_env_cfg.py
     │       └── rough_env_cfg.py
-    │   └── qzsibot_zsl1
+    │   └── zsibot_zsl1
     │       ├── agent  # <- this is where we store the learning agent configurations
     |           └── rsl_rl_ppo_cfg.py
     │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
