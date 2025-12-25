@@ -350,10 +350,13 @@ This looks like as follows:
 source/robot_lab/data/Robots
 ├── unitree/a1_description/mesh
 ├── unitree/a1_description/urdf
-    └──a1.urdf
+|   └──a1.urdf
 ├── zsibot/zsl1_description/mesh
 ├── zsibot/zsl1_description/urdf
-    └──zsl1.urdf
+|   └──zsl1.urdf
+├── opendoge/apx_description/mesh
+└── opendoge/apx_description/urdf
+    └──apx_description.urdf
 
 source/robot_lab/robot_lab/assets/
 ├── __init__.py
