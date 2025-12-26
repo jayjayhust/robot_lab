@@ -37,8 +37,8 @@ OPENDOGE_APX_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.4),
         joint_pos={
-            ".*hip_joint": 0.0,
-            ".*thigh_joint": 0.8,
+            ".*_hip_joint": 0.0,
+            ".*_thigh_joint": 0.8,
             ".*_calf_joint": -1.5,
         },
         joint_vel={".*": 0.0},
@@ -46,7 +46,7 @@ OPENDOGE_APX_CFG = ArticulationCfg(
     soft_joint_pos_limit_factor=0.9,
     actuators={
         "base_legs": DCMotorCfg(
-            joint_names_expr=[".*hip_joint", ".*thigh_joint", ".*_calf_joint"],
+            joint_names_expr=[".*_hip_joint", ".*_thigh_joint", ".*_calf_joint"],
             effort_limit=28,
             saturation_effort=28,
             velocity_limit=28,
@@ -57,4 +57,4 @@ OPENDOGE_APX_CFG = ArticulationCfg(
     },
 )
 
-"""Configuration of opendoge."""
+"""Configuration of opendoge quadruped."""
