@@ -68,6 +68,7 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             },
         }
         self.events.randomize_rigid_body_mass_base.params["asset_cfg"].body_names = [self.base_link_name]
+        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.5, 0.5)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
         self.events.randomize_rigid_body_mass_others.params["asset_cfg"].body_names = [
             f"^(?!.*{self.base_link_name}).*"
         ]
