@@ -51,24 +51,36 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # ------------------------------Events------------------------------
         self.events.randomize_reset_base.params = {
             "pose_range": {
-                "x": (-0.5, 0.5),
-                "y": (-0.5, 0.5),
-                "z": (0.0, 0.2),
-                "roll": (-3.14, 3.14),
-                "pitch": (-3.14, 3.14),
-                "yaw": (-3.14, 3.14),
+                # "x": (-0.5, 0.5),
+                # "y": (-0.5, 0.5),
+                # "z": (0.0, 0.2),
+                "x": (-0, 0),
+                "y": (-0, 0),
+                "z": (0.1, 0.2),
+                # "roll": (-3.14, 3.14),
+                # "pitch": (-3.14, 3.14),
+                # "yaw": (-3.14, 3.14),
+                "roll": (-0.0, 0.0),
+                "pitch": (-0.0, 0.0),
+                "yaw": (-0, 0),
             },
             "velocity_range": {
-                "x": (-0.5, 0.5),
-                "y": (-0.5, 0.5),
-                "z": (-0.5, 0.5),
-                "roll": (-0.5, 0.5),
-                "pitch": (-0.5, 0.5),
-                "yaw": (-0.5, 0.5),
+                # "x": (-0.5, 0.5),
+                # "y": (-0.5, 0.5),
+                # "z": (-0.5, 0.5),
+                # "roll": (-0.5, 0.5),
+                # "pitch": (-0.5, 0.5),
+                # "yaw": (-0.5, 0.5),
+                "x": (-0, 0.0),
+                "y": (-0.0, 0.0),
+                "z": (-0.0, 0.0),
+                "roll": (-0.000, 0.000),
+                "pitch": (-0.000, 0.000),
+                "yaw": (-0.000, 0.000),
             },
         }
         self.events.randomize_rigid_body_mass_base.params["asset_cfg"].body_names = [self.base_link_name]
-        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.5, 0.5)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
+        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.0, 0.0)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
         self.events.randomize_rigid_body_mass_others.params["asset_cfg"].body_names = [
             f"^(?!.*{self.base_link_name}).*"
         ]
