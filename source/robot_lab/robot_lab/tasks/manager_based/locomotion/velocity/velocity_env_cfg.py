@@ -319,10 +319,8 @@ class EventCfg:
         mode="reset",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=""),
-            # "force_range": (-10.0, 10.0),
-            # "torque_range": (-10.0, 10.0),
-            "force_range": (-0.0, 0.0),  # decrease the turbulence for opendoge training debug
-            "torque_range": (-0.1, 0.1),  # decrease the turbulence for opendoge training debug
+            "force_range": (-10.0, 10.0),
+            "torque_range": (-10.0, 10.0),
         },
     )
 
