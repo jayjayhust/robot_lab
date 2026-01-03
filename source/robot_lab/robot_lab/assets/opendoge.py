@@ -50,11 +50,11 @@ OPENDOGE_APX_CFG = ArticulationCfg(
             # effort_limit=28,
             # saturation_effort=28,
             # velocity_limit=28,
-            effort_limit=1.8,  # 降低力矩限制(robstride eduLite05 spec)
-            saturation_effort=1.8,  # 电机峰值力矩（短时, or use: 6N.M)
+            effort_limit=1.8,  # 降低力矩限制(robstride eduLite05 spec: 额定负载1.8N.m)
+            saturation_effort=1.8,  # 电机峰值力矩（峰值负载: 6N.m)
             velocity_limit=5,  # 降低速度限制(robstride eduLite05 spec)
-            stiffness=20.0,
-            damping=0.7,
+            stiffness=20.0,  # stiffness gains (also known as p-gain) of the joints in the group.
+            damping=0.7,  # damping gains (also known as d-gain) of the joints in the group.
             friction=0.0
         ),
     },
