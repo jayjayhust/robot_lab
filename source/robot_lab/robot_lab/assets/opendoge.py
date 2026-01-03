@@ -21,14 +21,10 @@ OPENDOGE_APX_CFG = ArticulationCfg(
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
             retain_accelerations=False,
-            # linear_damping=0.0,
-            # angular_damping=0.0,
-            # max_linear_velocity=1000.0,
-            # max_angular_velocity=1000.0,
-            linear_damping=0.1,  # 增加线性阻尼
-            angular_damping=0.1,  # 增加角阻尼
-            max_linear_velocity=10.0,
-            max_angular_velocity=5.0,
+            linear_damping=0.0,
+            angular_damping=0.0,
+            max_linear_velocity=1000.0,
+            max_angular_velocity=1000.0,
             max_depenetration_velocity=1.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
@@ -54,15 +50,12 @@ OPENDOGE_APX_CFG = ArticulationCfg(
             # effort_limit=28,
             # saturation_effort=28,
             # velocity_limit=28,
+            effort_limit=1.8,  # 降低力矩限制(robstride eduLite05 spec)
+            saturation_effort=1.8,  # 电机峰值力矩（短时, or use: 6N.M)
+            velocity_limit=5,  # 降低速度限制(robstride eduLite05 spec)
             stiffness=20.0,
             damping=0.7,
-            # friction=0.0,
-            effort_limit=1.8,  # 降低力矩限制(robstride eduLite05 spec)
-            saturation_effort=1.8,  # 电机峰值力矩（短时, or use: 6N.M*9=54?)
-            velocity_limit=5,  # 降低速度限制(robstride eduLite05 spec)
-            # stiffness=30.0,  # increase刚性(参考位置环Kp from robstride eduLite05 spec)
-            # damping=2.0,  # 增加阻尼(参考速度环Kp from robstride eduLite05 spec)
-            friction=0.0,  # 按需增加摩擦
+            friction=0.0
         ),
     },
 )
