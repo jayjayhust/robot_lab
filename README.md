@@ -361,7 +361,9 @@ source/robot_lab/data/Robots
 source/robot_lab/robot_lab/assets/
 ├── __init__.py
 |── unitree.py  # <- this is where we define robot assets
-└── zsibot.py  # <- including urdf...
+|── zsibot.py  # <- including urdf path...
+└── opendoge.py  # <- articulation config(including motor parameters)
+
 
 source/robot_lab/robot_lab/tasks/manager_based/locomotion/
 ├── __init__.py
