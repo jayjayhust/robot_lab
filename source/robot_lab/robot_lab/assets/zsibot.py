@@ -1,11 +1,11 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
+
+from robot_lab.assets import ISAACLAB_ASSETS_DATA_DIR
 
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import DCMotorCfg, ImplicitActuatorCfg
 from isaaclab.assets.articulation import ArticulationCfg
-
-from robot_lab.assets import ISAACLAB_ASSETS_DATA_DIR
 
 ##
 # Configuration
@@ -94,7 +94,7 @@ ZSIBOT_ZSL1W_CFG = ArticulationCfg(
     actuators={
         "legs": DCMotorCfg(
             joint_names_expr=[".*_ABAD_JOINT", ".*_HIP_JOINT", ".*_KNEE_JOINT"],
-            effort_limit=28,
+            effort_limit=28,  # zs CHAMP P65 spec: 额定扭矩11.5, 峰值扭矩48
             saturation_effort=28,
             velocity_limit=28,
             stiffness=20.0,

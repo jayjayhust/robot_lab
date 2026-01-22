@@ -38,8 +38,8 @@ OPENDOGE_APX_CFG = ArticulationCfg(
         pos=(0.0, 0.0, 0.4),
         joint_pos={
             ".*_hip_joint": 0.0,
-            ".*_thigh_joint": 0.8,
-            ".*_calf_joint": -1.5,
+            ".*_thigh_joint": 0.43,
+            ".*_calf_joint": -0.86,
         },
         joint_vel={".*": 0.0},
     ),
@@ -60,8 +60,8 @@ OPENDOGE_APX_CFG = ArticulationCfg(
         # hips 和 thighs 组的配置
         "base_legs_hip_thigh": DCMotorCfg(
             joint_names_expr=[".*_hip_joint", ".*_thigh_joint"],
-            effort_limit=1.8,  # 额定负载
-            saturation_effort=1.8,  # 峰值力矩
+            effort_limit=6,  # 额定负载
+            saturation_effort=6,  # 峰值力矩
             velocity_limit=5,  # 速度限制
             stiffness=20.0,
             damping=0.7,
@@ -70,8 +70,10 @@ OPENDOGE_APX_CFG = ArticulationCfg(
         # calf_joint 的配置：基于 thigh_joint 的 1.5 倍扭矩
         "base_legs_calf": DCMotorCfg(
             joint_names_expr=[".*_calf_joint"],
-            effort_limit=1.8 * 1.5,  # thigh_joint 力矩的 1.5 倍
-            saturation_effort=1.8 * 1.5,  # 峰值力矩
+            # effort_limit=4 * 1.5,  # thigh_joint 力矩的 1.5 倍
+            effort_limit=6 * 1.0,  # thigh_joint 力矩的 1.0 倍
+            # saturation_effort=4 * 1.5,  # 峰值力矩
+            saturation_effort=6 * 1.0,  # 峰值力矩
             velocity_limit=5,  # 保持速度限制为 thigh_joint 一致，若模型有需求可调整
             stiffness=20.0,  # stiffness 与 thigh_joint 保持一致
             damping=0.7,  # damping 与 thigh_joint 保持一致
