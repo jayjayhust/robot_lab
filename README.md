@@ -206,6 +206,11 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # ./robot_lab/logs/rsl_rl/zsibot_zsl1_rough/2025-12-16_21-47-16/model_49999.pt
 
 # Play
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Opendoge-Apx-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Opendoge-Apx-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
 ```
 
