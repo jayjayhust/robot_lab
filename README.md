@@ -199,19 +199,31 @@ RSL-RL:
 ```bash
 # Train
 # <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-Opendoge-Apx-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Opendoge-Apx-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):
 # ./robot_lab/logs/rsl_rl/zsibot_zsl1_rough/2025-12-16_21-47-16/model_49999.pt
 
 # Play
-# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0
-# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Opendoge-Apx-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Opendoge-Apx-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0 --num_envs 1 --keyboard
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
+python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME> --num_envs=<NUM_ENVS> --keyboard
+
+# View tensorboard
+# e.g.: tensorboard --logdir=logs/rsl_rl/sdog_sdog2_flat/2026-03-05_10-05-10
+tensorboard --logdir=logs
 ```
 
 CusRL (**Experimental**):

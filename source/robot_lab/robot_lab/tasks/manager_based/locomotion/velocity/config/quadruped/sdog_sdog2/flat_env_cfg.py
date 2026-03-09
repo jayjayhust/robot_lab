@@ -3,6 +3,8 @@
 
 from isaaclab.utils import configclass
 
+from isaaclab.envs import mdp
+
 from .rough_env_cfg import SdogSdog2RoughEnvCfg
 
 

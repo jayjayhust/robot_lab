@@ -8,7 +8,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class OpendogeApxRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 50000
+    max_iterations = 100000  # 从50000增加到100000
     save_interval = 100
     experiment_name = "opendoge_apx_rough"
     policy = RslRlPpoActorCriticCfg(
@@ -40,5 +40,5 @@ class OpendogeApxFlatPPORunnerCfg(OpendogeApxRoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 5000
+        self.max_iterations = 20000  # 从5000增加到20000
         self.experiment_name = "opendoge_apx_flat"
