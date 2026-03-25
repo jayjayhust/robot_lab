@@ -678,3 +678,113 @@ def flat_orientation_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = Scen
     reward = torch.sum(torch.square(asset.data.projected_gravity_b[:, :2]), dim=1)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
+
+
+def track_lin_vel_xy_heading_aligned_exp(
+    env: ManagerBasedRLEnv,
+    std: float,
+    command_name: str,
+    heading_threshold: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Reward tracking of linear velocity commands with heading alignment priority.
+
+    This reward function implements a two-stage behavior:
+    1. When heading misalignment > threshold: reward yaw rotation to align with heading_target
+    2. When heading aligned: reward forward velocity tracking toward the commanded speed
+
+    Uses ``heading_target`` from the command term directly (requires heading_command=True in CommandCfg).
+    This encourages the robot to first turn to face the target direction before moving forward.
+
+    Args:
+        env: The environment.
+        std: Standard deviation for the exponential kernel.
+        command_name: Name of the command term.
+        heading_threshold: Heading alignment threshold in radians. When heading error is below
+            this value, forward velocity tracking is rewarded.
+        asset_cfg: Asset configuration.
+
+    Returns:
+        Reward tensor.
+    """
+    import isaaclab.utils.math as imath
+
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    command_term = env.command_manager.get_term(command_name)
+    command = env.command_manager.get_command(command_name)
+
+    # Get the target heading from the command term (world frame)
+    # heading_target is only available when heading_command=True
+    if hasattr(command_term, "heading_target"):
+        target_heading_w = command_term.heading_target  # shape: (num_envs,)
+    else:
+        # Fallback: derive from xy command direction in body frame
+        target_heading_w = torch.atan2(command[:, 1], command[:, 0])
+
+    # Compute robot's current yaw in world frame from quaternion
+    # Extract yaw from quaternion: yaw = atan2(2*(qw*qz + qx*qy), 1 - 2*(qy^2 + qz^2))
+    quat_w = asset.data.root_quat_w[:, 0]
+    quat_x = asset.data.root_quat_w[:, 1]
+    quat_y = asset.data.root_quat_w[:, 2]
+    quat_z = asset.data.root_quat_w[:, 3]
+    robot_yaw = torch.atan2(2.0 * (quat_w * quat_z + quat_x * quat_y), 1.0 - 2.0 * (quat_y * quat_y + quat_z * quat_z))
+
+    # Compute heading error (wrapped to [-pi, pi])
+    heading_error = imath.wrap_to_pi(target_heading_w - robot_yaw)
+
+    # Check if command magnitude is significant (use xy component of vel_command_b as speed indicator)
+    cmd_speed = torch.norm(command[:, :2], dim=1)
+    has_command = cmd_speed > 0.1
+
+    # Stage 1: Heading alignment (when misaligned)
+    heading_aligned = torch.abs(heading_error) < heading_threshold
+
+    # Reward for reducing heading error (position-based)
+    heading_reward = torch.exp(-torch.square(heading_error) / (std**2))
+
+    # Reward for yaw rotation velocity that reduces heading error (velocity-based)
+    # desired_yaw_vel is proportional to heading error so robot spins toward the target
+    yaw_vel_w = asset.data.root_ang_vel_w[:, 2]
+    desired_yaw_vel = heading_error * 2.0  # Gain: 2.0 rad/s per radian error
+    yaw_vel_reward = torch.exp(-torch.square(yaw_vel_w - desired_yaw_vel) / std**2)
+
+    # Forward velocity: project world-frame velocity onto robot forward direction
+    forward_vel = (asset.data.root_lin_vel_w[:, 0] * torch.cos(robot_yaw)
+                   + asset.data.root_lin_vel_w[:, 1] * torch.sin(robot_yaw))
+    lateral_vel = (-asset.data.root_lin_vel_w[:, 0] * torch.sin(robot_yaw)
+                   + asset.data.root_lin_vel_w[:, 1] * torch.cos(robot_yaw))
+
+    # Forward velocity tracking: target speed is the commanded xy speed magnitude
+    forward_reward = torch.exp(-torch.square(forward_vel - cmd_speed) / std**2)
+    lateral_penalty = torch.exp(-torch.square(lateral_vel) / std**2)
+
+    # Combine rewards based on alignment state:
+    # Not aligned: focus on heading alignment (position + velocity)
+    # Aligned: focus on forward velocity tracking
+    reward = torch.where(
+        has_command,
+        torch.where(
+            heading_aligned,
+            # Aligned: forward tracking dominates
+            0.6 * forward_reward + 0.2 * heading_reward + 0.1 * yaw_vel_reward + 0.1 * lateral_penalty,
+            # Not aligned: heading alignment dominates, allow some forward progress
+            0.4 * heading_reward + 0.3 * yaw_vel_reward + 0.2 * forward_reward + 0.1 * lateral_penalty,
+        ),
+        heading_reward,
+    )
+
+    # On inclined terrain (stairs steps), fall back to pure forward-velocity tracking
+    # because heading is locked and heading_target may be 0, making the alignment logic unreliable.
+    proj_gravity = env.scene["robot"].data.projected_gravity_b
+    pitch_angle = torch.abs(torch.atan2(proj_gravity[:, 0], -proj_gravity[:, 2]))
+    on_incline = pitch_angle > 0.17  # ~10 degrees
+    # On incline: use standard body-frame velocity tracking (vel_command_b is world-stabilized)
+    lin_vel_error = torch.sum(torch.square(command[:, :2] - asset.data.root_lin_vel_b[:, :2]), dim=1)
+    incline_reward = torch.exp(-lin_vel_error / std**2)
+    reward = torch.where(on_incline, incline_reward, reward)
+
+    # Apply gravity alignment factor
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+
+    return reward

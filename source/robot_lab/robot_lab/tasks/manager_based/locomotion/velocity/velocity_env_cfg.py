@@ -30,6 +30,7 @@ from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
 ##
 # Pre-defined configs
+# https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/config/rough.py
 ##
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 
@@ -106,13 +107,16 @@ class CommandsCfg:
     base_velocity = mdp.UniformThresholdVelocityCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.02,
+        rel_standing_envs=0.02,  # 2% 环境保持静止
         rel_heading_envs=1.0,
-        heading_command=True,
+        heading_command=True,  # Command heading
         heading_control_stiffness=0.5,
-        debug_vis=True,
+        debug_vis=True,  # Debug visualization(显示目标朝向箭头和本体朝向箭头)
         ranges=mdp.UniformThresholdVelocityCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-1.0, 1.0), ang_vel_z=(-1.0, 1.0), heading=(-math.pi, math.pi)
+            lin_vel_x=(-1.0, 1.0),  # Linear velocity in x-direction
+            lin_vel_y=(-1.0, 1.0),  # Linear velocity in y-direction
+            ang_vel_z=(-1.0, 1.0),  # Angular velocity around z-axis
+            heading=(-math.pi, math.pi)  # Heading angle
         ),
     )
 

@@ -217,7 +217,7 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Sdog-Sdog2-v0 --num_envs 1 --keyboard
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0
-# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --num_envs 1 --keyboard
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME> --num_envs=<NUM_ENVS> --keyboard
 
