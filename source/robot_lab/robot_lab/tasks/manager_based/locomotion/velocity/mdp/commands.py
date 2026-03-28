@@ -3,24 +3,34 @@
 
 from __future__ import annotations
 
-import torch
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
+import torch
 
 from isaaclab.managers import CommandTerm, CommandTermCfg
 from isaaclab.utils import configclass
-from isaaclab.utils.math import quat_apply, quat_apply_inverse, yaw_quat
+
+import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
 
 from .utils import is_robot_on_terrain
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
 
+# UniformVelocityCommand class definition:
+# https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/envs/mdp/commands/velocity_command.py
+# The command comprises of a linear velocity in x and y direction and an angular velocity around
+# the z-axis. It is given in the robot's base frame.
+# If the cfg.heading_command flag is set to True, the angular velocity is computed from the heading
+# error similar to doing a proportional control on the heading error. The target heading is sampled uniformly
+# from the provided range. Otherwise, the angular velocity is sampled uniformly from the provided range.
+# Mathematically, the angular velocity is computed as follows from the heading command:
+# math:omega_z = \frac{1}{2} \text{wrap_to_pi}(\theta_{\text{target}} - \theta_{\text{current}})
 
 class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
     """Command generator that generates a velocity command in SE(2) from uniform distribution with threshold.
+    SE(2) stands for the special Euclidean group in two dimensions(二维特殊欧几里得群 ).
 
     This command generator automatically detects "pits" terrain and applies restrictions:
     - For pit terrains: only allow forward movement (no lateral or rotational movement)
@@ -39,77 +49,26 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
         super().__init__(cfg, env)
         # Track which robots were on pit terrain in the previous step
         self.was_on_pit = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
-        # World-horizontal (yaw-frame) velocity buffer: stores xy velocity direction fixed in world horizontal plane
-        self.vel_command_yaw_w = torch.zeros(self.num_envs, 2, device=self.device)
 
     def _resample_command(self, env_ids: Sequence[int]):
         """Resample velocity commands with threshold."""
         super()._resample_command(env_ids)
+        # command(buffer): x vel, y vel, yaw vel, heading
+        # REF: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/envs/mdp/commands/velocity_command.py
         # set small commands to zero
         self.vel_command_b[env_ids, :2] *= (torch.norm(self.vel_command_b[env_ids, :2], dim=1) > 0.2).unsqueeze(1)
-
-        # Store the velocity command in world frame aligned with heading_target.
-        # This ensures the robot moves in the direction it is facing (heading_target),
-        # not in some arbitrary direction independent of heading.
-        # The speed magnitude is taken from vel_command_b, direction from heading_target.
-        if self.cfg.heading_command:
-            # Get the speed magnitude from the sampled body-frame velocity
-            speed = torch.norm(self.vel_command_b[env_ids, :2], dim=1)
-            # Compute world-frame velocity direction from heading_target
-            # heading_target is the desired world-frame heading angle
-            heading = self.heading_target[env_ids]
-            # World-frame velocity: (speed * cos(heading), speed * sin(heading))
-            self.vel_command_yaw_w[env_ids, 0] = speed * torch.cos(heading)
-            self.vel_command_yaw_w[env_ids, 1] = speed * torch.sin(heading)
-        else:
-            # Fallback: use robot's current yaw to convert body-frame to world-frame
-            vel_b_3d = torch.zeros(len(env_ids), 3, device=self.device)
-            vel_b_3d[:, :2] = self.vel_command_b[env_ids, :2]
-            yaw_q = yaw_quat(self.robot.data.root_quat_w[env_ids])
-            vel_yaw = quat_apply(yaw_q, vel_b_3d)
-            self.vel_command_yaw_w[env_ids] = vel_yaw[:, :2]
 
     def _update_command(self):
         """Update commands and apply terrain-aware restrictions in real-time.
 
         This function:
         1. Calls parent's update to handle heading and standing envs
-        2. Applies world-horizontal velocity stabilization to maintain fixed world-coordinate direction
-        3. On stairs: disable yaw rotation and lock heading to forward
-        4. Checks which robots are currently on pit terrain
-        5. For robots leaving pits: resamples their commands
-        6. For robots on pits: restricts to forward-only movement and sets heading to 0
+        2. Checks which robots are currently on pit terrain
+        3. For robots leaving pits: resamples their commands
+        4. For robots on pits: restricts to forward-only movement and sets heading to 0
         """
         # First, call parent's update command
         super()._update_command()
-
-        # Apply world-horizontal velocity stabilization to ALL environments.
-        # This ensures vel_command_b[:, :2] always represents the same world-horizontal direction
-        # regardless of robot pitch/roll on any terrain (stairs, rough terrain, etc.).
-        vel_yaw_3d = torch.zeros(self.num_envs, 3, device=self.device)
-        vel_yaw_3d[:, :2] = self.vel_command_yaw_w
-        yaw_q = yaw_quat(self.robot.data.root_quat_w)
-        vel_b_3d = quat_apply_inverse(yaw_q, vel_yaw_3d)
-        self.vel_command_b[:, :2] = vel_b_3d[:, :2]
-
-        # Check terrain types for conditional behavior
-        on_stair_terrain = is_robot_on_terrain(self._env, "pyramid_stairs") | is_robot_on_terrain(
-            self._env, "pyramid_stairs_inv"
-        )
-
-        # On stair steps (inclined surfaces): disable yaw rotation to prevent destabilization.
-        # The world-horizontal velocity stabilization above ensures linear velocity direction is maintained.
-        if on_stair_terrain.any():
-            # Detect if robot is actually on stair steps (inclined) vs flat landing
-            proj_gravity = self.robot.data.projected_gravity_b
-            pitch_angle = torch.abs(torch.atan2(proj_gravity[:, 0], -proj_gravity[:, 2]))
-            # Threshold: ~10 degrees (0.17 rad) - above this is considered on stair steps
-            on_stair_steps = on_stair_terrain & (pitch_angle > 0.17)
-
-            if on_stair_steps.any():
-                stair_step_env_ids = torch.where(on_stair_steps)[0]
-                # Only disable yaw rotation command, keep linear velocity as stabilized above
-                self.vel_command_b[stair_step_env_ids, 2] = 0.0
 
         # Check which robots are currently on pit terrain (real-time check every step)
         on_pits = is_robot_on_terrain(self._env, "pits")

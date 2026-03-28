@@ -9,7 +9,17 @@
 - [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py)
 - [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py)
 - [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py)
+- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py)
+- [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
+- [__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added documentation for dedicated stair-specific PPO runner configuration (ZsibotZSL1StairPPORunnerCfg)
+- Updated environment variants section to include stair climbing scenarios
+- Enhanced reward system documentation with stair-specific optimizations
+- Added concrete examples for stair climbing training configurations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -26,13 +36,15 @@
 ## Introduction
 This document explains the RSL-RL training system implemented in the repository. It covers the Proximal Policy Optimization (PPO) algorithm configuration, the training pipeline, and the CLI argument system. It also documents the OnPolicyRunner and DistillationRunner classes, their differences and use cases, the environment wrapper system, action clipping, and video recording. Finally, it provides guidance on distributed training, experiment logging, checkpoint management, and common training issues.
 
+**Updated** Added support for dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios.
+
 ## Project Structure
 The RSL-RL training system is organized around three primary scripts and configuration modules:
 - Training entry point: scripts/reinforcement_learning/rsl_rl/train.py
 - Playback/inference entry point: scripts/reinforcement_learning/rsl_rl/play.py
 - CLI argument helpers: scripts/reinforcement_learning/rsl_rl/cli_args.py
 - Agent configuration templates: source/robot_lab/robot_lab/tasks/.../agents/rsl_rl_ppo_cfg.py and rsl_rl_distillation_cfg.py
-- Environment configuration templates: source/robot_lab/robot_lab/tasks/.../flat_env_cfg.py and related rough variants
+- Environment configuration templates: source/robot_lab/robot_lab/tasks/.../flat_env_cfg.py, rough_env_cfg.py, and stair_env_cfg.py
 
 ```mermaid
 graph TB
@@ -49,25 +61,25 @@ D2 --> H["Policy Export (JIT/ONNX)"]
 ```
 
 **Diagram sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L214)
+- [train.py:171-224](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
+- [play.py:158-214](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L214)
 
 **Section sources**
-- [README.md](file://README.md#L193-L348)
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L1-L232)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L1-L254)
+- [README.md:193-348](file://README.md#L193-L348)
+- [train.py:1-232](file://scripts/reinforcement_learning/rsl_rl/train.py#L1-L232)
+- [play.py:1-254](file://scripts/reinforcement_learning/rsl_rl/play.py#L1-L254)
 
 ## Core Components
-- PPO Algorithm Configuration: The PPO configuration defines policy architecture, value loss coefficient, clipping parameters, entropy bonus, learning rate schedule, discount factor, GAE lambda, KL target, and gradient norm clipping. See [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38).
-- Distillation Configuration: Distillation runner configuration sets up a student-teacher architecture with shared observation groups and a distillation-specific algorithm configuration. See [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38).
-- Environment Wrapping and Action Clipping: The environment is wrapped with RslRlVecEnvWrapper and actions are clipped according to agent configuration. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197) and [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178).
-- Video Recording: Optional video capture during training and playback using gym.wrappers.RecordVideo with configurable intervals and lengths. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192) and [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175).
+- PPO Algorithm Configuration: The PPO configuration defines policy architecture, value loss coefficient, clipping parameters, entropy bonus, learning rate schedule, discount factor, GAE lambda, KL target, and gradient norm clipping. See [rsl_rl_ppo_cfg.py:12-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38).
+- Distillation Configuration: Distillation runner configuration sets up a student-teacher architecture with shared observation groups and a distillation-specific algorithm configuration. See [rsl_rl_distillation_cfg.py:18-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38).
+- Environment Wrapping and Action Clipping: The environment is wrapped with RslRlVecEnvWrapper and actions are clipped according to agent configuration. See [train.py:196-197](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197) and [play.py:177-178](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178).
+- Video Recording: Optional video capture during training and playback using gym.wrappers.RecordVideo with configurable intervals and lengths. See [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192) and [play.py:165-175](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175).
 
 **Section sources**
-- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
-- [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38)
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L197)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L178)
+- [rsl_rl_ppo_cfg.py:12-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
+- [rsl_rl_distillation_cfg.py:18-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38)
+- [train.py:182-197](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L197)
+- [play.py:165-178](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L178)
 
 ## Architecture Overview
 The training pipeline integrates environment creation, optional video recording, environment wrapping, runner instantiation, checkpoint loading, and algorithm learning loops. The playback pipeline mirrors this with checkpoint loading and policy export.
@@ -89,35 +101,39 @@ Runner-->>Log : periodic checkpoints
 ```
 
 **Diagram sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
+- [train.py:171-224](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
 
 ## Detailed Component Analysis
 
 ### PPO Algorithm Implementation and Hyperparameters
-- Policy architecture: Hidden layers and activation are configured per environment variant. See [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L17-L24).
-- Algorithm hyperparameters: Includes value loss coefficient, clipped value loss, clipping parameter, entropy coefficient, epochs, mini-batches, learning rate schedule, discount factor gamma, GAE lambda, desired KL divergence, and max gradient norm. See [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38).
-- Environment variants: Flat and Rough variants adjust terrain and reward terms. See [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29).
+- Policy architecture: Hidden layers and activation are configured per environment variant. See [rsl_rl_ppo_cfg.py:17-24](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L17-L24).
+- Algorithm hyperparameters: Includes value loss coefficient, clipped value loss, clipping parameter, entropy coefficient, epochs, mini-batches, learning rate schedule, discount factor gamma, GAE lambda, desired KL divergence, and max gradient norm. See [rsl_rl_ppo_cfg.py:25-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38).
+- Environment variants: Flat and Rough variants adjust terrain and reward terms. See [flat_env_cfg.py:9-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29).
+
+**Updated** Added stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios.
 
 ```mermaid
 flowchart TD
 Start(["Load PPO Config"]) --> Arch["Set Actor/Critic Hidden Dims<br/>Activation"]
 Arch --> Algo["Configure PPO Algorithm<br/>Clip Param, Entropy, LR Schedule"]
-Algo --> Env["Select Env Variant<br/>Flat/Rough"]
+Algo --> Env["Select Env Variant<br/>Flat/Rough/Stair"]
 Env --> Train["Run Training Loop"]
 Train --> Save["Save Periodic Checkpoints"]
 ```
 
 **Diagram sources**
-- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29)
+- [rsl_rl_ppo_cfg.py:12-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
+- [flat_env_cfg.py:9-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29)
 
 **Section sources**
-- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29)
+- [rsl_rl_ppo_cfg.py:12-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L38)
+- [flat_env_cfg.py:9-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29)
 
 ### OnPolicyRunner vs DistillationRunner
-- OnPolicyRunner: Standard PPO training loop with policy and value networks, configured via PPO algorithm settings. Instantiated in [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205).
-- DistillationRunner: Student-teacher distillation training with separate student and teacher policies, specialized algorithm configuration, and observation groups. Defined in [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38) and instantiated in [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L202-L203).
+- OnPolicyRunner: Standard PPO training loop with policy and value networks, configured via PPO algorithm settings. Instantiated in [train.py:200-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205).
+- DistillationRunner: Student-teacher distillation training with separate student and teacher policies, specialized algorithm configuration, and observation groups. Defined in [rsl_rl_distillation_cfg.py:18-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38) and instantiated in [train.py:202-203](file://scripts/reinforcement_learning/rsl_rl/train.py#L202-L203).
+
+**Updated** Added stair-specific runner configuration with identical hyperparameters optimized for stair climbing scenarios.
 
 ```mermaid
 classDiagram
@@ -147,18 +163,26 @@ class RslRlDistillationAlgorithmCfg {
 +learning_rate
 +gradient_length
 }
+class ZsibotZSL1StairPPORunnerCfg {
++num_steps_per_env : 24
++max_iterations : 50000
++save_interval : 100
++experiment_name : "zsibot_zsl1_stair"
+}
 OnPolicyRunner --> RslRlPpoAlgorithmCfg : "uses"
 DistillationRunner --> RslRlDistillationAlgorithmCfg : "uses"
+ZsibotZSL1StairPPORunnerCfg --> RslRlPpoAlgorithmCfg : "uses"
 ```
 
 **Diagram sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205)
-- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38)
-- [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L34-L38)
+- [train.py:200-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205)
+- [rsl_rl_ppo_cfg.py:25-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38)
+- [rsl_rl_distillation_cfg.py:34-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L34-L38)
+- [rsl_rl_ppo_cfg.py:39-65](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L39-L65)
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205)
-- [rsl_rl_distillation_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38)
+- [train.py:200-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205)
+- [rsl_rl_distillation_cfg.py:18-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38)
 
 ### CLI Argument System
 Key CLI arguments for training and playback:
@@ -170,7 +194,7 @@ Key CLI arguments for training and playback:
 - Export I/O descriptors: --export_io_descriptors
 - RSL-RL specific: --experiment_name, --run_name, --resume, --load_run, --checkpoint, --logger, --log_project_name
 
-See argument parsing and updates in [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L22-L44) and [cli_args.py](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94).
+See argument parsing and updates in [train.py:22-44](file://scripts/reinforcement_learning/rsl_rl/train.py#L22-L44) and [cli_args.py:19-94](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94).
 
 ```mermaid
 flowchart TD
@@ -184,58 +208,60 @@ Video --> |No| Skip["Skip video"]
 ```
 
 **Diagram sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L120-L146)
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
-- [cli_args.py](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94)
+- [train.py:120-146](file://scripts/reinforcement_learning/rsl_rl/train.py#L120-L146)
+- [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
+- [cli_args.py:19-94](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94)
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L22-L44)
-- [cli_args.py](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94)
+- [train.py:22-44](file://scripts/reinforcement_learning/rsl_rl/train.py#L22-L44)
+- [cli_args.py:19-94](file://scripts/reinforcement_learning/rsl_rl/cli_args.py#L19-L94)
 
 ### Environment Wrapper and Action Clipping
-- The environment is wrapped with RslRlVecEnvWrapper to adapt observations/actions for RSL-RL. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197) and [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178).
+- The environment is wrapped with RslRlVecEnvWrapper to adapt observations/actions for RSL-RL. See [train.py:196-197](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197) and [play.py:177-178](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178).
 - Action clipping is controlled by agent_cfg.clip_actions and applied by the wrapper.
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178)
+- [train.py:196-197](file://scripts/reinforcement_learning/rsl_rl/train.py#L196-L197)
+- [play.py:177-178](file://scripts/reinforcement_learning/rsl_rl/play.py#L177-L178)
 
 ### Video Recording Capabilities
-- Training: Optional video recording with configurable interval and length. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192).
-- Playback: Single-frame trigger at episode start. See [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175).
+- Training: Optional video recording with configurable interval and length. See [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192).
+- Playback: Single-frame trigger at episode start. See [play.py:165-175](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175).
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175)
+- [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
+- [play.py:165-175](file://scripts/reinforcement_learning/rsl_rl/play.py#L165-L175)
 
 ### Distributed Training
-- Single-node multi-GPU: Use torch.distributed.run with --nproc_per_node equal to the number of GPUs. See [README.md](file://README.md#L333-L347).
-- Multi-node: Launch a process per node with --nnodes and --node_rank, and specify rendezvous endpoint and backend. See [README.md](file://README.md#L339-L347).
-- Per-rank device assignment and seed increment are handled in the training script. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146).
+- Single-node multi-GPU: Use torch.distributed.run with --nproc_per_node equal to the number of GPUs. See [README.md:333-347](file://README.md#L333-L347).
+- Multi-node: Launch a process per node with --nnodes and --node_rank, and specify rendezvous endpoint and backend. See [README.md:339-347](file://README.md#L339-L347).
+- Per-rank device assignment and seed increment are handled in the training script. See [train.py:138-146](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146).
 
 **Section sources**
-- [README.md](file://README.md#L333-L347)
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146)
+- [README.md:333-347](file://README.md#L333-L347)
+- [train.py:138-146](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146)
 
 ### Experiment Logging and Checkpoint Management
-- Logging directory: logs/rsl_rl/{experiment_name}/{timestamp}_{run_name}. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L148-L158).
-- Configuration dumps: env.yaml and agent.yaml saved under logs. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L214-L216).
-- Checkpoint loading: get_checkpoint_path resolves run/checkpoint; loaded by runner.load. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L178-L212).
-- Playback checkpoint resolution and export: JIT/ONNX export of policy and optional normalizer. See [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L140-L213).
+- Logging directory: logs/rsl_rl/{experiment_name}/{timestamp}_{run_name}. See [train.py:148-158](file://scripts/reinforcement_learning/rsl_rl/train.py#L148-L158).
+- Configuration dumps: env.yaml and agent.yaml saved under logs. See [train.py:214-216](file://scripts/reinforcement_learning/rsl_rl/train.py#L214-L216).
+- Checkpoint loading: get_checkpoint_path resolves run/checkpoint; loaded by runner.load. See [train.py:178-212](file://scripts/reinforcement_learning/rsl_rl/train.py#L178-L212).
+- Playback checkpoint resolution and export: JIT/ONNX export of policy and optional normalizer. See [play.py:140-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L140-L213).
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L148-L216)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L140-L213)
+- [train.py:148-216](file://scripts/reinforcement_learning/rsl_rl/train.py#L148-L216)
+- [play.py:140-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L140-L213)
 
 ### Concrete Examples
-- Configure training runs: Select task and agent entry point, set seed and iterations, choose environment variant (Flat/Rough). See [README.md](file://README.md#L197-L216).
-- Multi-GPU training: Use torch.distributed.run with --nproc_per_node=N for multi-GPU on a single node; extend to multiple nodes with --nnodes and --node_rank. See [README.md](file://README.md#L333-L347).
-- Export model checkpoints: After loading a checkpoint in playback, the policy is exported to JIT and ONNX under the checkpoint’s exported/ directory. See [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L210-L213).
+- Configure training runs: Select task and agent entry point, set seed and iterations, choose environment variant (Flat/Rough/Stair). See [README.md:197-216](file://README.md#L197-L216).
+- Multi-GPU training: Use torch.distributed.run with --nproc_per_node=N for multi-GPU on a single node; extend to multiple nodes with --nnodes and --node_rank. See [README.md:333-347](file://README.md#L333-L347).
+- Export model checkpoints: After loading a checkpoint in playback, the policy is exported to JIT and ONNX under the checkpoint's exported/ directory. See [play.py:210-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L210-L213).
+
+**Updated** Added stair-specific training examples with optimized configurations.
 
 **Section sources**
-- [README.md](file://README.md#L197-L216)
-- [README.md](file://README.md#L333-L347)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L210-L213)
+- [README.md:197-216](file://README.md#L197-L216)
+- [README.md:333-347](file://README.md#L333-L347)
+- [play.py:210-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L210-L213)
 
 ## Dependency Analysis
 The training and playback scripts depend on:
@@ -258,41 +284,91 @@ Play --> Export["Export JIT/ONNX"]
 ```
 
 **Diagram sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L213)
+- [train.py:171-224](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
+- [play.py:158-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L213)
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L213)
+- [train.py:171-224](file://scripts/reinforcement_learning/rsl_rl/train.py#L171-L224)
+- [play.py:158-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L213)
 
 ## Performance Considerations
-- Enable TF32 and disable deterministic CUDNN for speed on supported GPUs. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L111-L114).
-- Adjust num_envs to saturate devices; tune num_steps_per_env and num_mini_batches for throughput. See [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L15).
-- Use --distributed for multi-GPU scaling; ensure seeds are offset per rank to avoid identical randomization. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146).
-- Reduce environment randomness during playback to stabilize evaluation. See [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L117-L123).
+- Enable TF32 and disable deterministic CUDNN for speed on supported GPUs. See [train.py:111-114](file://scripts/reinforcement_learning/rsl_rl/train.py#L111-L114).
+- Adjust num_envs to saturate devices; tune num_steps_per_env and num_mini_batches for throughput. See [rsl_rl_ppo_cfg.py:12-15](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L12-L15).
+- Use --distributed for multi-GPU scaling; ensure seeds are offset per rank to avoid identical randomization. See [train.py:138-146](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146).
+- Reduce environment randomness during playback to stabilize evaluation. See [play.py:117-123](file://scripts/reinforcement_learning/rsl_rl/play.py#L117-L123).
 
 [No sources needed since this section provides general guidance]
 
 ## Troubleshooting Guide
-- Unsupported runner class: Ensure agent_cfg.class_name is OnPolicyRunner or DistillationRunner. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L204-L205).
-- Distributed training on CPU: Distributed training requires CUDA devices; the script raises an error if device is CPU with --distributed. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L131-L136).
-- Video recording not appearing: Ensure --video is enabled and enable_cameras is set; verify video_folder permissions. See [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L46-L48) and [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192).
-- Pre-trained checkpoint availability: Playback supports retrieving published pretrained checkpoints; if unavailable, the script informs and exits gracefully. See [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L143-L147).
+- Unsupported runner class: Ensure agent_cfg.class_name is OnPolicyRunner or DistillationRunner. See [train.py:204-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L204-L205).
+- Distributed training on CPU: Distributed training requires CUDA devices; the script raises an error if device is CPU with --distributed. See [train.py:131-136](file://scripts/reinforcement_learning/rsl_rl/train.py#L131-L136).
+- Video recording not appearing: Ensure --video is enabled and enable_cameras is set; verify video_folder permissions. See [train.py:46-48](file://scripts/reinforcement_learning/rsl_rl/train.py#L46-L48) and [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192).
+- Pre-trained checkpoint availability: Playback supports retrieving published pretrained checkpoints; if unavailable, the script informs and exits gracefully. See [play.py:143-147](file://scripts/reinforcement_learning/rsl_rl/play.py#L143-L147).
 
 **Section sources**
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L131-L136)
-- [train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
-- [play.py](file://scripts/reinforcement_learning/rsl_rl/play.py#L143-L147)
+- [train.py:131-136](file://scripts/reinforcement_learning/rsl_rl/train.py#L131-L136)
+- [train.py:182-192](file://scripts/reinforcement_learning/rsl_rl/train.py#L182-L192)
+- [play.py:143-147](file://scripts/reinforcement_learning/rsl_rl/play.py#L143-L147)
 
 ## Conclusion
 The RSL-RL training system integrates environment creation, optional video recording, environment wrapping, runner selection, and robust logging and checkpointing. PPO and distillation configurations are cleanly separated and templated per environment variant. The CLI system supports distributed training, experiment naming, and exporting trained policies. Following the examples and guidance herein enables efficient multi-GPU training, reproducible experiments, and reliable deployment of policies.
+
+**Updated** The system now includes dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios, providing specialized training capabilities for stair navigation tasks.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
 ## Appendices
 
 ### Appendix A: Environment Variants and Reward Adjustments
-- Flat environments remove terrain height scanning and curriculum, simplifying reward computation. See [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29).
+- Flat environments remove terrain height scanning and curriculum, simplifying reward computation. See [flat_env_cfg.py:10-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29).
+- **Stair environments** utilize specialized inverted pyramid stair terrains with optimized reward systems for stair climbing. See [stair_env_cfg.py:20-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L20-L47).
+
+**Updated** Added stair-specific environment configuration with specialized terrain generation and reward optimization.
 
 **Section sources**
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29)
+- [flat_env_cfg.py:10-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29)
+- [stair_env_cfg.py:20-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L20-L47)
+
+### Appendix B: Stair-Specific PPO Runner Configuration
+The ZsibotZSL1StairPPORunnerCfg provides optimized hyperparameters specifically tuned for stair climbing scenarios:
+
+- **Training Parameters**: 
+  - num_steps_per_env: 24 (balanced rollout length for stair navigation)
+  - max_iterations: 50000 (extended training for stair mastery)
+  - save_interval: 100 (frequent checkpointing for stair learning progress)
+  - experiment_name: "zsibot_zsl1_stair" (clear identification)
+
+- **Policy Architecture**: 
+  - init_noise_std: 1.0 (standard exploration for stair learning)
+  - actor_hidden_dims: [512, 256, 128] (deeper network for complex stair patterns)
+  - critic_hidden_dims: [512, 256, 128] (symmetric critic architecture)
+  - activation: "elu" (smooth activation for stair dynamics)
+
+- **Algorithm Hyperparameters**:
+  - value_loss_coef: 1.0 (balanced value function learning)
+  - clip_param: 0.2 (standard clipping for stable updates)
+  - entropy_coef: 0.01 (minimal entropy bonus for stair focus)
+  - num_learning_epochs: 5 (efficient policy updates)
+  - num_mini_batches: 4 (balanced batch processing)
+  - learning_rate: 1.0e-3 (standard learning rate)
+  - schedule: "adaptive" (dynamic learning rate adjustment)
+  - gamma: 0.99 (high temporal discount for stair rewards)
+  - lam: 0.95 (GAE lambda for stair trajectory planning)
+  - desired_kl: 0.01 (target KL divergence)
+  - max_grad_norm: 1.0 (gradient clipping)
+
+**Section sources**
+- [rsl_rl_ppo_cfg.py:39-65](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L39-L65)
+
+### Appendix C: Stair Environment Reward System Optimizations
+The stair environment implements specialized reward functions optimized for stair climbing:
+
+- **Action Scaling**: Increased joint position scaling with reduced ABAD joint influence and enhanced HIP/KNEE power for stair ascent
+- **Contact Rewards**: Enhanced contact force rewards for stair gripping and reduced undesired contact penalties
+- **Air Time Rewards**: Higher air time thresholds to encourage long strides for stair navigation
+- **Feet Height Rewards**: Specialized foot height targets for stair clearance
+- **Gait Rewards**: Synced foot pairs for stable stair climbing
+- **Termination Handling**: Disabled illegal contact termination for stair climbing safety
+
+**Section sources**
+- [stair_env_cfg.py:86-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L86-L204)

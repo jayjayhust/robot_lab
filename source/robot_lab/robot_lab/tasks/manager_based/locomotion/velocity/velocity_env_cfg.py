@@ -9,8 +9,6 @@
 import math
 from dataclasses import MISSING
 
-import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
-
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
 from isaaclab.envs import ManagerBasedRLEnvCfg
@@ -28,9 +26,10 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
+import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
+
 ##
 # Pre-defined configs
-# https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/config/rough.py
 ##
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 
@@ -73,6 +72,7 @@ class MySceneCfg(InteractiveSceneCfg):
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
         ray_alignment="yaw",
         pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+        # channels=100, vertical_fov_range=[-90, 90], horizontal_fov_range=[-90, 90], horizontal_res=1.0
         debug_vis=False,
         mesh_prim_paths=["/World/ground"],
     )
@@ -107,16 +107,13 @@ class CommandsCfg:
     base_velocity = mdp.UniformThresholdVelocityCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.02,  # 2% 环境保持静止
+        rel_standing_envs=0.02,
         rel_heading_envs=1.0,
-        heading_command=True,  # Command heading
+        heading_command=True,
         heading_control_stiffness=0.5,
-        debug_vis=True,  # Debug visualization(显示目标朝向箭头和本体朝向箭头)
+        debug_vis=True,
         ranges=mdp.UniformThresholdVelocityCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0),  # Linear velocity in x-direction
-            lin_vel_y=(-1.0, 1.0),  # Linear velocity in y-direction
-            ang_vel_z=(-1.0, 1.0),  # Angular velocity around z-axis
-            heading=(-math.pi, math.pi)  # Heading angle
+            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-1.0, 1.0), ang_vel_z=(-1.0, 1.0), heading=(-math.pi, math.pi)
         ),
     )
 
@@ -647,6 +644,27 @@ class RewardsCfg:
 
     upward = RewTerm(func=mdp.upward, weight=0.0)
 
+    # Climbing rewards
+    heading_alignment = RewTerm(
+        func=mdp.heading_alignment,
+        weight=0.0,
+        params={
+            "command_name": "base_velocity",
+            "std": 0.5,
+        },
+    )
+
+    climbing_progress = RewTerm(
+        func=mdp.climbing_progress,
+        weight=0.0,
+        params={
+            "command_name": "base_velocity",
+            "alignment_threshold": 0.7,
+            "forward_weight": 1.0,
+            "elevation_weight": 2.0,
+        },
+    )
+
 
 @configclass
 class TerminationsCfg:
@@ -726,6 +744,62 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.height_scanner is not None:
             self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+        if self.scene.contact_forces is not None:
+            self.scene.contact_forces.update_period = self.sim.dt
+
+        # check if terrain levels curriculum is enabled - if so, enable curriculum for terrain generator
+        # this generates terrains with increasing difficulty and is useful for training
+        if getattr(self.curriculum, "terrain_levels", None) is not None:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = True
+        else:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = False
+
+    def disable_zero_weight_rewards(self):
+        """If the weight of rewards is 0, set rewards to None"""
+        for attr in dir(self.rewards):
+            if not attr.startswith("__"):
+                reward_attr = getattr(self.rewards, attr)
+                if not callable(reward_attr) and reward_attr.weight == 0:
+                    setattr(self.rewards, attr, None)
+
+
+@configclass
+class LocomotionVelocityStairEnvCfg(ManagerBasedRLEnvCfg):
+    """Configuration for the locomotion velocity-tracking environment."""
+
+    # Scene settings
+    scene: MySceneCfg = MySceneCfg(num_envs=4096, env_spacing=2.5)
+    # Basic settings
+    observations: ObservationsCfg = ObservationsCfg()
+    actions: ActionsCfg = ActionsCfg()
+    commands: CommandsCfg = CommandsCfg()
+    # MDP settings
+    rewards: RewardsCfg = RewardsCfg()
+    terminations: TerminationsCfg = TerminationsCfg()
+    events: EventCfg = EventCfg()
+    curriculum: CurriculumCfg = CurriculumCfg()
+
+    def __post_init__(self):
+        """Post initialization."""
+        # general settings
+        self.decimation = 4
+        self.episode_length_s = 20.0
+        # simulation settings
+        self.sim.dt = 0.005
+        self.sim.render_interval = self.decimation
+        self.sim.physics_material = self.scene.terrain.physics_material
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+        # update sensor update periods
+        # we tick all the sensors based on the smallest update period (physics update period)
+        if self.scene.height_scanner is not None:
+            self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+            # Override height_scanner offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner.offset.pos = (0.0, 0.0, 1.0)
+        if self.scene.height_scanner_base is not None:
+            # Override height_scanner_base offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner_base.offset.pos = (0.0, 0.0, 1.0)
         if self.scene.contact_forces is not None:
             self.scene.contact_forces.update_period = self.sim.dt
 

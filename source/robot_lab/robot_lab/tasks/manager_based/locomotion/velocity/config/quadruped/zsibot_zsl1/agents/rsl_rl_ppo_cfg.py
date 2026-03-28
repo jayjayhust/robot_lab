@@ -35,6 +35,16 @@ class ZsibotZSL1RoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         max_grad_norm=1.0,
     )
 
+
+@configclass
+class ZsibotZSL1FlatPPORunnerCfg(ZsibotZSL1RoughPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 5000
+        self.experiment_name = "zsibot_zsl1_flat"
+
+
 @configclass
 class ZsibotZSL1StairPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
@@ -63,11 +73,3 @@ class ZsibotZSL1StairPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         desired_kl=0.01,
         max_grad_norm=1.0,
     )
-
-@configclass
-class ZsibotZSL1FlatPPORunnerCfg(ZsibotZSL1RoughPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "zsibot_zsl1_flat"

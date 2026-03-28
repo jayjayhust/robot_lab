@@ -7,9 +7,17 @@
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py)
 - [rough_env_cfg.py (Anymal D)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py)
 - [rough_env_cfg.py (OpenDog APX)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py)
+- [flat_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py)
 - [tracking_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/tracking_env_cfg.py)
 - [events.py (Beyond Mimic)](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/mdp/events.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated reset parameter ranges for Sdog-Sdog2 configurations with expanded pose and velocity ranges
+- Added documentation for external force torque randomization removal from Sdog-Sdog2 configurations
+- Enhanced reset base parameter documentation with expanded ranges
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -35,7 +43,9 @@ A["velocity_env_cfg.py<br/>Defines EventCfg and EventTerm entries"] --> B["event
 A --> C["utils.py<br/>Terrain-aware helpers"]
 D["rough_env_cfg.py (Anymal D)<br/>Robot-specific overrides"] --> A
 E["rough_env_cfg.py (OpenDog APX)<br/>Robot-specific overrides"] --> A
-F["tracking_env_cfg.py<br/>Beyond mimic config"] --> G["events.py (Beyond Mimic)<br/>Joint default position randomization"]
+F["rough_env_cfg.py (Sdog-Sdog2)<br/>Robot-specific overrides"] --> A
+G["flat_env_cfg.py (Sdog-Sdog2)<br/>Flat terrain variant"] --> F
+H["tracking_env_cfg.py<br/>Beyond mimic config"] --> I["events.py (Beyond Mimic)<br/>Joint default position randomization"]
 ```
 
 **Diagram sources**
@@ -44,6 +54,8 @@ F["tracking_env_cfg.py<br/>Beyond mimic config"] --> G["events.py (Beyond Mimic)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L1-L127)
 - [rough_env_cfg.py (Anymal D)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L41-L66)
 - [rough_env_cfg.py (OpenDog APX)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py#L51-L99)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L53-L77)
+- [flat_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py#L1-L32)
 - [tracking_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/tracking_env_cfg.py#L173-L213)
 - [events.py (Beyond Mimic)](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/mdp/events.py#L1-L55)
 
@@ -53,6 +65,8 @@ F["tracking_env_cfg.py<br/>Beyond mimic config"] --> G["events.py (Beyond Mimic)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L1-L127)
 - [rough_env_cfg.py (Anymal D)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L41-L66)
 - [rough_env_cfg.py (OpenDog APX)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py#L51-L99)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L53-L77)
+- [flat_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py#L1-L32)
 - [tracking_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/tracking_env_cfg.py#L173-L213)
 - [events.py (Beyond Mimic)](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/mdp/events.py#L1-L55)
 
@@ -63,8 +77,10 @@ F["tracking_env_cfg.py<br/>Beyond mimic config"] --> G["events.py (Beyond Mimic)
 
 Key event categories:
 - Startup events: randomize_rigid_body_material, randomize_rigid_body_mass_base, randomize_rigid_body_mass_others, randomize_com_positions
-- Reset events: randomize_apply_external_force_torque, randomize_reset_joints, randomize_actuator_gains, randomize_reset_base
+- Reset events: randomize_reset_joints, randomize_actuator_gains, randomize_reset_base
 - Interval events: randomize_push_robot
+
+**Updated** Removed randomize_apply_external_force_torque from Sdog-Sdog2 configurations while maintaining other reset events.
 
 **Section sources**
 - [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L258-L372)
@@ -97,12 +113,12 @@ Asset-->>Env : Ready for next step
 
 ### Event Timing Modes and Strategies
 - Startup mode: Applied once during environment initialization to randomize material, mass, and center-of-mass properties.
-- Reset mode: Applied on episode resets to randomize external forces/torques, joint positions, actuator gains, and base pose/velocity.
+- Reset mode: Applied on episode resets to randomize joint positions, actuator gains, and base pose/velocity.
 - Interval mode: Applied periodically during episodes to introduce perturbations (e.g., pushing the robot).
 
 Timing and parameters:
 - Startup: randomize_rigid_body_material, randomize_rigid_body_mass_base, randomize_rigid_body_mass_others, randomize_com_positions
-- Reset: randomize_apply_external_force_torque, randomize_reset_joints, randomize_actuator_gains, randomize_reset_base
+- Reset: randomize_reset_joints, randomize_actuator_gains, randomize_reset_base
 - Interval: randomize_push_robot with interval_range_s
 
 Impact:
@@ -175,17 +191,6 @@ Strategy:
 
 ### Reset Events
 
-#### randomize_apply_external_force_torque
-- Purpose: Apply random forces and torques to the base link.
-- Parameters: force_range, torque_range.
-- Mode: reset.
-
-Strategy:
-- Ensures robot starts with small disturbances to test stabilization.
-
-**Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L317-L325)
-
 #### randomize_reset_joints
 - Purpose: Randomize joint positions at reset.
 - Parameters: position_range, velocity_range.
@@ -216,12 +221,14 @@ Strategy:
 Strategy:
 - Uniform sampling within specified bounds; pit-terrain environments are excluded from randomization to avoid falls.
 
+**Updated** Expanded Sdog-Sdog2 reset base pose range (x: -0.5→0.5, y: -0.5→0.5) and velocity range from near-zero values to (-0.5, 0.5) for all axes.
+
 ```mermaid
 flowchart TD
 Start(["Reset Base Entry"]) --> CheckPits["Check if env assigned to pits"]
 CheckPits --> |Yes| ResetDefault["Reset to default state"]
-CheckPits --> |No| SamplePose["Sample pose from pose_range"]
-SamplePose --> SampleVel["Sample velocity from velocity_range"]
+CheckPits --> |No| SamplePose["Sample pose from expanded pose_range"]
+SamplePose --> SampleVel["Sample velocity from expanded velocity_range"]
 SampleVel --> ApplyState["Write root pose and velocity to sim"]
 ResetDefault --> End(["Done"])
 ApplyState --> End
@@ -230,11 +237,13 @@ ApplyState --> End
 **Diagram sources**
 - [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L269)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L69)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L54-L71)
 
 **Section sources**
 - [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L349-L363)
 - [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L269)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L69)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L54-L71)
 
 ### Interval Events
 
@@ -303,23 +312,29 @@ Common issues and resolutions:
 Relevant references:
 - Pit-terrain handling in reset base logic.
 - OpenDog APX overrides for reduced turbulence and stability.
+- Sdog-Sdog2 expanded reset parameter ranges for improved training stability.
 
 **Section sources**
 - [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L269)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L69)
 - [rough_env_cfg.py (OpenDog APX)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py#L89-L99)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L54-L71)
 
 ## Conclusion
-The event system provides a structured way to inject variability at startup, reset, and during episodes. By carefully selecting distributions, operations, and parameter ranges, the system improves generalization, robustness, and transfer across tasks and robots. Robot-specific overrides demonstrate how to tailor randomization for stability and training efficiency.
+The event system provides a structured way to inject variability at startup, reset, and during episodes. By carefully selecting distributions, operations, and parameter ranges, the system improves generalization, robustness, and transfer across tasks and robots. Robot-specific overrides demonstrate how to tailor randomization for stability and training efficiency. Recent updates to Sdog-Sdog2 configurations show expanded reset parameter ranges and removal of external force torque randomization to improve training stability and convergence.
 
 ## Appendices
 
 ### Example Configurations and Overrides
 - Anymal D rough environment: Demonstrates selective body mass randomization and base COM/force application.
 - OpenDog APX rough environment: Reduces turbulence and push magnitudes for stability.
+- Sdog-Sdog2 rough environment: Expanded reset base pose range (x: -0.5→0.5, y: -0.5→0.5) and velocity range from near-zero values to (-0.5, 0.5) for all axes, with external force torque randomization removed.
+- Sdog-Sdog2 flat environment: Inherits Sdog-Sdog2 rough configuration with flat terrain modifications.
 - Beyond mimic tracking: Adds joint default position randomization and shorter-interval pushing.
 
 **Section sources**
 - [rough_env_cfg.py (Anymal D)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L41-L66)
 - [rough_env_cfg.py (OpenDog APX)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py#L51-L99)
+- [rough_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L53-L77)
+- [flat_env_cfg.py (Sdog-Sdog2)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py#L1-L32)
 - [tracking_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/tracking_env_cfg.py#L173-L213)

@@ -12,7 +12,18 @@
 - [scripts/reinforcement_learning/skrl/play.py](file://scripts/reinforcement_learning/skrl/play.py)
 - [scripts/reinforcement_learning/rl_utils.py](file://scripts/reinforcement_learning/rl_utils.py)
 - [logs/rsl_rl/opendoge_apx_flat/2026-01-20_11-11-30/params/agent.yaml](file://logs/rsl_rl/opendoge_apx_flat/2026-01-20_11-11-30/params/agent.yaml)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py)
+- [source/robot_lab/robot_lab/assets/sdog2.py](file://source/robot_lab/robot_lab/assets/sdog2.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated Sdog-Sdog2 training configuration documentation to reflect increased maximum iterations
+- Added detailed explanation of enhanced training periods for improved robot capabilities
+- Updated hyperparameter configuration examples to show new iteration limits
+- Enhanced training optimization techniques section with new Sdog-Sdog2 specifics
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -37,6 +48,8 @@ This document explains the training pipeline architecture across three RL system
 - Training pipeline components including environment interaction, policy execution, gradient computation, and model updates
 - Training optimization techniques such as curriculum learning, symmetry data augmentation, and model distillation
 - Troubleshooting guidance for common training issues and performance optimization strategies
+
+**Updated** Enhanced training periods for Sdog-Sdog2 configurations with significantly increased maximum iterations reflecting commitment to longer training durations for improved robot capabilities.
 
 ## Project Structure
 The repository organizes RL training under scripts/reinforcement_learning with three subsystems:
@@ -144,6 +157,12 @@ RSL-RL provides OnPolicyRunner and DistillationRunner with PPO algorithm support
 - Wraps the environment with RslRlVecEnvWrapper and selects runner based on configuration
 - Supports resuming from checkpoints and exporting policy artifacts
 - Records videos during training when enabled
+
+**Updated** Enhanced Sdog-Sdog2 configurations now feature significantly increased maximum iterations:
+- Rough environment: max_iterations increased from 50,000 to 100,000 (double the previous value)
+- Flat environment: max_iterations increased from 5,000 to 20,000 (quadruple the previous value)
+
+These extended training periods enable more thorough exploration of the policy space for the improved Sdog-Sdog2 quadruped robot, allowing for better convergence on complex locomotion behaviors.
 
 ```mermaid
 sequenceDiagram
@@ -313,7 +332,39 @@ Update --> Save["Save checkpoint"]
 Save --> Observe
 ```
 
-[No sources needed since this diagram shows conceptual workflow, not actual code structure]
+### Enhanced Sdog-Sdog2 Training Configurations
+
+**Updated** The Sdog-Sdog2 quadruped robot now features significantly enhanced training configurations with extended maximum iterations:
+
+#### Sdog-Sdog2 RSL-RL PPO Configuration
+The Sdog-Sdog2 configurations demonstrate commitment to longer training periods for improved robot capabilities:
+
+- **Rough Environment Configuration**:
+  - max_iterations: 100,000 (increased from 50,000)
+  - num_steps_per_env: 24
+  - save_interval: 100
+  - experiment_name: "sdog_sdog2_rough"
+
+- **Flat Environment Configuration**:
+  - max_iterations: 20,000 (increased from 5,000)
+  - Inherits all other settings from rough environment
+  - experiment_name: "sdog_sdog2_flat"
+
+These increased iteration limits enable more thorough exploration of the policy space, particularly important for the enhanced Sdog-Sdog2 robot's improved capabilities and complexity.
+
+#### Environment Configuration Details
+Both environments share common characteristics:
+- **Robot Configuration**: Uses SDOG_SDOG2_CFG with articulated joints and contact sensors
+- **Observation Scaling**: Base linear velocity scaled by 2.0, angular velocity by 0.25
+- **Action Scaling**: Reduced joint position scaling (0.125 for hip joints, 0.25 for other joints)
+- **Reward Structure**: Comprehensive reward function including joint torques, contact forces, and velocity tracking
+- **Terrain Adaptation**: Flat environment replaces height scanning with plane terrain
+
+**Section sources**
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py#L1-L45)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py#L1-L32)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L1-L179)
+- [source/robot_lab/robot_lab/assets/sdog2.py](file://source/robot_lab/robot_lab/assets/sdog2.py#L1-L83)
 
 ## Dependency Analysis
 The training scripts depend on:
@@ -362,8 +413,13 @@ SKR_TRAIN --> RUN_SKR["skrl Runner"]
   - Symmetry configuration fields present in RSL-RL agent.yaml indicate potential for symmetry data augmentation
 - Logging overhead:
   - SKRL/RSL-RL export YAML params and optionally IO descriptors for reproducibility
+- **Enhanced Training Durations**:
+  - Sdog-Sdog2 configurations now support up to 100,000 iterations for rough terrain training
+  - Extended training allows for better policy convergence on complex quadruped locomotion
+  - Increased computational requirements necessitate appropriate hardware resources
 
-[No sources needed since this section provides general guidance]
+**Section sources**
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py#L11-L43)
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -379,6 +435,10 @@ Common issues and resolutions:
   - Keyboard mode sets num_envs to 1 and disables certain terminations for interactive control
 - Camera follow:
   - Use the camera-follow utility during interactive sessions to track the robot
+- **Extended Training Duration Issues**:
+  - Monitor memory usage during long training sessions (up to 100,000 iterations)
+  - Adjust batch sizes and environment counts for Sdog-Sdog2 configurations
+  - Ensure adequate storage space for extended experiment logs
 
 **Section sources**
 - [scripts/reinforcement_learning/rsl_rl/train.py](file://scripts/reinforcement_learning/rsl_rl/train.py#L57-L76)
@@ -391,6 +451,8 @@ The repository integrates three complementary RL training systems:
 - RSL-RL offers mature PPO support with robust configuration, distributed training, and checkpointing
 - CusRL provides an experimental, flexible trainer with distributed and optimization flags
 - SKRL enables advanced algorithms (including AMP) and multiple ML frameworks with unified runner APIs
+
+**Updated** Recent enhancements include significantly extended training periods for the Sdog-Sdog2 quadruped robot, with maximum iterations increased from 50,000 to 100,000 for rough environments and from 5,000 to 20,000 for flat environments. These changes reflect the improved capabilities of the Sdog-Sdog2 robot and the commitment to longer, more thorough training sessions for optimal policy convergence.
 
 Together, they form a comprehensive training pipeline supporting diverse research and deployment needs, with strong emphasis on reproducibility, distributed scalability, and practical evaluation workflows.
 
@@ -415,5 +477,19 @@ Together, they form a comprehensive training pipeline supporting diverse researc
   - Policy hidden dimensions and activation
   - PPO parameters: learning rate, schedule, gamma, lam, entropy_coef, clipping, normalization
 
+**Updated** Enhanced Sdog-Sdog2 configurations:
+- **Rough Environment**: max_iterations = 100,000, num_steps_per_env = 24
+- **Flat Environment**: max_iterations = 20,000, inherits all other settings from rough environment
+
 **Section sources**
 - [logs/rsl_rl/opendoge_apx_flat/2026-01-20_11-11-30/params/agent.yaml](file://logs/rsl_rl/opendoge_apx_flat/2026-01-20_11-11-30/params/agent.yaml#L1-L50)
+- [source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/agents/rsl_rl_ppo_cfg.py#L11-L43)
+
+### Sdog-Sdog2 Robot Configuration Details
+- **Robot Specifications**: Quadruped with articulated joints, contact sensors, and enhanced actuator configurations
+- **Joint Configuration**: 12 degrees of freedom (3 per leg) with specific torque and velocity limits
+- **Actuator Setup**: DCMotorCfg with customized effort limits and PD gains
+- **Initial State**: Elevated starting position (0.4m height) with specific joint configurations
+
+**Section sources**
+- [source/robot_lab/robot_lab/assets/sdog2.py](file://source/robot_lab/robot_lab/assets/sdog2.py#L14-L81)
