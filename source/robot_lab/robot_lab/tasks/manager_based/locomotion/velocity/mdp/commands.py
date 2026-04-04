@@ -87,8 +87,8 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
             self.vel_command_b[pit_env_ids, 0] = torch.clamp(
                 torch.abs(self.vel_command_b[pit_env_ids, 0]), min=0.3, max=0.6
             )
-            self.vel_command_b[pit_env_ids, 1] = 0.0  # no lateral movement
-            self.vel_command_b[pit_env_ids, 2] = 0.0  # no yaw rotation
+            self.vel_command_b[pit_env_ids, 1] = 0.0  # no lateral movement(y-axis)
+            self.vel_command_b[pit_env_ids, 2] = 0.0  # no yaw rotation(z-axis)
             # Set heading to 0 for pit robots
             if self.cfg.heading_command:
                 self.heading_target[pit_env_ids] = 0.0

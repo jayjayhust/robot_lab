@@ -39,9 +39,10 @@ STAIR_TERRAINS_CFG = TerrainGeneratorCfg(
         # ),
         "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
             proportion=0.2,  # Proportion of the terrain to generate
-            # step_height_range=(0.05, 0.23),  # 每节阶梯的高度范围
+            step_height_range=(0.05, 0.23),  # 每节阶梯的高度范围
             # step_height_range=(0.05, 0.10),  # 每节阶梯的高度范围
-            step_height_range=(0.05, 0.15),  # 每节阶梯的高度范围
+            # step_height_range=(0.05, 0.15),  # 每节阶梯的高度范围
+            # step_height_range=(0.05, 0.20),  # 每节阶梯的高度范围
             step_width=0.3,  # 每节阶梯的宽度
             platform_width=3.0,  # 平台宽度
             border_width=1.0,  # 边缘宽度
@@ -89,10 +90,11 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
 
         # ------------------------------Actions------------------------------
         # Action scale for stair climbing - larger scale for HIP/KNEE to enable leg lifting
+        # Increased for 0.23m max step height (was 0.4 for 0.15m steps)
         self.actions.joint_pos.scale = {
-            ".*_ABAD_JOINT": 0.15,   # Abduction: moderate (sideways movement)
-            ".*_HIP_JOINT": 0.4,     # Hip: larger for leg swing/lifting
-            ".*_KNEE_JOINT": 0.4,    # Knee: larger for leg extension
+            ".*_ABAD_JOINT": 0.15,    # Abduction: moderate (sideways movement)
+            ".*_HIP_JOINT": 0.6,     # Hip: larger for leg swing/lifting (0.23m steps need more)
+            ".*_KNEE_JOINT": 0.6,    # Knee: larger for leg extension (0.23m steps need more)
         }
         self.actions.joint_pos.clip = {".*": (-100.0, 100.0)}
         self.actions.joint_pos.joint_names = self.joint_names
@@ -103,8 +105,10 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
                 "x": (-0.5, 0.5),
                 "y": (-0.5, 0.5),
                 "z": (0.0, 0.2),
-                "roll": (-3.14, 3.14),
-                "pitch": (-3.14, 3.14),
+                # "roll": (-3.14, 3.14),
+                # "pitch": (-3.14, 3.14),
+                "roll": (-0.5, 0.5),  # Limited roll range for stability
+                "pitch": (-0.5, 0.5),  # Limited pitch range for stability
                 "yaw": (-3.14, 3.14),
             },
             "velocity_range": {
@@ -128,7 +132,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.is_terminated.weight = 0
 
         # Root penalties
-        self.rewards.lin_vel_z_l2.weight = -2.0  # Vertical velocity penalty
+        self.rewards.lin_vel_z_l2.weight = -1.0  # Moderate penalty to discourage jumping while allowing climbing
         self.rewards.ang_vel_xy_l2.weight = -0.05  # Angular velocity penalty
         self.rewards.flat_orientation_l2.weight = 0  # Flat orientation penalty
         self.rewards.base_height_l2.weight = 0  # Base height penalty
@@ -140,13 +144,13 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         # Joint penalties
         self.rewards.joint_torques_l2.weight = -2.5e-5
         self.rewards.joint_vel_l2.weight = 0
-        self.rewards.joint_acc_l2.weight = -2.5e-7
+        self.rewards.joint_acc_l2.weight = -5.0e-7
         # self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_hip_l1", -0.2, [".*_hip_joint"])
         self.rewards.joint_pos_limits.weight = -5.0
         self.rewards.joint_vel_limits.weight = 0
-        self.rewards.joint_power.weight = -2e-5
+        self.rewards.joint_power.weight = -1e-5  # -2e-5(strong penalty)/-1e-5(weak penalty)
         self.rewards.stand_still.weight = -2.0
-        self.rewards.joint_pos_penalty.weight = -0.3  # Reduced to allow climbing poses
+        self.rewards.joint_pos_penalty.weight = -0.1  # Further reduced to allow extreme joint positions for 0.23m steps
         self.rewards.joint_mirror.weight = -0.05
         self.rewards.joint_mirror.params["mirror_joints"] = [
             ["FAR_(ABAD|HIP|KNEE).*", "RBL_(ABAD|HIP|KNEE).*"],
@@ -154,7 +158,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         ]
 
         # Action penalties
-        self.rewards.action_rate_l2.weight = -0.01
+        self.rewards.action_rate_l2.weight = -0.02  # Increased to smooth out jumping motions
 
         # Contact sensor
         self.rewards.undesired_contacts.weight = -1.0
@@ -162,13 +166,13 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.contact_forces.weight = -1.5e-4
         self.rewards.contact_forces.params["sensor_cfg"].body_names = [self.foot_link_name]
 
-        # Velocity-tracking rewards
-        self.rewards.track_lin_vel_xy_exp.weight = 3.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.5
+        # Velocity-tracking rewards - reduced to prioritize climbing
+        self.rewards.track_lin_vel_xy_exp.weight = 1.5
+        self.rewards.track_ang_vel_z_exp.weight = 0.5
 
         # Others
-        self.rewards.feet_air_time.weight = 0.5  # Increased to encourage leg lifting
-        self.rewards.feet_air_time.params["threshold"] = 0.4
+        self.rewards.feet_air_time.weight = 0.8  # Reduced to discourage jumping
+        self.rewards.feet_air_time.params["threshold"] = 0.35  # Lower threshold for controlled stepping
         self.rewards.feet_air_time.params["sensor_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_air_time_variance.weight = -1.0
         self.rewards.feet_air_time_variance.params["sensor_cfg"].body_names = [self.foot_link_name]
@@ -184,32 +188,29 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.feet_height.weight = 0
         self.rewards.feet_height.params["target_height"] = 0.05
         self.rewards.feet_height.params["asset_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_height_body.weight = -2.0  # Reduced to allow higher foot lifts
-        self.rewards.feet_height_body.params["target_height"] = -0.35  # Allow feet to lift higher for climbing
+        self.rewards.feet_height_body.weight = -0.5  # Further reduced to allow higher foot lifts for 0.23m steps
+        self.rewards.feet_height_body.params["target_height"] = -0.15  # Allow feet to lift higher (0.23m step clearance)
         self.rewards.feet_height_body.params["asset_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_gait.weight = 0.2  # Reduced to allow more flexible gait during climbing
+        self.rewards.feet_gait.weight = 0.15  # Reduced to allow more flexible gait during climbing
         self.rewards.feet_gait.params["synced_feet_pair_names"] = (
             ("FL_FOOT_LINK", "RR_FOOT_LINK"),
             ("FR_FOOT_LINK", "RL_FOOT_LINK"),
         )
-        self.rewards.upward.weight = 0.6  # Reduced - too easy to achieve by standing
+        self.rewards.upward.weight = 0.15  # Slightly increased to maintain some horizontal posture
 
-        # Climbing rewards - phased approach
-        # Phase 1: Align robot heading with commanded velocity direction
-        self.rewards.heading_alignment.weight = 2.0
-        self.rewards.heading_alignment.params["std"] = 0.5
-        # Phase 2: Reward forward progress + elevation gain (only when aligned)
-        self.rewards.climbing_progress.weight = 1.5
-        self.rewards.climbing_progress.params["alignment_threshold"] = 0.1  # 0.7=>45°/0.3=>30°/0.1=>10° tolerance
-        self.rewards.climbing_progress.params["forward_weight"] = 1.0
-        self.rewards.climbing_progress.params["elevation_weight"] = 2.0
+        # Climbing rewards - balanced for controlled stepping
+        self.rewards.heading_alignment.weight = 0  # Removed heading alignment requirement
+        self.rewards.climbing_progress.weight = 2.5  # Balanced to encourage climbing without jumping
+        self.rewards.climbing_progress.params["alignment_threshold"] = 0.0  # No alignment requirement
+        self.rewards.climbing_progress.params["forward_weight"] = 4.0  # Add forward progress to encourage walking up
+        self.rewards.climbing_progress.params["elevation_weight"] = 5.0  # Moderate elevation reward
 
         # If the weight of rewards is 0, set rewards to None
         if self.__class__.__name__ == "ZsibotZSL1StairEnvCfg":
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------
-        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_hip"]
+        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD"]
         self.terminations.illegal_contact = None
 
         # ------------------------------Curriculums------------------------------
@@ -217,12 +218,17 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         # self.curriculum.command_levels_ang_vel.params["range_multiplier"] = (0.2, 1.0)
         self.curriculum.command_levels_lin_vel = None
         self.curriculum.command_levels_ang_vel = None
+        self.curriculum.terrain_levels = None  # No terrain levels
 
         # ------------------------------Commands------------------------------
-        # self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)  # Forward movement only, no backward movement
-        # self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)  # No lateral movement
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        # self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
+        self.commands.base_velocity.resampling_time_range = (10.0, 10.0)  # Resample command every 10.0 to 10.0 seconds
+        self.commands.base_velocity.rel_standing_envs = 0.02  # 2% of environments are standing environments
+        self.commands.base_velocity.rel_heading_envs = 1.0  # 100% of environments are heading environments
+        self.commands.base_velocity.heading_command = False  # Disable heading command, let robot rotate freely
+        # self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)  # X-axis
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 0.5)  # X-axis: Forward movement only, no backward movement
+        # self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)  # Y-axis
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)  # Y-axis: No lateral movement
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)  # Z-axis
+        # self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)  # Z-axis
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)

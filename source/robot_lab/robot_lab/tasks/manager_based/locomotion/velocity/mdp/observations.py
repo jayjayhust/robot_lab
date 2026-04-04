@@ -33,3 +33,30 @@ def phase(env: ManagerBasedRLEnv, cycle_time: float) -> torch.Tensor:
     phase = env.episode_length_buf[:, None] * env.step_dt / cycle_time
     phase_tensor = torch.cat([torch.sin(2 * torch.pi * phase), torch.cos(2 * torch.pi * phase)], dim=-1)
     return phase_tensor
+
+
+def feet_height_in_body_frame(
+    env: ManagerBasedEnv,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """The feet height relative to body frame.
+
+    This observation is useful for complex terrain (e.g., stairs) where the critic needs to
+    understand the relative height of feet to the body for better value estimation.
+
+    Args:
+        env: The environment.
+        asset_cfg: The SceneEntity associated with the robot. Defaults to SceneEntityCfg("robot").
+            body_names should specify the foot links.
+
+    Returns:
+        The feet height in body frame, shape is [num_envs, num_feet].
+    """
+    asset: Articulation = env.scene[asset_cfg.name]
+    # Get foot positions in world frame
+    foot_pos_w = asset.data.body_pos_w[:, asset_cfg.body_ids, 2]  # [num_envs, num_feet]
+    # Get root position in world frame
+    root_pos_w = asset.data.root_pos_w[:, 2]  # [num_envs]
+    # Compute height relative to body
+    feet_height = foot_pos_w - root_pos_w.unsqueeze(1)
+    return feet_height

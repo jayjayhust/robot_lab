@@ -193,9 +193,13 @@ class ObservationsCfg:
 
     @configclass
     class CriticCfg(ObsGroup):
-        """Observations for critic group."""
+        """Enhanced observations for critic group - optimized for complex terrain like stairs.
 
-        # observation terms (order preserved)
+        The critic benefits from additional state information that helps it better estimate
+        the value of states in challenging terrain conditions.
+        """
+
+        # === Base observations (same as policy) ===
         base_lin_vel = ObsTerm(
             func=mdp.base_lin_vel,
             clip=(-100.0, 100.0),
@@ -240,11 +244,23 @@ class ObservationsCfg:
             clip=(-1.0, 1.0),
             scale=1.0,
         )
-        # joint_effort = ObsTerm(
-        #     func=mdp.joint_effort,
-        #     clip=(-100, 100),
-        #     scale=0.01,
-        # )
+
+        # === Enhanced observations for complex terrain ===
+        # Feet height relative to body - helps critic understand terrain clearance
+        feet_height = ObsTerm(
+            func=mdp.feet_height_in_body_frame,
+            params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT_LINK")},
+            clip=(-0.5, 0.5),
+            scale=2.0,
+        )
+
+        # Joint effort - helps critic estimate energy consumption and stability
+        joint_effort = ObsTerm(
+            func=mdp.joint_effort,
+            params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*")},
+            clip=(-100.0, 100.0),
+            scale=0.01,
+        )
 
         def __post_init__(self):
             self.enable_corruption = False
@@ -672,6 +688,7 @@ class TerminationsCfg:
 
     # MDP terminations
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
+    
     # command_resample
     terrain_out_of_bounds = DoneTerm(
         func=mdp.terrain_out_of_bounds,
@@ -679,7 +696,7 @@ class TerminationsCfg:
         time_out=True,
     )
 
-    # Contact sensor
+    # Contact sensor(Terminate when the contact force on the sensor exceeds the force threshold)
     illegal_contact = DoneTerm(
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=""), "threshold": 1.0},

@@ -11,15 +11,19 @@
 - [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py)
 - [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py)
 - [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
+- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py)
+- [rl_utils.py](file://scripts/reinforcement_learning/rl_utils.py)
 - [__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added documentation for dedicated stair-specific PPO runner configuration (ZsibotZSL1StairPPORunnerCfg)
+- Enhanced with dedicated stair-specific PPO runner configuration (ZsibotZSL1StairPPORunnerCfg)
+- Added comprehensive debugging improvements for height scanner visualization
 - Updated environment variants section to include stair climbing scenarios
 - Enhanced reward system documentation with stair-specific optimizations
 - Added concrete examples for stair climbing training configurations
+- Removed documentation for temporarily removed height scanner debug visualization feature
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -36,7 +40,7 @@
 ## Introduction
 This document explains the RSL-RL training system implemented in the repository. It covers the Proximal Policy Optimization (PPO) algorithm configuration, the training pipeline, and the CLI argument system. It also documents the OnPolicyRunner and DistillationRunner classes, their differences and use cases, the environment wrapper system, action clipping, and video recording. Finally, it provides guidance on distributed training, experiment logging, checkpoint management, and common training issues.
 
-**Updated** Added support for dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios.
+**Updated** Enhanced with dedicated stair-specific PPO runner configuration and comprehensive debugging improvements for height scanner visualization capabilities.
 
 ## Project Structure
 The RSL-RL training system is organized around three primary scripts and configuration modules:
@@ -110,7 +114,7 @@ Runner-->>Log : periodic checkpoints
 - Algorithm hyperparameters: Includes value loss coefficient, clipped value loss, clipping parameter, entropy coefficient, epochs, mini-batches, learning rate schedule, discount factor gamma, GAE lambda, desired KL divergence, and max gradient norm. See [rsl_rl_ppo_cfg.py:25-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38).
 - Environment variants: Flat and Rough variants adjust terrain and reward terms. See [flat_env_cfg.py:9-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29).
 
-**Updated** Added stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios.
+**Updated** Enhanced with stair-specific PPO runner configuration featuring optimized hyperparameters for stair climbing scenarios.
 
 ```mermaid
 flowchart TD
@@ -133,7 +137,7 @@ Train --> Save["Save Periodic Checkpoints"]
 - OnPolicyRunner: Standard PPO training loop with policy and value networks, configured via PPO algorithm settings. Instantiated in [train.py:200-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L200-L205).
 - DistillationRunner: Student-teacher distillation training with separate student and teacher policies, specialized algorithm configuration, and observation groups. Defined in [rsl_rl_distillation_cfg.py:18-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_distillation_cfg.py#L18-L38) and instantiated in [train.py:202-203](file://scripts/reinforcement_learning/rsl_rl/train.py#L202-L203).
 
-**Updated** Added stair-specific runner configuration with identical hyperparameters optimized for stair climbing scenarios.
+**Updated** Enhanced with stair-specific runner configuration featuring identical hyperparameters optimized for stair climbing scenarios.
 
 ```mermaid
 classDiagram
@@ -251,12 +255,23 @@ Video --> |No| Skip["Skip video"]
 - [train.py:148-216](file://scripts/reinforcement_learning/rsl_rl/train.py#L148-L216)
 - [play.py:140-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L140-L213)
 
+### Debugging Improvements and Height Scanner Visualization
+**Updated** Enhanced debugging capabilities with improved height scanner visualization support:
+
+- **Height Scanner Debug Visualization**: The system now supports dynamic height scanner debug visualization that can be toggled based on headless mode. See [play.py:158-161](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L161).
+- **Camera Following**: Enhanced camera control with smoothing for better visualization during playback. See [rl_utils.py:9-27](file://scripts/reinforcement_learning/rl_utils.py#L9-L27).
+- **Debug Mode Integration**: Height scanner debug visualization is automatically disabled in headless mode for cleaner simulations.
+
+**Section sources**
+- [play.py:158-161](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L161)
+- [rl_utils.py:9-27](file://scripts/reinforcement_learning/rl_utils.py#L9-L27)
+
 ### Concrete Examples
 - Configure training runs: Select task and agent entry point, set seed and iterations, choose environment variant (Flat/Rough/Stair). See [README.md:197-216](file://README.md#L197-L216).
 - Multi-GPU training: Use torch.distributed.run with --nproc_per_node=N for multi-GPU on a single node; extend to multiple nodes with --nnodes and --node_rank. See [README.md:333-347](file://README.md#L333-L347).
 - Export model checkpoints: After loading a checkpoint in playback, the policy is exported to JIT and ONNX under the checkpoint's exported/ directory. See [play.py:210-213](file://scripts/reinforcement_learning/rsl_rl/play.py#L210-L213).
 
-**Updated** Added stair-specific training examples with optimized configurations.
+**Updated** Enhanced with stair-specific training examples featuring optimized configurations and debugging capabilities.
 
 **Section sources**
 - [README.md:197-216](file://README.md#L197-L216)
@@ -297,8 +312,6 @@ Play --> Export["Export JIT/ONNX"]
 - Use --distributed for multi-GPU scaling; ensure seeds are offset per rank to avoid identical randomization. See [train.py:138-146](file://scripts/reinforcement_learning/rsl_rl/train.py#L138-L146).
 - Reduce environment randomness during playback to stabilize evaluation. See [play.py:117-123](file://scripts/reinforcement_learning/rsl_rl/play.py#L117-L123).
 
-[No sources needed since this section provides general guidance]
-
 ## Troubleshooting Guide
 - Unsupported runner class: Ensure agent_cfg.class_name is OnPolicyRunner or DistillationRunner. See [train.py:204-205](file://scripts/reinforcement_learning/rsl_rl/train.py#L204-L205).
 - Distributed training on CPU: Distributed training requires CUDA devices; the script raises an error if device is CPU with --distributed. See [train.py:131-136](file://scripts/reinforcement_learning/rsl_rl/train.py#L131-L136).
@@ -313,9 +326,7 @@ Play --> Export["Export JIT/ONNX"]
 ## Conclusion
 The RSL-RL training system integrates environment creation, optional video recording, environment wrapping, runner selection, and robust logging and checkpointing. PPO and distillation configurations are cleanly separated and templated per environment variant. The CLI system supports distributed training, experiment naming, and exporting trained policies. Following the examples and guidance herein enables efficient multi-GPU training, reproducible experiments, and reliable deployment of policies.
 
-**Updated** The system now includes dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios, providing specialized training capabilities for stair navigation tasks.
-
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** The system now includes dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios, enhanced debugging capabilities with improved height scanner visualization, and comprehensive debugging improvements for better development experience.
 
 ## Appendices
 
@@ -323,7 +334,7 @@ The RSL-RL training system integrates environment creation, optional video recor
 - Flat environments remove terrain height scanning and curriculum, simplifying reward computation. See [flat_env_cfg.py:10-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29).
 - **Stair environments** utilize specialized inverted pyramid stair terrains with optimized reward systems for stair climbing. See [stair_env_cfg.py:20-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L20-L47).
 
-**Updated** Added stair-specific environment configuration with specialized terrain generation and reward optimization.
+**Updated** Enhanced with comprehensive stair-specific environment configuration featuring specialized terrain generation and reward optimization.
 
 **Section sources**
 - [flat_env_cfg.py:10-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L10-L29)
@@ -372,3 +383,15 @@ The stair environment implements specialized reward functions optimized for stai
 
 **Section sources**
 - [stair_env_cfg.py:86-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L86-L204)
+
+### Appendix D: Enhanced Debugging and Visualization Features
+**Updated** Comprehensive debugging improvements for enhanced development experience:
+
+- **Height Scanner Debug Visualization**: Dynamic toggle based on headless mode for better terrain perception debugging
+- **Camera Following System**: Smooth camera tracking with adjustable smoothing window for better visualization
+- **Debug Mode Integration**: Automatic debug visualization management across different environment modes
+- **Visualization Markers**: Enhanced marker-based debugging for commands and anchors in various MDP components
+
+**Section sources**
+- [play.py:158-161](file://scripts/reinforcement_learning/rsl_rl/play.py#L158-L161)
+- [rl_utils.py:9-27](file://scripts/reinforcement_learning/rl_utils.py#L9-L27)

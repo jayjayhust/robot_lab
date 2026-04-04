@@ -692,9 +692,9 @@ def climbing_progress(
     
     # Get commanded velocity direction in xy plane
     cmd_vel_xy = command[:, :2]
-    cmd_vel_norm = torch.norm(cmd_vel_xy, dim=1, keepdim=True)
-    cmd_vel_norm_safe = torch.clamp(cmd_vel_norm, min=0.1)
-    cmd_dir = cmd_vel_xy / cmd_vel_norm_safe
+    cmd_vel_norm = torch.norm(cmd_vel_xy, dim=1, keepdim=True)  # Command velocity norm
+    cmd_vel_norm_safe = torch.clamp(cmd_vel_norm, min=0.1)  # Command velocity norm, clamped to avoid division by zero
+    cmd_dir = cmd_vel_xy / cmd_vel_norm_safe  # Normalized command direction
     
     # Get robot's forward direction
     quat = asset.data.root_quat_w
@@ -704,30 +704,30 @@ def climbing_progress(
     forward_xy = forward_world[:, :2]
     forward_xy_norm = torch.norm(forward_xy, dim=1, keepdim=True)
     forward_xy_norm_safe = torch.clamp(forward_xy_norm, min=0.01)
-    forward_dir = forward_xy / forward_xy_norm_safe
+    forward_dir = forward_xy / forward_xy_norm_safe  # Normalized robot forward direction
     
     # Check alignment
-    dot_product = torch.sum(cmd_dir * forward_dir, dim=1)
+    dot_product = torch.sum(cmd_dir * forward_dir, dim=1)  # Dot product of command and forward direction
     is_aligned = (dot_product > alignment_threshold).float()
     
     # Forward progress: velocity component in command direction
     vel_xy = asset.data.root_lin_vel_w[:, :2]
-    forward_progress = torch.sum(vel_xy * cmd_dir, dim=1)  # Project velocity onto command direction
+    forward_progress = torch.sum(vel_xy * cmd_dir, dim=1)  # Project velocity onto command direction, summing components
     forward_progress = torch.clamp(forward_progress, min=0.0)  # Only reward forward movement
     
     # Elevation gain: positive z velocity
-    z_vel = asset.data.root_lin_vel_w[:, 2]
+    z_vel = asset.data.root_lin_vel_w[:, 2]  # Positive z velocity
     elevation_gain = torch.clamp(z_vel, min=0.0)  # Only reward upward movement
     
     # Combine rewards
     reward = forward_weight * forward_progress + elevation_weight * elevation_gain
     
     # Only active when aligned and command is significant
-    reward *= is_aligned
-    reward *= (cmd_vel_norm.squeeze() > 0.1).float()
+    reward *= is_aligned  # Only active when aligned
+    reward *= (cmd_vel_norm.squeeze() > 0.1).float()  # Only active when command is significant
     
-    # Scale by upright factor
-    reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    # Scale by upright factor to encourage upright posture
+    reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7  # Scale by upright factor
     
     return reward
 

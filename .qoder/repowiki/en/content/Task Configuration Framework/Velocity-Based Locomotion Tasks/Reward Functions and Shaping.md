@@ -13,6 +13,7 @@
 - [rewards.py (handstand)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/others/unitree_a1_handstand/env/rewards.py)
 - [rough_env_cfg.py (Zsibot ZSL1)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py)
 - [stair_env_cfg.py (Zsibot ZSL1)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
+- [flat_env_cfg.py (Zsibot ZSL1)](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py)
 </cite>
 
 ## Update Summary
@@ -22,6 +23,7 @@
 - Documented the requirement for heading_command=True in CommandCfg for accessing heading_target
 - Added examples of Zsibot ZSL1 configurations using the new reward function
 - Updated troubleshooting guide with guidance for the new reward function
+- Removed documentation of experimental reward system and temporary reward weight configurations that were previously documented but are no longer in the codebase
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -70,6 +72,7 @@ SdogFlat["sdog_sdog2_flat_env_cfg.py<br/>SdogSdog2FlatEnvCfg"]
 ApxCfg["opendoge_apx_rough_env_cfg.py<br/>OpendogeApxRoughEnvCfg"]
 ZSL1Rough["rough_env_cfg.py (Zsibot ZSL1)<br/>Two-stage Control Strategy"]
 ZSL1Stair["stair_env_cfg.py (Zsibot ZSL1)<br/>Incline Terrain Handling"]
+ZSL1Flat["flat_env_cfg.py (Zsibot ZSL1)<br/>Flat Terrain Configuration"]
 end
 subgraph "MDP Rewards"
 RImpl["rewards.py<br/>Velocity-based reward functions"]
@@ -85,6 +88,7 @@ SdogFlat --> SdogCfg
 ApxCfg --> VCFG
 ZSL1Rough --> VCFG
 ZSL1Stair --> VCFG
+ZSL1Flat --> VCFG
 HS --> VCFG
 ```
 
@@ -95,11 +99,12 @@ HS --> VCFG
 - [sdog_sdog2_rough_env_cfg.py:14-179](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L14-L179)
 - [sdog_sdog2_flat_env_cfg.py:11-32](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/flat_env_cfg.py#L11-L32)
 - [opendoge_apx_rough_env_cfg.py:14-187](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py#L14-L187)
-- [rewards.py:1-791](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L791)
+- [rewards.py:1-807](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L807)
 - [curriculums.py:1-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L1-L60)
 - [rewards.py (handstand):1-58](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/others/unitree_a1_handstand/env/rewards.py#L1-L58)
 - [rough_env_cfg.py (Zsibot ZSL1):123-129](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L123-L129)
 - [stair_env_cfg.py (Zsibot ZSL1):157-163](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L157-L163)
+- [flat_env_cfg.py (Zsibot ZSL1):1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L1-L30)
 
 **Section sources**
 - [velocity_env_cfg.py:695-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L695-L744)
@@ -156,6 +161,10 @@ This section documents the RewardsCfg class and its reward terms. Each term is d
   - feet_distance_y_exp / feet_distance_xy_exp: Exponential shaping of foot placement relative to desired stance geometry.
   - upward: Encourage base orientation pointing upwards.
 
+- **Climbing and Specialized Rewards**
+  - **New** heading_alignment: Reward for aligning robot heading with commanded velocity direction in xy plane.
+  - **New** climbing_progress: Reward for climbing combining forward progress and elevation gain when aligned with command.
+
 Typical weight ranges observed in example environments:
 - Velocity tracking: positive weights around 2–5
 - Stability penalties: negative weights around −0.05 to −0.2
@@ -163,13 +172,14 @@ Typical weight ranges observed in example environments:
 - Action penalties: negative weights around −0.01 to −0.075
 - Contact rewards/penalties: vary widely by task; e.g., feet_air_time often positive, feet_slide negative
 - Upward/base_height: positive weights around 1.0
+- **New** Climbing rewards: heading_alignment (0.0–2.0), climbing_progress (0.0–2.0)
 
 Activation/deactivation:
 - Zero-weight terms are disabled by environment configuration's disable_zero_weight_rewards method.
 
 **Section sources**
 - [velocity_env_cfg.py:375-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L375-L744)
-- [rewards.py:22-791](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L791)
+- [rewards.py:22-807](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L807)
 
 ## Architecture Overview
 The reward system is built around manager-based terms that are configured in RewardsCfg and executed during environment steps. Curriculum adjusts command ranges dynamically based on reward performance.
@@ -186,7 +196,7 @@ end
 
 **Diagram sources**
 - [velocity_env_cfg.py:695-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L695-L744)
-- [rewards.py:1-791](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L791)
+- [rewards.py:1-807](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L807)
 - [curriculums.py:1-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L1-L60)
 
 ## Detailed Component Analysis
@@ -427,6 +437,46 @@ Reward --> End
 **Section sources**
 - [rewards.py:336-583](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L336-L583)
 
+### Climbing and Specialized Rewards
+
+**Updated** New climbing-specific reward functions designed for stair climbing and incline navigation.
+
+#### Heading Alignment Reward
+- **New** heading_alignment
+  - Purpose: Reward for aligning robot heading with commanded velocity direction in xy plane.
+  - Implementation highlights: Computes dot product between command direction and robot forward direction, applies exponential kernel with std parameter.
+  - Typical usage: Phase 1 of two-stage climbing control; encourages proper orientation before movement.
+  - Weight range: 0.0–2.0 in examples.
+
+#### Climbing Progress Reward
+- **New** climbing_progress
+  - Purpose: Reward for climbing combining forward progress and elevation gain when aligned with command.
+  - Implementation highlights: Only active when robot is reasonably aligned with command direction; combines forward velocity projection and positive z velocity.
+  - Typical usage: Phase 2 of two-stage climbing control; rewards actual climbing behavior.
+  - Weight range: 0.0–2.0 in examples.
+
+#### Mathematical Implementation Details
+
+```mermaid
+flowchart TD
+Start(["Climbing Progress Calculation"]) --> CheckAlign["Check Alignment with Command"]
+CheckAlign --> IsAligned{"Aligned (> threshold)?"}
+IsAligned --> |No| Zero["Return 0"]
+IsAligned --> |Yes| CalcVel["Calculate Velocity Components"]
+CalcVel --> Forward["Forward Progress: v · cmd_dir"]
+Forward --> Elev["Elevation Gain: max(v_z, 0)"]
+Elev --> Combine["Combine: w_forward·forward + w_elevation·elevation"]
+Combine --> Scale["Scale by Upright Factor"]
+Scale --> End(["Return Reward"])
+Zero --> End
+```
+
+**Diagram sources**
+- [rewards.py:670-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L670-L732)
+
+**Section sources**
+- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
+
 ### Curriculum-Based Reward Scaling
 - command_levels_lin_vel / command_levels_ang_vel
   - Purpose: Dynamically expand command ranges based on tracking reward performance.
@@ -492,10 +542,17 @@ Cmd-->>Env : Updated command ranges
   - Automatic fallback to body-frame tracking on steep inclines (pitch > 10°)
   - Enables full 360° heading sampling for comprehensive direction learning
   - Example weights: track_lin_vel_xy_exp (4.0), track_ang_vel_z_exp (1.5), feet_air_time (2.5), feet_height (6.0), upward (0.3)
+  - **New** Climbing-specific configuration includes heading_alignment (2.0) and climbing_progress (1.5) rewards
 
 - **Handstand (Unitree A1)**
   - Specialized rewards for feet height and orientation to maintain inverted posture.
   - Example functions: handstand_feet_height_exp, handstand_feet_on_air, handstand_feet_air_time, handstand_orientation_l2.
+
+- **Updated** **Zsibot ZSL1 Flat Terrain Configuration**
+  - **New** Simplified configuration for flat terrain with reduced climbing-specific rewards
+  - Disables height scanning sensors for cost reduction
+  - Reduces terrain curriculum complexity
+  - Example weights: track_lin_vel_xy_exp (3.0), track_ang_vel_z_exp (1.5), feet_air_time (0.1), upward (1.0)
 
 **Impact on learning:**
 - Strong tracking rewards accelerate convergence to desired velocities.
@@ -507,6 +564,7 @@ Cmd-->>Env : Updated command ranges
 - Contact rewards encourage natural gait patterns; gait enforcement improves coordination.
 - Curriculum expands task difficulty progressively, preventing premature plateauing.
 - **Updated** Selective reward disabling allows for task-specific optimization (e.g., climbing ladder stability).
+- **New** Climbing-specific rewards enable specialized stair climbing behavior with proper heading alignment and elevation gain.
 
 **Section sources**
 - [rough_env_cfg.py:51-125](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L51-L125)
@@ -517,6 +575,7 @@ Cmd-->>Env : Updated command ranges
 - [rewards.py:683-790](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L683-L790)
 - [rough_env_cfg.py (Zsibot ZSL1):123-129](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L123-L129)
 - [stair_env_cfg.py (Zsibot ZSL1):157-163](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L157-L163)
+- [flat_env_cfg.py (Zsibot ZSL1):1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L1-L30)
 
 ## Dependency Analysis
 - Rewards depend on:
@@ -539,10 +598,10 @@ RImpl --> ActMgr
 ```
 
 **Diagram sources**
-- [rewards.py:1-791](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L791)
+- [rewards.py:1-807](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L807)
 
 **Section sources**
-- [rewards.py:1-791](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L791)
+- [rewards.py:1-807](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L807)
 
 ## Performance Considerations
 - Exponential kernels (e.g., track_lin_vel_xy_exp, track_ang_vel_z_exp) are computationally efficient and smooth, aiding stable gradients.
@@ -552,6 +611,7 @@ RImpl --> ActMgr
 - **Updated** Two-stage control strategy adds computational overhead but significantly improves stability and learning efficiency.
 - **Updated** Heading alignment calculation requires quaternion-to-yaw conversion; consider caching when using multiple reward functions.
 - **Updated** Incline detection uses projected gravity calculation; ensure terrain complexity doesn't overwhelm the detection threshold.
+- **New** Climbing-specific rewards add minimal computational overhead while enabling specialized behavior.
 
 ## Troubleshooting Guide
 - Reward not activating
@@ -593,12 +653,20 @@ RImpl --> ActMgr
   - Tracking rewards too weak: Increase from 3.0 to 5.0 for linear and 1.5 to 2.5 for angular velocity.
   - Stability constraints too restrictive: Disable flat_orientation_l2 for climbing flexibility.
   - **Updated** Two-stage control not working: Ensure CommandCfg has `heading_command=True` and `rel_heading_envs=1.0`.
+  - **New** Heading alignment reward not effective: Check alignment_threshold parameter (0.1–0.7) and ensure command magnitude is sufficient.
+  - **New** Climbing progress reward inactive: Verify robot is aligned with command (alignment_threshold) and moving forward/elevating.
 
 - **Updated** Command configuration requirements
   - **Problem**: heading_target not available in reward function
   - **Solution**: Set `heading_command=True` in CommandsCfg and ensure `rel_heading_envs=1.0`
   - **Problem**: Full 360° heading sampling not working
   - **Solution**: Set `heading=(-math.pi, math.pi)` in CommandsCfg ranges
+
+- **New** Zsibot ZSL1 specific issues
+  - **Problem**: Flat terrain configuration not working
+  - **Solution**: Ensure height scanning sensors are disabled and terrain is set to plane
+  - **Problem**: Stair climbing configuration not optimal
+  - **Solution**: Verify climbing-specific rewards (heading_alignment, climbing_progress) are enabled and properly weighted
 
 **Section sources**
 - [velocity_env_cfg.py:737-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L737-L744)
@@ -607,14 +675,20 @@ RImpl --> ActMgr
 - [rewards.py:683-790](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L683-L790)
 - [sdog_sdog2_rough_env_cfg.py:86-146](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/sdog_sdog2/rough_env_cfg.py#L86-L146)
 - [rough_env_cfg.py (Zsibot ZSL1):185-188](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L185-L188)
+- [stair_env_cfg.py (Zsibot ZSL1):197-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L197-L231)
+- [flat_env_cfg.py (Zsibot ZSL1):1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L1-L30)
 
 ## Conclusion
 The reward system provides a flexible, modular framework for velocity-based locomotion. By combining velocity tracking, stability penalties, joint/action constraints, and contact-based shaping—and by leveraging curriculum-driven command scaling—environments can be tuned to achieve robust, efficient, and natural locomotion behaviors. 
 
 **Updated** The addition of the heading-aligned velocity tracking function with two-stage control strategy represents a significant advancement in locomotion stability. This new reward function implements sophisticated behavior prioritizing heading alignment before forward velocity tracking, making it particularly effective for complex terrain navigation and stair climbing. The automatic incline detection and gravity alignment factors further enhance its adaptability across different environments. The Zsibot ZSL1 configurations demonstrate practical applications where this two-stage approach prevents rear-facing locomotion and enables precise direction control. Example configurations illustrate effective weight choices and term combinations across humanoid and quadruped tasks, with special-purpose rewards for specialized gaits such as handstands. The enhanced reward system now provides researchers and practitioners with powerful tools for developing stable, efficient, and adaptable locomotion policies.
 
+**New** The introduction of climbing-specific rewards (heading_alignment and climbing_progress) enables specialized stair climbing behavior with proper heading alignment and elevation gain. These rewards work in conjunction with the two-stage control strategy to create a comprehensive climbing solution that prioritizes safety and efficiency.
+
 ## Appendices
 - Reward term summary and typical weight ranges are documented in the "Core Components" section with references to example environments.
 - **Updated** Sdog-Sdog2 specific configurations provide detailed examples of reward organization and selective term disabling for climbing ladder performance.
 - **Updated** Zsibot ZSL1 configurations showcase the practical implementation of two-stage control strategy with comprehensive terrain adaptation capabilities.
+- **New** Zsibot ZSL1 flat terrain configuration demonstrates simplified reward setup for basic locomotion tasks.
 - **Updated** Command configuration requirements for heading-aligned reward functions include `heading_command=True` and appropriate heading sampling ranges.
+- **New** Climbing-specific reward parameters include alignment thresholds and weight balancing for optimal stair climbing performance.
