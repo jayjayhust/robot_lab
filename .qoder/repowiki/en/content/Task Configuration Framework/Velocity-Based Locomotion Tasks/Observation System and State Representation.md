@@ -8,7 +8,16 @@
 - [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py)
 - [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py)
 - [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py)
+- [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added documentation for the new `feet_height_in_body_frame` observation function
+- Updated the Individual Observation Terms section to include this new function
+- Enhanced the CriticCfg section to explain the new terrain clearance observation
+- Added information about the function's purpose for stair climbing scenarios
+- Updated configuration examples to show the new observation parameters
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -36,23 +45,26 @@ E["commands.py<br/>Command generators"] --> A
 F["rewards.py<br/>Reward functions using observations"] --> A
 G["anymal_d rough_env_cfg.py<br/>Robot-specific overrides"] --> A
 H["booster_t1 rough_env_cfg.py<br/>Robot-specific overrides"] --> A
+I["stair_env_cfg.py<br/>Stair climbing overrides"] --> A
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L254)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L35)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [velocity_env_cfg.py:130-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L271)
+- [observations.py:1-63](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L63)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [rewards.py:22-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
+- [rough_env_cfg.py:14-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
+- [rough_env_cfg.py:16-36](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [stair_env_cfg.py:80-90](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L80-L90)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L254)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L35)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [velocity_env_cfg.py:130-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L271)
+- [observations.py:1-63](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L63)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [rewards.py:22-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
+- [rough_env_cfg.py:14-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
+- [rough_env_cfg.py:16-36](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [stair_env_cfg.py:80-90](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L80-L90)
 
 ## Core Components
 - ObservationsCfg: Central configuration container for observations, composed of two groups:
@@ -69,9 +81,10 @@ Key observation terms in PolicyCfg and CriticCfg include:
 - Joint positions and velocities (relative to defaults)
 - Last actions
 - Height scan from a ray-caster sensor
+- **Feet height in body frame** (enhanced critic observations for complex terrain)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L254)
+- [velocity_env_cfg.py:133-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L271)
 
 ## Architecture Overview
 The observation pipeline transforms raw sensor and state signals into normalized tensors consumed by policy and critic networks. The policy receives noisy observations to improve generalization, while the critic receives clean observations for stable value estimation.
@@ -97,7 +110,7 @@ Concat-->>Net : Flattened observation
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L254)
+- [velocity_env_cfg.py:133-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L271)
 
 ## Detailed Component Analysis
 
@@ -110,6 +123,7 @@ Concat-->>Net : Flattened observation
   - Disables noise and corruption.
   - Concatenates observation terms in order.
   - Mirrors the same terms as PolicyCfg but without noise.
+  - **Enhanced with feet height observation for complex terrain scenarios.**
 
 Configuration highlights:
 - Noise: Additive uniform noise applied per term.
@@ -118,7 +132,7 @@ Configuration highlights:
 - Corruption: Boolean flag controlling whether corrupted observations are produced.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L254)
+- [velocity_env_cfg.py:133-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L271)
 
 ### Individual Observation Terms
 
@@ -130,7 +144,7 @@ Configuration highlights:
 - Use: Captures forward/backward and lateral translation relative to the robot.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L143)
+- [velocity_env_cfg.py:138-143](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L143)
 
 #### Base Angular Velocity
 - Function: Base angular velocity around the z-axis in body frame.
@@ -140,17 +154,17 @@ Configuration highlights:
 - Use: Encodes turning rate and rotational stability.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L144-L149)
+- [velocity_env_cfg.py:144-149](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L144-L149)
 
 #### Projected Gravity Vector
-- Function: Projection of gravity onto the robot’s body frame.
+- Function: Projection of gravity onto the robot's body frame.
 - Noise: Optional small uniform noise.
 - Clip: Broad range to avoid numerical issues.
 - Scale: Unit magnitude normalization often implied.
 - Use: Encodes tilt and levelness; stabilizes reward shaping.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L150-L155)
+- [velocity_env_cfg.py:150-155](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L150-L155)
 
 #### Velocity Commands
 - Function: Generated command for base velocity (x/y translational, z rotational).
@@ -160,7 +174,7 @@ Configuration highlights:
 - Use: Supervisory signal guiding velocity tracking rewards.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L156-L161)
+- [velocity_env_cfg.py:156-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L156-L161)
 
 #### Joint Positions (Relative)
 - Function: Joint positions relative to default rest configuration.
@@ -171,7 +185,7 @@ Configuration highlights:
 - Use: Regularizes posture and compensates for actuator drift.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L162-L168)
+- [velocity_env_cfg.py:162-168](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L162-L168)
 
 #### Joint Velocities (Relative)
 - Function: Joint velocities relative to default rest configuration.
@@ -182,7 +196,7 @@ Configuration highlights:
 - Use: Penalizes excessive motion and aids stability.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L169-L175)
+- [velocity_env_cfg.py:169-175](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L169-L175)
 
 #### Last Actions
 - Function: Previous actions sent to the robot.
@@ -191,7 +205,7 @@ Configuration highlights:
 - Use: Temporal continuity and action smoothing.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L176-L180)
+- [velocity_env_cfg.py:176-180](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L176-L180)
 
 #### Height Scan
 - Function: Height measurements from a ray-caster sensor.
@@ -202,7 +216,20 @@ Configuration highlights:
 - Use: Terrain adaptation and foothold awareness.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L181-L187)
+- [velocity_env_cfg.py:181-187](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L181-L187)
+
+#### Feet Height in Body Frame
+- **New Function**: Computes foot heights relative to the robot's body frame.
+- **Purpose**: Provides crucial terrain clearance information for stair climbing and complex terrain scenarios.
+- **Enhanced Critic**: Available only in CriticCfg for improved value estimation in challenging terrains.
+- **Parameters**: Asset configuration specifying foot link names (e.g., `".*_FOOT_LINK"`).
+- **Clip**: Narrow range `(-0.5, 0.5)` to bound terrain clearance values.
+- **Scale**: Factor `2.0` to emphasize terrain clearance differences.
+- **Use**: Helps the critic understand relative foot heights for better value estimation during stair climbing and uneven terrain navigation.
+
+**Section sources**
+- [velocity_env_cfg.py:248-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L248-L255)
+- [observations.py:38-62](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L38-L62)
 
 ### Noise Injection Mechanisms
 - Noise type: Additive uniform noise configured per term.
@@ -217,12 +244,12 @@ Examples of noise parameters:
 - Height scan: small range.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L140-L141)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L146-L147)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L152-L153)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L165-L166)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L172-L173)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L184-L185)
+- [velocity_env_cfg.py:140-141](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L140-L141)
+- [velocity_env_cfg.py:146-147](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L146-L147)
+- [velocity_env_cfg.py:152-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L152-L153)
+- [velocity_env_cfg.py:165-166](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L165-L166)
+- [velocity_env_cfg.py:172-173](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L172-L173)
+- [velocity_env_cfg.py:184-185](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L184-L185)
 
 ### Clipping and Scaling
 - Clip: Applies hard bounds to stabilize training and avoid outliers.
@@ -234,14 +261,16 @@ Examples of scale overrides:
 - Base angular velocity: reduced scale for stability.
 - Joint positions: identity scale.
 - Joint velocities: reduced scale.
+- **Feet height in body frame**: scale factor of `2.0` for enhanced terrain clearance sensitivity.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L142-L143)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L148-L149)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L167-L168)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L174-L175)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L29-L32)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L31-L34)
+- [velocity_env_cfg.py:142-143](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L142-L143)
+- [velocity_env_cfg.py:148-149](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L148-L149)
+- [velocity_env_cfg.py:167-168](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L167-L168)
+- [velocity_env_cfg.py:174-175](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L174-L175)
+- [velocity_env_cfg.py:253-254](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L253-L254)
+- [rough_env_cfg.py:29-32](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L29-L32)
+- [rough_env_cfg.py:31-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L31-L34)
 
 ### Data Corruption Techniques
 - Corruption flag: Controlled per group.
@@ -250,8 +279,8 @@ Examples of scale overrides:
 - Purpose: Policy learns under noisy conditions; critic remains stable.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L189-L191)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L248-L250)
+- [velocity_env_cfg.py:190-192](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L190-L192)
+- [velocity_env_cfg.py:265-267](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L265-L267)
 
 ### Concatenation Strategies
 - Order preservation: Terms are concatenated in the declared order.
@@ -259,8 +288,8 @@ Examples of scale overrides:
 - Group independence: Policy and Critic maintain separate concatenations.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L189-L191)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L248-L250)
+- [velocity_env_cfg.py:190-192](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L190-L192)
+- [velocity_env_cfg.py:265-267](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L265-L267)
 
 ### Preprocessing Pipelines
 - Step-by-step:
@@ -272,9 +301,10 @@ Examples of scale overrides:
 - Policy vs Critic:
   - Policy adds noise and may enable corruption.
   - Critic bypasses noise and corruption.
+  - **Critic includes enhanced terrain clearance observation for complex scenarios.**
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L254)
+- [velocity_env_cfg.py:133-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L133-L271)
 
 ### Examples of Observation Term Configuration
 - PolicyCfg:
@@ -284,29 +314,37 @@ Examples of scale overrides:
 - CriticCfg:
   - Identical terms without noise.
   - Same clip and scale as PolicyCfg.
-
-Robot-specific overrides:
-- Anymal-D rough environment:
-  - Increased base linear velocity scale.
-  - Reduced joint velocities scale.
-- Booster T1 rough environment:
-  - Increased base linear velocity scale.
-  - Reduced base angular velocity scale.
-  - Explicitly removing base linear velocity and height scan from policy.
+  - **Enhanced with feet height observation for terrain clearance.**
+- Robot-specific overrides:
+  - Anymal-D rough environment:
+    - Increased base linear velocity scale.
+    - Reduced joint velocities scale.
+  - Booster T1 rough environment:
+    - Increased base linear velocity scale.
+    - Reduced base angular velocity scale.
+    - Explicitly removing base linear velocity and height scan from policy.
+  - **ZSIBot ZSL1 stair environment:**
+    - Base linear velocity scale increased to `2.0`.
+    - Base angular velocity scale reduced to `0.25`.
+    - Base linear velocity term removed from policy for stability.
+    - Height scan enabled for terrain perception during stair climbing.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L187)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L198-L241)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L28-L34)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L30-L36)
+- [velocity_env_cfg.py:138-187](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L187)
+- [velocity_env_cfg.py:198-241](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L198-L241)
+- [velocity_env_cfg.py:248-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L248-L255)
+- [rough_env_cfg.py:28-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L28-L34)
+- [rough_env_cfg.py:30-36](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L30-L36)
+- [stair_env_cfg.py:80-90](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L80-L90)
 
 ### Relationship to Commands and Rewards
 - Commands: Velocity commands are generated and passed to the environment; observations include these commands to guide tracking.
 - Rewards: Many reward functions depend on observations (e.g., tracking errors, contact times, projected gravity), reinforcing the importance of accurate and stable observation pipelines.
+- **Enhanced terrain rewards**: Stair climbing rewards benefit from the feet height observation for better terrain clearance assessment.
 
 **Section sources**
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [rewards.py:22-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
 
 ## Dependency Analysis
 - ObservationsCfg depends on:
@@ -316,6 +354,7 @@ Robot-specific overrides:
 - Robot-specific overrides depend on:
   - Base link and foot link naming conventions.
   - Sensor prim paths aligned to base link.
+- **New dependency**: Feet height observation requires proper foot link naming patterns (e.g., `".*_FOOT_LINK"`).
 
 ```mermaid
 graph TB
@@ -327,28 +366,35 @@ MDP --> Scene["Scene Entities"]
 MDP --> Cmd["Command Manager"]
 R1["Anymal-D Overrides"] --> O
 R2["Booster T1 Overrides"] --> O
+R3["ZSIBot Stair Overrides"] --> O
+FH["Feet Height Function"] --> MDP
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L254)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [velocity_env_cfg.py:130-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L271)
+- [observations.py:38-62](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L38-L62)
+- [rough_env_cfg.py:14-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
+- [rough_env_cfg.py:16-36](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [stair_env_cfg.py:56-66](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L66)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L254)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [velocity_env_cfg.py:130-271](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L271)
+- [observations.py:38-62](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L38-L62)
+- [rough_env_cfg.py:14-34](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/rough_env_cfg.py#L14-L34)
+- [rough_env_cfg.py:16-36](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L16-L36)
+- [stair_env_cfg.py:56-66](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L66)
 
 ## Performance Considerations
 - Training stability:
   - Policy noise improves generalization but should be calibrated to avoid saturating the action space.
   - Critic absence of noise yields stable value estimates.
+  - **Feet height observation provides valuable terrain information without significantly impacting computational cost.**
 - Computational cost:
   - Concatenation is linear in the number of terms; reducing terms or simplifying scales can lower overhead.
+  - **Feet height observation adds minimal computational overhead while providing significant benefits for stair climbing.**
 - Robustness:
   - Robot-specific scales and noise adjustments help adapt to different dynamics and sensor characteristics.
-
-[No sources needed since this section provides general guidance]
+  - **Foot link naming consistency is crucial for proper feet height computation.**
 
 ## Troubleshooting Guide
 - Symmetry helpers:
@@ -357,11 +403,16 @@ R2["Booster T1 Overrides"] --> O
   - Commands can be restricted on certain terrains to prevent unrealistic motion during training.
 - Reward alignment:
   - Several rewards incorporate projected gravity and contact sensor data; ensure observations reflect these signals consistently.
+- **Feet height observation issues:**
+  - Ensure foot link naming follows the pattern `".*_FOOT_LINK"` or adjust the asset configuration accordingly.
+  - Verify that the robot asset has proper foot link definitions in the URDF/robot description.
+  - Check that the critic group includes the feet height observation for stair climbing scenarios.
 
 **Section sources**
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L26)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
+- [observations.py:16-26](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L26)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [rewards.py:22-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L75)
+- [stair_env_cfg.py:56-66](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L66)
 
 ## Conclusion
-The observation system separates policy and critic pathways to balance robustness and stability. PolicyCfg leverages noise and optional corruption to generalize across diverse conditions, while CriticCfg maintains clean, consistent inputs for reliable value estimation. Carefully tuned clipping, scaling, and robot-specific overrides ensure stable training and strong performance across different locomotion platforms.
+The observation system separates policy and critic pathways to balance robustness and stability. PolicyCfg leverages noise and optional corruption to generalize across diverse conditions, while CriticCfg maintains clean, consistent inputs for reliable value estimation. The addition of the feet height in body frame observation enhances the critic's ability to handle complex terrain scenarios, particularly stair climbing, by providing crucial terrain clearance information. Carefully tuned clipping, scaling, and robot-specific overrides ensure stable training and strong performance across different locomotion platforms.

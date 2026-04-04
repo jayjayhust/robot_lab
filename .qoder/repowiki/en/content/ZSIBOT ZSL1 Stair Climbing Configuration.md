@@ -19,10 +19,11 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced stair climbing configuration with specialized reward system including heading alignment and climbing progress rewards
-- Added advanced terrain-aware command generation with automatic pit detection and restrictions
-- Implemented world-horizontal velocity stabilization through optimized reward weighting
-- Removed experimental reward system and temporary debug features that were previously documented
+- Updated action scaling for hip and knee joints from 0.4 to 0.6 to support 0.23m step heights
+- Implemented stability constraints with roll/pitch limits of ±0.5 radians for enhanced stability
+- Modified reward weights to prioritize controlled climbing with climbing_progress now weighted at 2.5
+- Enhanced termination conditions by removing illegal contact termination and focusing on stability constraints
+- Updated reward system to remove heading alignment requirement and emphasize climbing progress
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -39,7 +40,7 @@
 ## Introduction
 This document provides a comprehensive analysis of the ZSIBOT ZSL1 Stair Climbing Configuration within the robot_lab repository. The ZSL1 is a quadruped robot designed for stair navigation, featuring articulated legs and optional wheel attachments for enhanced mobility. The configuration leverages Isaac Lab's reinforcement learning framework to enable stair climbing capabilities through carefully tuned environment settings, reward functions, and actuator configurations.
 
-The repository integrates the ZSL1 robot model with RSL-RL training and evaluation pipelines, providing both flat and rough terrain variants, with specialized stair-climbing configurations optimized for step negotiation and stability. Recent enhancements include world-horizontal velocity stabilization, advanced terrain-aware command generation, and a specialized reward system designed specifically for stair climbing performance.
+The repository integrates the ZSL1 robot model with RSL-RL training and evaluation pipelines, providing both flat and rough terrain variants, with specialized stair-climbing configurations optimized for step negotiation and stability. Recent enhancements include increased action scaling for hip and knee joints to support 0.23m step heights, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions.
 
 **Section sources**
 - [README.md:1-512](file://README.md#L1-L512)
@@ -84,8 +85,8 @@ VEL_ENV --> STAIR_CFG
 ```
 
 **Diagram sources**
-- [zsibot.py:1-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L1-L115)
-- [stair_env_cfg.py:1-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L231)
+- [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
+- [stair_env_cfg.py:1-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L235)
 - [rough_env_cfg.py:1-188](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L1-L188)
 - [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L1-L30)
 - [rsl_rl_ppo_cfg.py:1-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L1-L75)
@@ -102,24 +103,40 @@ The ZSL1 stair climbing configuration consists of several interconnected compone
 The robot configuration defines the physical properties, actuator specifications, and initial conditions for the ZSL1:
 
 - **Articulation Configuration**: Defines the robot as an articulated body with collision detection and contact sensors
-- **Actuator Setup**: Includes DCMotorCfg for leg joints and ImplicitActuatorCfg for wheel joints
+- **Actuator Setup**: Includes DCMotorCfg for leg joints with torque limits of 28 N⋅m and ImplicitActuatorCfg for wheel joints
 - **Initial State**: Sets default joint positions and velocities for stable starting conditions
 - **Joint Limits**: Specifies effort and velocity limits based on motor specifications
 
 ### Environment Configurations
 Three primary environment configurations provide different training scenarios:
 
-- **Stair Environment**: Specialized for step negotiation with modified reward functions and terrain-aware commands
+- **Stair Environment**: Specialized for step negotiation with modified reward functions, enhanced action scaling, and stability constraints
 - **Rough Terrain**: Base configuration for general quadruped locomotion
 - **Flat Terrain**: Simplified environment for baseline performance testing
 
-### Enhanced Reward System
-The stair climbing environment features a specialized reward system designed for stair navigation:
+### Enhanced Action Scaling
+The stair climbing environment features increased action scaling for hip and knee joints to support 0.23m step heights:
 
-- **Heading Alignment Reward**: Encourages proper robot orientation relative to commanded velocity direction
-- **Climbing Progress Reward**: Phased approach rewarding forward progress and elevation gain when properly aligned
-- **World-Horizontal Velocity Stabilization**: Optimized reward weighting to maintain stable horizontal movement
-- **Terrain-Aware Penalties**: Specialized penalties for undesired contacts and joint deviations
+- **Hip Joint Scaling**: Increased from 0.4 to 0.6 to enable powerful leg swing and lifting motions
+- **Knee Joint Scaling**: Increased from 0.4 to 0.6 to provide adequate leg extension for step negotiation
+- **Abduction Joint Scaling**: Maintained at 0.15 for moderate sideways movement
+- **Action Clipping**: Applied with broad limits of (-100.0, 100.0) for stability
+
+### Stability Constraints
+Enhanced stability constraints limit roll and pitch movements to prevent dangerous orientations:
+
+- **Roll Limit**: ±0.5 radians (±28.6 degrees) for enhanced stability
+- **Pitch Limit**: ±0.5 radians (±28.6 degrees) for safe stair negotiation
+- **Yaw Limit**: Maintained at ±π radians for full rotational freedom
+- **Position Range**: Limited to prevent excessive base movement during climbing
+
+### Modified Reward System
+The stair climbing environment features a reward system prioritizing controlled climbing:
+
+- **Climbing Progress Reward**: Weighted at 2.5 with forward progress (4.0) and elevation gain (5.0) components
+- **Removed Heading Alignment**: Heading alignment requirement eliminated to focus on climbing performance
+- **Reduced Air Time**: Air time threshold lowered to 0.35 seconds for controlled stepping
+- **Enhanced Foot Height Rewards**: Modified targeting for optimal foot positioning during stair negotiation
 
 ### Advanced Command Generation
 Terrain-aware command generation automatically adapts robot behavior based on terrain conditions:
@@ -131,8 +148,8 @@ Terrain-aware command generation automatically adapts robot behavior based on te
 
 **Section sources**
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
-- [stair_env_cfg.py:50-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L50-L231)
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
+- [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 - [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
 
 ## Architecture Overview
@@ -147,15 +164,15 @@ ACTUATOR_CONFIG["Actuator Configuration<br/>DCMotor & ImplicitActuator"]
 end
 subgraph "Environment Definition Layer"
 BASE_ENV["Base Environment<br/>LocomotionVelocityRoughEnvCfg"]
-STAIR_ENV["Stair Environment<br/>Modified Rewards & Actions"]
+STAIR_ENV["Stair Environment<br/>Enhanced Actions & Stability"]
 FLAT_ENV["Flat Environment<br/>Simplified Settings"]
-ENHANCED_REWARDS["Enhanced Rewards<br/>Heading Alignment & Climbing Progress"]
+ENHANCED_REWARDS["Enhanced Rewards<br/>Controlled Climbing Focus"]
 TERRAIN_COMMANDS["Terrain-Aware Commands<br/>Pit Detection & Restrictions"]
 end
 subgraph "Training Infrastructure Layer"
 PPO_TRAINER["PPO Trainer<br/>RslRlOnPolicyRunnerCfg"]
 OBSERVATION["Observation Pipeline<br/>Joint Pos/Vel & Height Scan"]
-REWARD_SYSTEM["Specialized Reward System<br/>World-Horizontal Stabilization"]
+REWARD_SYSTEM["Modified Reward System<br/>Climbing Progress Priority"]
 COMMAND_GENERATION["Advanced Command Generation<br/>Real-time Terrain Adaptation"]
 end
 URDF_MODEL --> ASSET_CONFIG
@@ -178,7 +195,7 @@ PPO_TRAINER --> COMMAND_GENERATION
 - [zsl1.urdf:1-951](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf#L1-L951)
 - [zsl1w.urdf:1-959](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L959)
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
-- [stair_env_cfg.py:50-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L50-L231)
+- [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
 - [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
 - [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
 
@@ -249,8 +266,8 @@ START([Environment Initialization]) --> LOAD_BASE["Load Base Configuration"]
 LOAD_BASE --> APPLY_STAIR["Apply Stair-Specific Modifications"]
 APPLY_STAIR --> MODIFY_OBS["Modify Observations"]
 MODIFY_OBS --> ADJUST_ACTIONS["Adjust Action Scaling"]
-ADJUST_ACTIONS --> CONFIG_EVENTS["Configure Randomization Events"]
-CONFIG_EVENTS --> SETUP_REWARDS["Setup Enhanced Reward System"]
+ADJUST_ACTIONS --> CONFIG_EVENTS["Configure Stability Constraints"]
+CONFIG_EVENTS --> SETUP_REWARDS["Setup Modified Reward System"]
 SETUP_REWARDS --> ENABLE_TERRAIN["Enable Stair Terrain"]
 ENABLE_TERRAIN --> ADD_COMMANDS["Add Terrain-Aware Commands"]
 ADD_COMMANDS --> END([Ready for Training])
@@ -258,31 +275,34 @@ MODIFY_OBS --> |Reduced| HEIGHT_SCAN["Disable Height Scan"]
 MODIFY_OBS --> |Scaled| JOINT_OBS["Scale Joint Observations"]
 ADJUST_ACTIONS --> |Increased| STAIR_ACTIONS["Higher Action Scale for Stairs"]
 ADJUST_ACTIONS --> |Clipped| JOINT_CLIP["Action Clipping for Stability"]
-SETUP_REWARDS --> |Enhanced| HEADING_ALIGN["Heading Alignment Reward"]
-SETUP_REWARDS --> |Specialized| CLIMB_PROGRESS["Climbing Progress Reward"]
-SETUP_REWARDS --> |Optimized| WORLD_STAB["World-Horizontal Stabilization"]
-SETUP_REWARDS --> |Reduced| JOINT_PENALTIES["Minimal Joint Penalties"]
-SETUP_REWARDS --> |Enhanced| CONTACT_REWARDS["Improved Contact Forces"]
-SETUP_REWARDS --> |Modified| FEET_HEIGHT["Aggressive Foot Height Rewards"]
+CONFIG_EVENTS --> |Limited| ROLL_PITCH["Roll/Pitch Limits ±0.5rad"]
+CONFIG_EVENTS --> |Enhanced| RESET_STABILITY["Stability Constraints"]
+SETUP_REWARDS --> |Prioritized| CLIMB_PROGRESS["Climbing Progress Reward 2.5"]
+SETUP_REWARDS --> |Modified| AIR_TIME["Reduced Air Time Threshold 0.35"]
+SETUP_REWARDS --> |Removed| HEADING_ALIGN["Heading Alignment Requirement"]
+SETUP_REWARDS --> |Enhanced| FOOT_HEIGHT["Improved Foot Height Rewards"]
 ADD_COMMANDS --> |Automatic| PIT_DETECTION["Pit Terrain Detection"]
 ADD_COMMANDS --> |Restrictive| FORWARD_ONLY["Forward-Only Movement"]
 ADD_COMMANDS --> |Heading Control| HEADING_ADJUST["Heading Adjustment"]
 ```
 
 **Diagram sources**
-- [stair_env_cfg.py:75-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L75-L231)
+- [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
+- [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 
 Key environmental modifications for stair climbing include:
 
-- **Observation Space**: Reduced dimensionality by disabling height scanning to focus computational resources on essential locomotion signals
-- **Action Scaling**: Increased scaling factors for stair-specific joint groups to enable powerful climbing motions
-- **Enhanced Reward System**: Specialized rewards for heading alignment and climbing progress with phased approach
-- **World-Horizontal Stabilization**: Optimized reward weighting to maintain stable horizontal movement during stair negotiation
-- **Terrain Generation**: Custom stair terrain configuration with controlled step heights and widths
-- **Terrain-Aware Commands**: Automatic adaptation of robot behavior based on terrain conditions
+- **Enhanced Action Scaling**: Increased hip and knee joint scaling from 0.4 to 0.6 to support 0.23m step heights
+- **Stability Constraints**: Roll and pitch limits set to ±0.5 radians for enhanced stability during stair negotiation
+- **Modified Reward System**: Climbing progress reward prioritized with weight of 2.5, eliminating heading alignment requirement
+- **Reduced Air Time Threshold**: Lowered to 0.35 seconds for controlled stepping rather than jumping
+- **Enhanced Termination Conditions**: Illegal contact termination removed, focusing on stability constraints
 
 **Section sources**
-- [stair_env_cfg.py:50-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L50-L231)
+- [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
+- [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 
 ### Training Configuration Analysis
 The reinforcement learning configuration employs PPO with hyperparameters optimized for stair climbing performance and enhanced reward system:
@@ -293,7 +313,7 @@ participant Trainer as "PPO Trainer"
 participant Env as "Stair Environment"
 participant Agent as "Policy Network"
 participant Memory as "Experience Buffer"
-participant Rewards as "Enhanced Reward System"
+participant Rewards as "Modified Reward System"
 participant Commands as "Terrain-Aware Commands"
 Trainer->>Env : Initialize Environment
 Env->>Commands : Generate Terrain-Aware Commands
@@ -302,8 +322,8 @@ Env-->>Trainer : Return Initial State
 Trainer->>Agent : Forward Pass
 Agent-->>Trainer : Action Probabilities
 Trainer->>Env : Execute Action
-Env->>Rewards : Evaluate Enhanced Rewards
-Rewards-->>Env : Return Specialized Rewards
+Env->>Rewards : Evaluate Modified Rewards
+Rewards-->>Env : Return Prioritized Climbing Rewards
 Env-->>Trainer : Next State, Reward, Done
 Trainer->>Memory : Store Experience
 Memory-->>Trainer : Sample Batch
@@ -322,7 +342,7 @@ The training configuration emphasizes:
 - **Network Architecture**: Multi-layer perceptrons with 512-256-128 hidden units and ELU activation for nonlinear policy representation
 - **Learning Parameters**: Adaptive learning rate scheduling with entropy regularization to balance exploration and exploitation
 - **Optimization**: Gradient clipping and mini-batch training for stable convergence on challenging stair tasks
-- **Enhanced Reward Processing**: Specialized reward computation for stair climbing performance
+- **Modified Reward Processing**: Specialized reward computation prioritizing climbing progress over velocity tracking
 - **Terrain-Aware Command Processing**: Dynamic command generation based on environmental conditions
 
 **Section sources**
@@ -330,31 +350,65 @@ The training configuration emphasizes:
 
 ## Enhanced Stair Climbing Features
 
-### Specialized Reward System
-The stair climbing environment features a sophisticated reward system designed specifically for stair navigation performance:
+### Modified Action Scaling System
+The stair climbing environment features enhanced action scaling specifically designed for 0.23m step heights:
 
 ```mermaid
 flowchart TD
-REWARDS_START([Reward Calculation]) --> HEADING_ALIGN["Heading Alignment Reward<br/>Exponential Kernel on Alignment Error"]
-HEADING_ALIGN --> CLIMB_PROGRESS["Climbing Progress Reward<br/>Phased Approach: Alignment + Progress"]
-CLIMB_PROGRESS --> WORLD_STAB["World-Horizontal Stabilization<br/>Upright Factor Scaling"]
-WORLD_STAB --> CONTACT_FORCE["Contact Force Rewards<br/>Improved Sensitivity"]
-CONTACT_FORCE --> FEET_HEIGHT["Foot Height Rewards<br/>Aggressive Targeting"]
-FEET_HEIGHT --> OTHER_REWARDS["Other Stair-Specific Rewards<br/>Air Time, Gait, Slide"]
-OTHER_REWARDS --> REWARDS_END([Reward Combination])
+ACTION_START([Action Scaling]) --> HIP_SCALE["Hip Joint Scaling<br/>0.4 → 0.6 (150% increase)"]
+HIP_SCALE --> KNEE_SCALE["Knee Joint Scaling<br/>0.4 → 0.6 (150% increase)"]
+KNEE_SCALE --> ABAD_SCALE["Abduction Joint Scaling<br/>0.15 (unchanged)"]
+ABAD_SCALE --> CLIPPING["Action Clipping<br/>(-100.0, 100.0)"]
+CLIPPING --> STABILITY["Stability Constraints<br/>Roll/Pitch ±0.5rad"]
+STABILITY --> CONTROLLED["Controlled Climbing<br/>Enhanced Step Negotiation"]
+ACTION_END([Enhanced Action System])
 ```
 
 **Diagram sources**
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
-- [stair_env_cfg.py:126-209](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L126-L209)
+- [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
+- [stair_env_cfg.py:110-112](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L112)
 
-Key reward enhancements include:
+Key action scaling enhancements include:
 
-- **Heading Alignment Reward**: Exponential kernel reward for proper robot orientation relative to commanded velocity direction
-- **Climbing Progress Reward**: Phased approach combining forward progress and elevation gain when properly aligned
-- **World-Horizontal Velocity Stabilization**: Upright factor scaling to maintain stable horizontal movement
-- **Enhanced Contact Force Rewards**: Improved sensitivity for detecting proper foot-ground interaction
-- **Aggressive Foot Height Rewards**: Modified targeting for optimal foot positioning during stair negotiation
+- **Hip Joint Scaling**: Increased from 0.4 to 0.6 to provide 150% more leg swing and lifting power for 0.23m step heights
+- **Knee Joint Scaling**: Increased from 0.4 to 0.6 to enable adequate leg extension during step negotiation
+- **Abduction Joint Scaling**: Maintained at 0.15 for moderate sideways movement without compromising stability
+- **Enhanced Stability**: Combined with roll/pitch limits of ±0.5 radians for safe stair climbing
+
+### Stability Constraint System
+Enhanced stability constraints prevent dangerous orientations during stair negotiation:
+
+- **Roll Limit**: ±0.5 radians (±28.6 degrees) prevents excessive side-to-side tilting during climbing
+- **Pitch Limit**: ±0.5 radians (±28.6 degrees) maintains safe forward/backward tilt for stability
+- **Yaw Freedom**: Unrestricted rotation allows natural stair climbing orientation changes
+- **Position Constraints**: Limited base movement prevents falls during step transitions
+
+### Modified Reward System
+The stair climbing environment features a reward system prioritizing controlled climbing:
+
+```mermaid
+flowchart TD
+REWARDS_START([Reward Calculation]) --> CLIMB_PROGRESS["Climbing Progress Reward<br/>Weight: 2.5<br/>Forward: 4.0, Elevation: 5.0"]
+CLIMB_PROGRESS --> REDUCED_AIR_TIME["Reduced Air Time<br/>Threshold: 0.35s"]
+REDUCED_AIR_TIME --> ENHANCED_FOOT_HEIGHT["Enhanced Foot Height<br/>Body Weight: -0.5"]
+ENHANCED_FOOT_HEIGHT --> REMOVED_HEADING["Removed Heading Alignment<br/>Requirement"]
+ENHANCED_FOOT_HEIGHT --> CONTROLLED_GAIT["Controlled Gait<br/>Reduced to 0.15"]
+CONTROLLED_GAIT --> OTHER_REWARDS["Other Stair-Specific Rewards<br/>Slide, Stumble, Contact"]
+OTHER_REWARDS --> REWARDS_END([Prioritized Climbing Rewards])
+```
+
+**Diagram sources**
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
+- [stair_env_cfg.py:169-178](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L169-L178)
+- [stair_env_cfg.py:188-194](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L188-L194)
+
+Key reward modifications include:
+
+- **Climbing Progress Reward**: Weighted at 2.5 with forward progress (4.0) and elevation gain (5.0) components
+- **Reduced Air Time Threshold**: Lowered to 0.35 seconds to discourage jumping and promote controlled stepping
+- **Enhanced Foot Height Rewards**: Modified targeting for optimal foot positioning during stair negotiation
+- **Removed Heading Alignment**: Eliminated to focus on climbing performance rather than orientation
+- **Controlled Gait**: Reduced to 0.15 to allow more flexible gait during climbing
 
 ### Terrain-Aware Command Generation
 Advanced command generation automatically adapts robot behavior based on terrain conditions:
@@ -384,18 +438,10 @@ Terrain-aware command features:
 - **Heading Control**: Automatic heading adjustment to maintain stability on difficult terrain
 - **Command Resampling**: Intelligent resampling of commands when robots exit challenging terrain
 
-### World-Horizontal Velocity Stabilization
-The system implements world-horizontal velocity stabilization through optimized reward weighting and command processing:
-
-- **Zero Weight Reward Elimination**: Automatic disabling of rewards with zero weights to reduce computational overhead
-- **Optimized Reward Scaling**: Careful balancing of reward weights for stable stair climbing performance
-- **Upright Factor Scaling**: Integration of robot orientation into reward calculations for world-horizontal stability
-- **Alignment Threshold Tuning**: Adjustable thresholds for reward activation based on robot orientation and command alignment
-
 **Section sources**
-- [stair_env_cfg.py:207-209](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L207-L209)
-- [velocity_env_cfg.py:759-766](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L759-L766)
-- [rewards.py:664-667](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L664-L667)
+- [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
+- [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 
 ## Dependency Analysis
 The ZSL1 stair climbing configuration exhibits a well-structured dependency hierarchy that enables modular development and testing, with enhanced integration between reward systems and command generation:
@@ -419,8 +465,9 @@ ZSL1_CFG["ZSL1 Configuration"]
 STAIR_CFG["Stair Environment"]
 FLAT_CFG["Flat Environment"]
 PPO_CFG["PPO Training"]
-ENHANCED_REWARDS["Enhanced Reward System"]
+MODIFIED_REWARDS["Modified Reward System"]
 TERRAIN_COMMANDS["Terrain-Aware Commands"]
+END_STABILITY["Enhanced Stability Constraints"]
 end
 ISAACLAB --> ASSETS
 RSL_RL --> TRAINING
@@ -433,9 +480,10 @@ SCRIPTS --> TRAINING
 ZSL1_CFG --> STAIR_CFG
 ZSL1_CFG --> FLAT_CFG
 PPO_CFG --> SCRIPTS
-STAIR_CFG --> ENHANCED_REWARDS
+STAIR_CFG --> MODIFIED_REWARDS
 STAIR_CFG --> TERRAIN_COMMANDS
-ENHANCED_REWARDS --> MDP
+STAIR_CFG --> END_STABILITY
+MODIFIED_REWARDS --> MDP
 TERRAIN_COMMANDS --> MDP
 MDP --> STAIR_CFG
 ```
@@ -467,10 +515,10 @@ Several factors influence the performance of ZSL1 stair climbing with the enhanc
 - **Terrain-Aware Command Processing**: Efficient grid-based terrain detection minimizes processing overhead
 
 ### Training Stability
-- **Reward Engineering**: Balanced reward functions prevent overfitting to specific stair configurations
+- **Reward Engineering**: Modified reward functions prioritize controlled climbing over velocity tracking
 - **Randomization**: Controlled environmental randomization improves generalization across different stair types
 - **Convergence Monitoring**: Regular evaluation metrics track progress toward stair climbing objectives
-- **World-Horizontal Stabilization**: Optimized reward weighting maintains stable horizontal movement
+- **Enhanced Stability Constraints**: Roll/pitch limits of ±0.5 radians maintain safe stair climbing performance
 - **Terrain-Aware Adaptation**: Dynamic command generation prevents robots from getting stuck on challenging terrains
 
 ### Hardware Considerations
@@ -478,6 +526,7 @@ Several factors influence the performance of ZSL1 stair climbing with the enhanc
 - **Safety Margins**: Conservative joint position limits protect hardware during training
 - **Power Management**: Efficient motor control reduces heat generation and power consumption
 - **Contact Sensor Optimization**: Enhanced contact force detection prevents damage to robot components
+- **Stability Monitoring**: Roll/pitch constraints prevent mechanical stress during stair negotiation
 
 ## Troubleshooting Guide
 Common issues and solutions for ZSL1 stair climbing configuration with enhanced features:
@@ -486,7 +535,7 @@ Common issues and solutions for ZSL1 stair climbing configuration with enhanced 
 - **Poor Convergence**: Verify reward function balance and ensure adequate exploration through entropy regularization
 - **Instability**: Check action clipping parameters and reduce learning rate if oscillations occur
 - **Slow Learning**: Confirm proper randomization settings and sufficient training iterations
-- **Reward System Issues**: Verify enhanced reward weights and ensure proper reward scaling
+- **Reward System Issues**: Verify modified reward weights and ensure proper reward scaling
 - **Command Generation Problems**: Check terrain detection algorithms and command restriction logic
 
 ### Simulation Problems
@@ -500,18 +549,21 @@ Common issues and solutions for ZSL1 stair climbing configuration with enhanced 
 - **Torque Limits**: Monitor actuator efforts to prevent exceeding motor specifications
 - **Temperature Monitoring**: Track motor temperatures during intensive stair climbing training
 - **Mechanical Integrity**: Regular inspection of links and joints for wear during repetitive stair negotiation
-- **Reward System Safety**: Ensure reward scaling prevents excessive forces during stair climbing
+- **Stability Constraints**: Ensure roll/pitch limits are properly configured to prevent mechanical failure
+- **Reward System Safety**: Verify reward scaling prevents excessive forces during stair climbing
 
 **Section sources**
-- [stair_env_cfg.py:118-231](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L118-L231)
+- [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
+- [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 - [zsibot.py:47-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L47-L115)
 - [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
 - [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
 
 ## Conclusion
-The ZSIBOT ZSL1 Stair Climbing Configuration represents a comprehensive approach to quadruped stair navigation within the Isaac Lab framework, enhanced with world-horizontal velocity stabilization, advanced terrain-aware command generation, and specialized reward systems. Through careful engineering of robot dynamics, environment design, and reinforcement learning parameters, the system achieves robust stair climbing capabilities while maintaining training efficiency and safety.
+The ZSIBOT ZSL1 Stair Climbing Configuration represents a comprehensive approach to quadruped stair navigation within the Isaac Lab framework, enhanced with increased action scaling for hip and knee joints, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions. Through careful engineering of robot dynamics, environment design, and reinforcement learning parameters, the system achieves robust stair climbing capabilities while maintaining training efficiency and safety.
 
-The recent enhancements include a sophisticated reward system with heading alignment and climbing progress rewards, automatic terrain-aware command generation with pit detection and restrictions, and world-horizontal velocity stabilization through optimized reward weighting. These improvements enable the system to adapt dynamically to different stair configurations and terrain conditions while maintaining stable locomotion performance.
+The recent enhancements include increased action scaling from 0.4 to 0.6 for hip and knee joints to support 0.23m step heights, stability constraints limiting roll and pitch to ±0.5 radians, modified reward weights with climbing progress prioritized at 2.5, and enhanced termination conditions focusing on stability rather than illegal contact. These improvements enable the system to adapt dynamically to different stair configurations and terrain conditions while maintaining stable locomotion performance.
 
 The modular architecture continues to enable easy adaptation for different stair configurations and robot variants, while the well-tuned reward functions and actuator specifications provide the foundation for successful stair negotiation. Future enhancements could include dynamic stair height adjustment, multi-modal terrain adaptation, and advanced gait pattern learning for improved stair climbing performance.
 

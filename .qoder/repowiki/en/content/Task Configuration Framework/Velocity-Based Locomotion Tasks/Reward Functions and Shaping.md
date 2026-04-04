@@ -18,12 +18,11 @@
 
 ## Update Summary
 **Changes Made**
-- Added documentation for the new heading-aligned velocity tracking function (track_lin_vel_xy_heading_aligned_exp)
-- Updated velocity tracking rewards section to include the two-stage control strategy implementation
-- Documented the requirement for heading_command=True in CommandCfg for accessing heading_target
-- Added examples of Zsibot ZSL1 configurations using the new reward function
-- Updated troubleshooting guide with guidance for the new reward function
-- Removed documentation of experimental reward system and temporary reward weight configurations that were previously documented but are no longer in the codebase
+- Enhanced documentation for climbing_progress reward function with improved mathematical precision and numerical stability
+- Added comprehensive documentation for new climbing-specific reward components (heading_alignment, climbing_progress)
+- Updated velocity-tracking reward adjustments with enhanced two-stage control strategy
+- Documented modified reward weights optimized for stair climbing performance
+- Added detailed examples of climbing-specific configurations for Zsibot ZSL1
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -47,7 +46,7 @@ This document explains reward functions and shaping tailored for velocity-based 
 - Reward weighting strategies, curriculum-based reward scaling, and reward term activation/deactivation
 - Practical examples of reward function tuning, common reward combinations, and their impact on learning behavior
 
-**Updated** Enhanced documentation with new heading-aligned velocity tracking function that implements two-stage control strategy for improved locomotion stability on complex terrain.
+**Updated** Enhanced documentation with improved climbing_progress reward function featuring enhanced mathematical precision, clearer variable naming, and improved numerical stability. Added comprehensive coverage of new climbing-specific reward components and optimized reward weights for stair climbing performance.
 
 ## Project Structure
 The reward system is implemented as modular manager terms and configured via environment configurations. Key locations:
@@ -70,12 +69,12 @@ RCfg["rough_env_cfg.py<br/>BoosterT1RoughEnvCfg"]
 SdogCfg["sdog_sdog2_rough_env_cfg.py<br/>SdogSdog2RoughEnvCfg"]
 SdogFlat["sdog_sdog2_flat_env_cfg.py<br/>SdogSdog2FlatEnvCfg"]
 ApxCfg["opendoge_apx_rough_env_cfg.py<br/>OpendogeApxRoughEnvCfg"]
-ZSL1Rough["rough_env_cfg.py (Zsibot ZSL1)<br/>Two-stage Control Strategy"]
-ZSL1Stair["stair_env_cfg.py (Zsibot ZSL1)<br/>Incline Terrain Handling"]
-ZSL1Flat["flat_env_cfg.py (Zsibot ZSL1)<br/>Flat Terrain Configuration"]
+ZSL1Rough["rough_env_cfg.py (Zsibot ZSL1)<br/>Enhanced Two-Stage Control"]
+ZSL1Stair["stair_env_cfg.py (Zsibot ZSL1)<br/>Specialized Climbing Rewards"]
+ZSL1Flat["flat_env_cfg.py (Zsibot ZSL1)<br/>Basic Locomotion Configuration"]
 end
 subgraph "MDP Rewards"
-RImpl["rewards.py<br/>Velocity-based reward functions"]
+RImpl["rewards.py<br/>Enhanced Reward Functions"]
 Cur["curriculums.py<br/>Curriculum helpers"]
 HS["rewards.py (handstand)<br/>Handstand-specific rewards"]
 end
@@ -112,7 +111,7 @@ HS --> VCFG
 ## Core Components
 This section documents the RewardsCfg class and its reward terms. Each term is described by purpose, computation characteristics, and typical weight ranges observed in example configurations.
 
-**Updated** Enhanced with new heading-aligned velocity tracking function and two-stage control strategy.
+**Updated** Enhanced with improved climbing_progress reward function featuring enhanced mathematical precision and numerical stability, plus new climbing-specific reward components.
 
 - **General Terms**
   - is_terminated: Terminal reward for episode termination.
@@ -149,6 +148,10 @@ This section documents the RewardsCfg class and its reward terms. Each term is d
   - track_ang_vel_z_exp: Exponential reward for tracking commanded z angular velocity; similar structure to linear tracking.
   - **Updated** track_lin_vel_xy_heading_aligned_exp: Two-stage control strategy that prioritizes heading alignment before forward velocity tracking.
 
+- **Climbing and Specialized Rewards**
+  - **New** heading_alignment: Reward for aligning robot heading with commanded velocity direction in xy plane.
+  - **Updated** climbing_progress: Enhanced reward for climbing combining forward progress and elevation gain when aligned with command, featuring improved mathematical precision and numerical stability.
+
 - **Other Contact-Based Rewards**
   - feet_air_time: Sum of per-foot air-time above a threshold when command is non-zero.
   - feet_air_time_variance: Penalize variance in air/ground time across feet.
@@ -160,10 +163,6 @@ This section documents the RewardsCfg class and its reward terms. Each term is d
   - feet_height / feet_height_body: Encourage swing feet to clear a target height with velocity-aware weighting.
   - feet_distance_y_exp / feet_distance_xy_exp: Exponential shaping of foot placement relative to desired stance geometry.
   - upward: Encourage base orientation pointing upwards.
-
-- **Climbing and Specialized Rewards**
-  - **New** heading_alignment: Reward for aligning robot heading with commanded velocity direction in xy plane.
-  - **New** climbing_progress: Reward for climbing combining forward progress and elevation gain when aligned with command.
 
 Typical weight ranges observed in example environments:
 - Velocity tracking: positive weights around 2–5
@@ -200,6 +199,53 @@ end
 - [curriculums.py:1-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L1-L60)
 
 ## Detailed Component Analysis
+
+### Enhanced Climbing Progress Reward Function
+
+**Updated** The climbing_progress reward function has been significantly enhanced with improved mathematical precision, clearer variable naming, and enhanced numerical stability.
+
+#### Mathematical Improvements
+
+The enhanced climbing_progress function now features:
+
+1. **Improved Numerical Stability**: Better handling of edge cases with safe division operations and proper clamping
+2. **Enhanced Variable Naming**: More descriptive variable names for better readability and maintainability
+3. **Robust Edge Case Handling**: Proper handling of zero-magnitude commands and near-zero vectors
+4. **Optimized Computational Flow**: Streamlined calculations for better performance
+
+#### Enhanced Implementation Details
+
+```mermaid
+flowchart TD
+Start(["Climbing Progress Calculation"]) --> CheckCmd["Check Command Magnitude"]
+CheckCmd --> HasCmd{"Has Significant Command?"}
+HasCmd --> |No| Zero["Return 0"]
+HasCmd --> |Yes| GetDir["Get Command and Forward Directions"]
+GetDir --> Normalize["Normalize Vectors Safely"]
+Normalize --> CheckAlign["Check Alignment with Threshold"]
+CheckAlign --> IsAligned{"Aligned (> threshold)?"}
+IsAligned --> |No| Zero["Return 0"]
+IsAligned --> |Yes| CalcComponents["Calculate Progress Components"]
+CalcComponents --> Forward["Forward Progress: v · cmd_dir"]
+Forward --> Elev["Elevation Gain: max(v_z, 0)"]
+Elev --> Combine["Combine: w_forward·forward + w_elevation·elevation"]
+Combine --> Scale["Scale by Upright Factor"]
+Scale --> End(["Return Reward"])
+Zero --> End
+```
+
+**Diagram sources**
+- [rewards.py:670-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L670-L732)
+
+#### Key Enhancements
+
+1. **Safe Vector Operations**: All vector normalization operations now use `cmd_vel_norm_safe` and `forward_xy_norm_safe` to prevent division by zero
+2. **Improved Clamping**: Better handling of edge cases with minimum thresholds (0.1 for command velocity, 0.01 for forward direction)
+3. **Clearer Logic Flow**: Enhanced readability with descriptive variable names and logical separation of concerns
+4. **Robust Parameter Handling**: Improved parameter validation and default value handling
+
+**Section sources**
+- [rewards.py:670-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L670-L732)
 
 ### Heading-Aligned Velocity Tracking with Two-Stage Control Strategy
 
@@ -437,9 +483,9 @@ Reward --> End
 **Section sources**
 - [rewards.py:336-583](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L336-L583)
 
-### Climbing and Specialized Rewards
+### Enhanced Climbing and Specialized Rewards
 
-**Updated** New climbing-specific reward functions designed for stair climbing and incline navigation.
+**Updated** New climbing-specific reward functions designed for stair climbing and incline navigation, featuring enhanced mathematical precision and numerical stability.
 
 #### Heading Alignment Reward
 - **New** heading_alignment
@@ -448,10 +494,11 @@ Reward --> End
   - Typical usage: Phase 1 of two-stage climbing control; encourages proper orientation before movement.
   - Weight range: 0.0–2.0 in examples.
 
-#### Climbing Progress Reward
-- **New** climbing_progress
-  - Purpose: Reward for climbing combining forward progress and elevation gain when aligned with command.
-  - Implementation highlights: Only active when robot is reasonably aligned with command direction; combines forward velocity projection and positive z velocity.
+#### Enhanced Climbing Progress Reward
+- **Updated** climbing_progress
+  - Purpose: Enhanced reward for climbing combining forward progress and elevation gain when aligned with command.
+  - Implementation highlights: Only active when robot is reasonably aligned with command direction; combines forward velocity projection and positive z velocity with improved numerical stability.
+  - Enhanced features: Safe vector operations, robust edge case handling, improved computational flow.
   - Typical usage: Phase 2 of two-stage climbing control; rewards actual climbing behavior.
   - Weight range: 0.0–2.0 in examples.
 
@@ -459,11 +506,16 @@ Reward --> End
 
 ```mermaid
 flowchart TD
-Start(["Climbing Progress Calculation"]) --> CheckAlign["Check Alignment with Command"]
+Start(["Enhanced Climbing Progress Calculation"]) --> CheckCmd["Check Command Magnitude"]
+CheckCmd --> HasCmd{"Has Significant Command?"}
+HasCmd --> |No| Zero["Return 0"]
+HasCmd --> |Yes| GetDir["Get Command and Forward Directions"]
+GetDir --> SafeNorm["Safe Vector Normalization<br/>with clamping (0.1, 0.01)"]
+SafeNorm --> CheckAlign["Check Alignment with Threshold"]
 CheckAlign --> IsAligned{"Aligned (> threshold)?"}
 IsAligned --> |No| Zero["Return 0"]
-IsAligned --> |Yes| CalcVel["Calculate Velocity Components"]
-CalcVel --> Forward["Forward Progress: v · cmd_dir"]
+IsAligned --> |Yes| CalcComponents["Calculate Progress Components"]
+CalcComponents --> Forward["Forward Progress: v · cmd_dir"]
 Forward --> Elev["Elevation Gain: max(v_z, 0)"]
 Elev --> Combine["Combine: w_forward·forward + w_elevation·elevation"]
 Combine --> Scale["Scale by Upright Factor"]
@@ -535,14 +587,14 @@ Cmd-->>Env : Updated command ranges
   - Emphasize joint smoothing (joint_acc_l2), joint limits (joint_pos_limits), power (joint_power), mirror constraints (joint_mirror), and gait enforcement (feet_gait).
   - Example weights: joint_torques_l2 ≈ −2.5e-5, joint_acc_l2 ≈ −2.5e-7, joint_pos_limits ≈ −5.0, joint_power ≈ −2e-5, joint_mirror ≈ −0.05, action_rate_l2 ≈ −0.01, feet_air_time ≈ 0.1–0.15, feet_height_body ≈ −5.0, feet_gait ≈ 0.5.
 
-- **Updated** **Zsibot ZSL1 with Two-Stage Control**
+- **Updated** **Zsibot ZSL1 with Enhanced Two-Stage Control**
   - **New** Sophisticated two-stage control strategy for complex terrain navigation
   - Uses `track_lin_vel_xy_heading_aligned_exp` with weight 4.0 and heading threshold 0.3 radians
   - Prevents rear-facing locomotion on rough terrain by prioritizing heading alignment
   - Automatic fallback to body-frame tracking on steep inclines (pitch > 10°)
   - Enables full 360° heading sampling for comprehensive direction learning
   - Example weights: track_lin_vel_xy_exp (4.0), track_ang_vel_z_exp (1.5), feet_air_time (2.5), feet_height (6.0), upward (0.3)
-  - **New** Climbing-specific configuration includes heading_alignment (2.0) and climbing_progress (1.5) rewards
+  - **New** Enhanced climbing-specific configuration includes heading_alignment (2.0) and climbing_progress (1.5) rewards with improved mathematical precision
 
 - **Handstand (Unitree A1)**
   - Specialized rewards for feet height and orientation to maintain inverted posture.
@@ -554,9 +606,19 @@ Cmd-->>Env : Updated command ranges
   - Reduces terrain curriculum complexity
   - Example weights: track_lin_vel_xy_exp (3.0), track_ang_vel_z_exp (1.5), feet_air_time (0.1), upward (1.0)
 
+- **Updated** **Zsibot ZSL1 Stair Climbing Configuration**
+  - **New** Specialized stair climbing configuration with enhanced climbing rewards
+  - heading_alignment: 0 (removed requirement)
+  - climbing_progress: 2.5 with alignment_threshold: 0.0, forward_weight: 4.0, elevation_weight: 5.0
+  - Reduced velocity tracking rewards (track_lin_vel_xy_exp: 1.5, track_ang_vel_z_exp: 0.5)
+  - Enhanced feet_height_body for 0.23m step clearance (-0.15 target height)
+  - Disabled flat_orientation_l2 for climbing flexibility
+  - Reduced upward weight (0.15) to allow controlled body tilt during leg lifting
+
 **Impact on learning:**
 - Strong tracking rewards accelerate convergence to desired velocities.
 - **Updated** Two-stage control strategy prevents robots from facing away from velocity goals, improving stability on complex terrain.
+- **Updated** Enhanced climbing_progress reward function provides more precise climbing behavior with improved numerical stability.
 - **Updated** Heading alignment prioritization enables precise direction control before forward movement.
 - **Updated** Incline detection automatically adapts control strategy for different terrains.
 - **Updated** Stability penalties prevent unrealistic behaviors while allowing climbing flexibility.
@@ -564,7 +626,8 @@ Cmd-->>Env : Updated command ranges
 - Contact rewards encourage natural gait patterns; gait enforcement improves coordination.
 - Curriculum expands task difficulty progressively, preventing premature plateauing.
 - **Updated** Selective reward disabling allows for task-specific optimization (e.g., climbing ladder stability).
-- **New** Climbing-specific rewards enable specialized stair climbing behavior with proper heading alignment and elevation gain.
+- **New** Enhanced climbing-specific rewards enable specialized stair climbing behavior with proper heading alignment and elevation gain.
+- **Updated** Improved mathematical precision in climbing_progress reward leads to more reliable and consistent climbing performance.
 
 **Section sources**
 - [rough_env_cfg.py:51-125](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/rough_env_cfg.py#L51-L125)
@@ -609,9 +672,10 @@ RImpl --> ActMgr
 - Curriculum updates occur periodically; ensure episode length aligns with update cadence to avoid frequent range changes mid-episode.
 - Zero-weight term removal reduces computation overhead during evaluation or when disabling terms.
 - **Updated** Two-stage control strategy adds computational overhead but significantly improves stability and learning efficiency.
+- **Updated** Enhanced climbing_progress reward function maintains computational efficiency while providing improved numerical stability.
 - **Updated** Heading alignment calculation requires quaternion-to-yaw conversion; consider caching when using multiple reward functions.
 - **Updated** Incline detection uses projected gravity calculation; ensure terrain complexity doesn't overwhelm the detection threshold.
-- **New** Climbing-specific rewards add minimal computational overhead while enabling specialized behavior.
+- **New** Enhanced climbing-specific rewards add minimal computational overhead while enabling specialized behavior with improved reliability.
 
 ## Troubleshooting Guide
 - Reward not activating
@@ -648,13 +712,14 @@ RImpl --> ActMgr
   - Reduce action_rate_l2 if smoothing is insufficient.
   - **Updated** Sdog-Sdog2 configuration already includes power optimization with joint_power (-2e-5).
 
-- **Updated** Climbing-specific issues
+- **Updated** Enhanced climbing-specific issues
   - Base height target too low: Increase from 0.25m to 0.33m for better climbing stability.
   - Tracking rewards too weak: Increase from 3.0 to 5.0 for linear and 1.5 to 2.5 for angular velocity.
   - Stability constraints too restrictive: Disable flat_orientation_l2 for climbing flexibility.
   - **Updated** Two-stage control not working: Ensure CommandCfg has `heading_command=True` and `rel_heading_envs=1.0`.
-  - **New** Heading alignment reward not effective: Check alignment_threshold parameter (0.1–0.7) and ensure command magnitude is sufficient.
-  - **New** Climbing progress reward inactive: Verify robot is aligned with command (alignment_threshold) and moving forward/elevating.
+  - **New** Enhanced climbing_progress reward not effective: Verify alignment_threshold parameter (0.0–0.7) and ensure command magnitude is sufficient.
+  - **New** Climbing progress reward inactive: Check that robot is aligned with command (alignment_threshold) and moving forward/elevating.
+  - **New** Numerical instability in climbing_progress: Ensure proper vector normalization and safe division operations are in place.
 
 - **Updated** Command configuration requirements
   - **Problem**: heading_target not available in reward function
@@ -667,6 +732,8 @@ RImpl --> ActMgr
   - **Solution**: Ensure height scanning sensors are disabled and terrain is set to plane
   - **Problem**: Stair climbing configuration not optimal
   - **Solution**: Verify climbing-specific rewards (heading_alignment, climbing_progress) are enabled and properly weighted
+  - **Problem**: Enhanced climbing_progress reward producing NaN values
+  - **Solution**: Check for proper vector normalization and ensure minimum thresholds are applied (0.1 for command velocity, 0.01 for forward direction)
 
 **Section sources**
 - [velocity_env_cfg.py:737-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L737-L744)
@@ -681,14 +748,14 @@ RImpl --> ActMgr
 ## Conclusion
 The reward system provides a flexible, modular framework for velocity-based locomotion. By combining velocity tracking, stability penalties, joint/action constraints, and contact-based shaping—and by leveraging curriculum-driven command scaling—environments can be tuned to achieve robust, efficient, and natural locomotion behaviors. 
 
-**Updated** The addition of the heading-aligned velocity tracking function with two-stage control strategy represents a significant advancement in locomotion stability. This new reward function implements sophisticated behavior prioritizing heading alignment before forward velocity tracking, making it particularly effective for complex terrain navigation and stair climbing. The automatic incline detection and gravity alignment factors further enhance its adaptability across different environments. The Zsibot ZSL1 configurations demonstrate practical applications where this two-stage approach prevents rear-facing locomotion and enables precise direction control. Example configurations illustrate effective weight choices and term combinations across humanoid and quadruped tasks, with special-purpose rewards for specialized gaits such as handstands. The enhanced reward system now provides researchers and practitioners with powerful tools for developing stable, efficient, and adaptable locomotion policies.
+**Updated** The addition of the enhanced climbing_progress reward function with improved mathematical precision, clearer variable naming, and enhanced numerical stability represents a significant advancement in climbing-specific locomotion. This new reward function provides more reliable and consistent stair climbing behavior through better vector normalization, robust edge case handling, and improved computational flow. The enhanced climbing-specific rewards (heading_alignment and climbing_progress) enable specialized stair climbing behavior with proper heading alignment and elevation gain, making them particularly effective for Zsibot ZSL1 configurations. The automatic incline detection and gravity alignment factors in the two-stage control strategy further enhance adaptability across different environments. The Zsibot ZSL1 configurations demonstrate practical applications where this enhanced reward system prevents rear-facing locomotion, enables precise direction control, and provides reliable climbing performance. Example configurations illustrate effective weight choices and term combinations across humanoid and quadruped tasks, with special-purpose rewards for specialized gaits such as handstands. The enhanced reward system now provides researchers and practitioners with powerful tools for developing stable, efficient, and adaptable locomotion policies with improved numerical reliability and climbing-specific performance.
 
-**New** The introduction of climbing-specific rewards (heading_alignment and climbing_progress) enables specialized stair climbing behavior with proper heading alignment and elevation gain. These rewards work in conjunction with the two-stage control strategy to create a comprehensive climbing solution that prioritizes safety and efficiency.
+**New** The introduction of enhanced climbing-specific rewards (heading_alignment and climbing_progress) enables specialized stair climbing behavior with improved mathematical precision and numerical stability. These rewards work in conjunction with the two-stage control strategy to create a comprehensive climbing solution that prioritizes safety and efficiency while maintaining computational efficiency and reliability.
 
 ## Appendices
 - Reward term summary and typical weight ranges are documented in the "Core Components" section with references to example environments.
 - **Updated** Sdog-Sdog2 specific configurations provide detailed examples of reward organization and selective term disabling for climbing ladder performance.
-- **Updated** Zsibot ZSL1 configurations showcase the practical implementation of two-stage control strategy with comprehensive terrain adaptation capabilities.
-- **New** Zsibot ZSL1 flat terrain configuration demonstrates simplified reward setup for basic locomotion tasks.
+- **Updated** Zsibot ZSL1 configurations showcase the practical implementation of enhanced two-stage control strategy with comprehensive terrain adaptation capabilities.
+- **New** Zsibot ZSL1 stair climbing configuration demonstrates specialized reward setup with enhanced climbing-specific parameters.
 - **Updated** Command configuration requirements for heading-aligned reward functions include `heading_command=True` and appropriate heading sampling ranges.
-- **New** Climbing-specific reward parameters include alignment thresholds and weight balancing for optimal stair climbing performance.
+- **New** Enhanced climbing-specific reward parameters include improved alignment thresholds and weight balancing for optimal stair climbing performance with numerical stability guarantees.

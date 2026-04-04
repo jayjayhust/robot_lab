@@ -801,11 +801,14 @@ class LocomotionVelocityStairEnvCfg(ManagerBasedRLEnvCfg):
     def __post_init__(self):
         """Post initialization."""
         # general settings
-        self.decimation = 4
-        self.episode_length_s = 20.0
+        self.decimation = 4  # Number of control action updates @ sim.dt per policy dt. 
+        # Since sim.dt=0.005 and decimation=4, policy is updated every 4*0.005=0.02s(policy dt=0.02s).
+        self.episode_length_s = 20.0  # Duration of an episode (in seconds).
         # simulation settings
-        self.sim.dt = 0.005
-        self.sim.render_interval = self.decimation
+        self.sim.dt = 0.005  # The physics simulation time-step (in seconds). For instance, 
+        # if the simulation dt is 0.01s and the policy dt is 0.1s, then the decimation is 10. 
+        # This means that the control action is updated every 10 simulation steps.
+        self.sim.render_interval = self.decimation  # The number of physics simulation steps per rendering step.
         self.sim.physics_material = self.scene.terrain.physics_material
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
         # update sensor update periods
