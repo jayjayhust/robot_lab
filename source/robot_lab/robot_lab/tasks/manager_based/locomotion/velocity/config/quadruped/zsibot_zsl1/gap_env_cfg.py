@@ -1,9 +1,10 @@
 # Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 import math
 import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
-from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityStairEnvCfg
+from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityGapEnvCfg
 
 from isaaclab.utils import configclass
 from isaaclab.managers import SceneEntityCfg
@@ -18,42 +19,145 @@ from robot_lab.assets.zsibot import ZSIBOT_ZSL1_CFG  # isort: skip
 import isaaclab.terrains as terrain_gen
 from isaaclab.terrains.terrain_generator_cfg import TerrainGeneratorCfg
 
-STAIR_TERRAINS_CFG = TerrainGeneratorCfg(
-    size=(8.0, 8.0),  # The width (along x) and length (along y) of each sub-terrain (in m)
-    border_width=10.0,  # The width of the border around the terrain (in m)
-    num_rows=10,  # Number of rows of sub-terrains to generate
-    num_cols=10,  # Number of columns of sub-terrains to generate
-    horizontal_scale=0.1,  # Horizontal scale of the terrain (in m)
-    vertical_scale=0.005,  # Vertical scale of the terrain (in m)
-    slope_threshold=0.75,  # The slope threshold above which surfaces are made vertical (in rad)
-    use_cache=False,
-    # https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/sub_terrain_cfg.py
-    sub_terrains={
-        # "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
-        #     proportion=0.2,
-        #     step_height_range=(0.05, 0.23),
-        #     step_width=0.3,
-        #     platform_width=3.0,
-        #     border_width=1.0,
-        #     holes=False,
-        # ),
-        "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
-            proportion=0.2,  # Proportion of the terrain to generate
-            step_height_range=(0.05, 0.23),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.10),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.15),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.20),  # 每节阶梯的高度范围
-            step_width=0.3,  # 每节阶梯的宽度
-            platform_width=3.0,  # 平台宽度
-            border_width=1.0,  # 边缘宽度
-            holes=False,
-        )
-    },
-)
-"""Stair terrains configuration."""
+##########################################################
+# https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab/isaaclab/terrains/trimesh/mesh_terrains.py#L600
+# import isaaclab.terrains.trimesh.mesh_terrains_cfg as mesh_terrains_cfg
+import trimesh
+import numpy as np
+def gap_terrain(
+    difficulty: float, cfg: MeshGapTerrainCfg
+) -> tuple[list[trimesh.Trimesh], np.ndarray]:
+    """Generate a terrain with a gap around the platform.
+
+    The terrain has a ground with a platform in the middle. The platform is surrounded by a gap
+    of width :obj:`gap_width` on all sides.
+
+    .. image:: ../../_static/terrains/trimesh/gap_terrain.jpg
+       :width: 40%
+       :align: center
+
+    Args:
+        difficulty: The difficulty of the terrain. This is a value between 0 and 1.
+        cfg: The configuration for the terrain.
+
+    Returns:
+        A tuple containing the tri-mesh of the terrain and the origin of the terrain (in m).
+    """
+    # resolve the terrain configuration
+    gap_width = cfg.gap_width_range[0] + difficulty * (cfg.gap_width_range[1] - cfg.gap_width_range[0])
+
+    # initialize list of meshes
+    meshes_list = list()
+    # constants for terrain generation
+    terrain_height = 1.0
+    terrain_center = (0.5 * cfg.size[0], 0.5 * cfg.size[1], -terrain_height / 2)
+
+    # Generate the outer ring
+    inner_size = (cfg.platform_width + 2 * gap_width, cfg.platform_width + 2 * gap_width)
+    meshes_list += make_border(cfg.size, inner_size, terrain_height, terrain_center)
+    # Generate the inner box
+    box_dim = (cfg.platform_width, cfg.platform_width, terrain_height)
+    box = trimesh.creation.box(box_dim, trimesh.transformations.translation_matrix(terrain_center))
+    meshes_list.append(box)
+
+    # specify the origin of the terrain
+    origin = np.array([terrain_center[0], terrain_center[1], 0.0])
+
+    return meshes_list, origin
+
+def gap_strip_terrain(
+    difficulty: float, cfg: MeshGapStripTerrainCfg
+) -> tuple[list[trimesh.Trimesh], np.ndarray]:
+    """Generate a repeated gap + landing strip along +X with a run-up platform."""
+    gap_width = cfg.gap_width_range[0] + difficulty * (cfg.gap_width_range[1] - cfg.gap_width_range[0])
+    landing_len = cfg.landing_length
+    start_len = cfg.start_platform_length
+
+    meshes_list: list[trimesh.Trimesh] = []
+    terrain_height = 1.0
+    z_center = -terrain_height / 2
+    y_center = 0.5 * cfg.size[1]
+
+    # start platform / x_ptr를 runup끝으로 이동
+    x_ptr = 0.0
+    start_dim = (start_len, cfg.size[1], terrain_height)
+    start_center = (x_ptr + 0.5 * start_len, y_center, z_center)
+    meshes_list.append(trimesh.creation.box(start_dim, trimesh.transformations.translation_matrix(start_center)))
+    x_ptr += start_len
+
+    # repeat [gap + landing] until size.x is filled
+    while x_ptr + gap_width + landing_len <= cfg.size[0]:
+        x_ptr += gap_width  # skip gap region (air)
+        land_center = (x_ptr + 0.5 * landing_len, y_center, z_center)
+        land_dim = (landing_len, cfg.size[1], terrain_height)
+        meshes_list.append(trimesh.creation.box(land_dim, trimesh.transformations.translation_matrix(land_center)))
+        x_ptr += landing_len
+
+    # fill any remaining tail with flat ground to avoid an extra-long final gap
+    if x_ptr < cfg.size[0]:
+        tail_len = cfg.size[0] - x_ptr
+        tail_center = (x_ptr + 0.5 * tail_len, y_center, z_center)
+        tail_dim = (tail_len, cfg.size[1], terrain_height)
+        meshes_list.append(trimesh.creation.box(tail_dim, trimesh.transformations.translation_matrix(tail_center)))
+
+    origin = np.array([start_len * 0.5, y_center, 0.0])
+    return meshes_list, origin
+
+# https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab/isaaclab/terrains/trimesh/mesh_terrains_cfg.py#L194
+from isaaclab.terrains.sub_terrain_cfg import SubTerrainBaseCfg
+from dataclasses import MISSING
+@configclass
+class MeshGapTerrainCfg(SubTerrainBaseCfg):
+    """Configuration for a terrain with a gap around the platform."""
+
+    function = gap_terrain
+
+    gap_width_range: tuple[float, float] = MISSING
+    """The minimum and maximum width of the gap (in m)."""
+    platform_width: float = 1.0
+    """The width of the square platform at the center of the terrain. Defaults to 1.0."""
 
 @configclass
-class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
+class MeshGapStripTerrainCfg(SubTerrainBaseCfg):
+    """Configuration for a repeated gap-and-landing strip along +X."""
+
+    function = gap_strip_terrain
+
+    gap_width_range: tuple[float, float] = MISSING
+    """The minimum and maximum width of the gaps (in m)."""
+    landing_length: float = 0.5
+    """Length of each landing platform between gaps (in m)."""
+    start_platform_length: float = 3.0
+    """Length of the initial run-up platform (in m)."""
+    platform_width: float = 3.0
+    """Alias for the run-up platform length for spawn clamping."""
+##########################################################
+
+GAP_TERRAINS_CFG = TerrainGeneratorCfg(
+    size=(23.0, 6.0),  # Terrain Size 23m X 6m
+    # border_width=10.0,  # The width of the border around the terrain (in m)
+    num_rows=10,  # Number of rows of sub-terrains to generate
+    num_cols=10,  # Number of columns of sub-terrains to generate. gap occupy 10 columns
+    # horizontal_scale=0.1,  # Horizontal scale of the terrain (in m)
+    # vertical_scale=0.005,  # Vertical scale of the terrain (in m)
+    # slope_threshold=0.75,  # The slope threshold above which surfaces are made vertical (in rad)
+    # use_cache=False,
+    # REF1: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/sub_terrain_cfg.py
+    # REF2: https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab_tasks/isaaclab_tasks/direct/go2/go2_env_cfg.py
+    sub_terrains={
+        "gap_bar": MeshGapStripTerrainCfg(
+            proportion=(3 / 18),
+            size=(23.0, 23.0),
+            gap_width_range=(0.1, 0.8),
+            landing_length=0.45,
+            start_platform_length=8.0,  # longer run-up for the gap strip
+        ),
+    },
+)
+"""Gap terrains configuration."""
+
+@configclass
+class ZsibotZSL1GapEnvCfg(LocomotionVelocityGapEnvCfg):
     base_link_name = "BASE_LINK"
     foot_link_name = ".*_FOOT_LINK"
     # fmt: off
@@ -75,7 +179,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "generator"  # “plane”, “usd”, and “generator”
-        self.scene.terrain.terrain_generator = STAIR_TERRAINS_CFG
+        self.scene.terrain.terrain_generator = GAP_TERRAINS_CFG
 
         # ------------------------------Observations------------------------------
         self.observations.policy.base_lin_vel.scale = 2.0
@@ -206,7 +310,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.climbing_progress.params["elevation_weight"] = 5.0  # Moderate elevation reward
 
         # If the weight of rewards is 0, set rewards to None
-        if self.__class__.__name__ == "ZsibotZSL1StairEnvCfg":
+        if self.__class__.__name__ == "ZsibotZSL1GapEnvCfg":
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------

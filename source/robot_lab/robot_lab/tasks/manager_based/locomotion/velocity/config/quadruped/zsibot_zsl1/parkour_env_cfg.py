@@ -1,9 +1,10 @@
 # Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 import math
 import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
-from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityStairEnvCfg
+from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityParkourEnvCfg
 
 from isaaclab.utils import configclass
 from isaaclab.managers import SceneEntityCfg
@@ -18,7 +19,122 @@ from robot_lab.assets.zsibot import ZSIBOT_ZSL1_CFG  # isort: skip
 import isaaclab.terrains as terrain_gen
 from isaaclab.terrains.terrain_generator_cfg import TerrainGeneratorCfg
 
-STAIR_TERRAINS_CFG = TerrainGeneratorCfg(
+##########################################################
+# https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab/isaaclab/terrains/trimesh/mesh_terrains.py#L6
+# import isaaclab.terrains.trimesh.mesh_terrains_cfg as mesh_terrains_cfg
+import trimesh
+import numpy as np
+def parkour_step_terrain(
+    difficulty: float, cfg: MeshParkourStepTerrainCfg
+) -> tuple[list[trimesh.Trimesh], np.ndarray]:
+    """Generate a parkour-style staircase that rises then descends along +X."""
+    meshes_list: list[trimesh.Trimesh] = []
+    ground_thickness = 0.1
+    wall_thickness = ground_thickness
+    y_center = 0.5 * cfg.size[1]
+    y_left = 0.5 * wall_thickness
+    y_right = cfg.size[1] - 0.5 * wall_thickness
+
+    # parameters
+    step_height = cfg.step_height_range[0] + difficulty * (cfg.step_height_range[1] - cfg.step_height_range[0])
+    base_len_min, base_len_max = cfg.step_length_base_range
+    steps_total = max(1, cfg.steps)
+    steps_up = steps_total // 2
+    steps_down = steps_total - steps_up
+
+    def add_side_walls(x_start: float, length: float, top_height: float):
+        """Add thin side walls to close open edges."""
+        wall_height = top_height + ground_thickness
+        if wall_height <= 0.0 or length <= 0.0:
+            return
+        z_center = 0.5 * (top_height - ground_thickness)
+        x_center = x_start + 0.5 * length
+        wall_dim = (length, wall_thickness, wall_height)
+        meshes_list.append(
+            trimesh.creation.box(wall_dim, trimesh.transformations.translation_matrix((x_center, y_left, z_center)))
+        )
+        meshes_list.append(
+            trimesh.creation.box(wall_dim, trimesh.transformations.translation_matrix((x_center, y_right, z_center)))
+        )
+
+    # initial flat platform
+    x_ptr = 0.0
+    height = 0.0
+    start_len = cfg.start_platform_length
+    start_dim = (start_len, cfg.size[1], ground_thickness)
+    start_center = (0.5 * start_len, y_center, height - 0.5 * ground_thickness)
+    meshes_list.append(trimesh.creation.box(start_dim, trimesh.transformations.translation_matrix(start_center)))
+    add_side_walls(x_ptr, start_len, height)
+    x_ptr += start_len
+
+    # ascending steps
+    for _ in range(steps_up):
+        base_len = np.random.uniform(base_len_min, base_len_max)
+        step_len = base_len + step_height
+        prev_height = height
+        height += step_height
+        dim = (step_len, cfg.size[1], ground_thickness)
+        center = (x_ptr + 0.5 * step_len, y_center, height - 0.5 * ground_thickness)
+        meshes_list.append(trimesh.creation.box(dim, trimesh.transformations.translation_matrix(center)))
+        wall_height = abs(height - prev_height)
+        if wall_height > 1e-6:
+            wall_dim = (ground_thickness, cfg.size[1], wall_height)
+            wall_center = (x_ptr + 0.5 * ground_thickness, y_center, 0.5 * (height + prev_height))
+            meshes_list.append(trimesh.creation.box(wall_dim, trimesh.transformations.translation_matrix(wall_center)))
+        add_side_walls(x_ptr, step_len, height)
+        x_ptr += step_len
+        if x_ptr >= cfg.size[0]:
+            break
+
+    # descending steps
+    for _ in range(steps_down):
+        if x_ptr >= cfg.size[0]:
+            break
+        base_len = np.random.uniform(base_len_min, base_len_max)
+        step_len = base_len + step_height
+        prev_height = height
+        height -= step_height
+        dim = (step_len, cfg.size[1], ground_thickness)
+        center = (x_ptr + 0.5 * step_len, y_center, height - 0.5 * ground_thickness)
+        meshes_list.append(trimesh.creation.box(dim, trimesh.transformations.translation_matrix(center)))
+        wall_height = abs(height - prev_height)
+        if wall_height > 1e-6:
+            wall_dim = (ground_thickness, cfg.size[1], wall_height)
+            wall_center = (x_ptr + 0.5 * ground_thickness, y_center, 0.5 * (height + prev_height))
+            meshes_list.append(trimesh.creation.box(wall_dim, trimesh.transformations.translation_matrix(wall_center)))
+        add_side_walls(x_ptr, step_len, height)
+        x_ptr += step_len
+
+    # remaining flat
+    if x_ptr < cfg.size[0]:
+        flat_len = cfg.size[0] - x_ptr
+        flat_dim = (flat_len, cfg.size[1], ground_thickness)
+        flat_center = (x_ptr + 0.5 * flat_len, y_center, height - 0.5 * ground_thickness)
+        meshes_list.append(trimesh.creation.box(flat_dim, trimesh.transformations.translation_matrix(flat_center)))
+        add_side_walls(x_ptr, flat_len, height)
+
+    origin = np.array([cfg.start_platform_length * 0.5, y_center, 0.0])
+    return meshes_list, origin
+
+# https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab/isaaclab/terrains/trimesh/mesh_terrains_cfg.py#L194
+from isaaclab.terrains.sub_terrain_cfg import SubTerrainBaseCfg
+@configclass
+class MeshParkourStepTerrainCfg(SubTerrainBaseCfg):
+    """Configuration for a parkour-style staircase that rises then descends."""
+
+    function = parkour_step_terrain
+
+    start_platform_length: float = 3.0
+    """Run-up length before the first step (in m)."""
+    step_height_range: tuple[float, float] = (0.1, 0.45)
+    """Min/max height change per step (in m) over difficulty."""
+    step_length_base_range: tuple[float, float] = (0.3, 1.5)
+    """Base step length range; actual length = base + step_height (in m)."""
+    steps: int = 6
+    """Total number of steps (rise then fall)."""
+##########################################################
+
+PARKOUR_TERRAINS_CFG = TerrainGeneratorCfg(
     size=(8.0, 8.0),  # The width (along x) and length (along y) of each sub-terrain (in m)
     border_width=10.0,  # The width of the border around the terrain (in m)
     num_rows=10,  # Number of rows of sub-terrains to generate
@@ -27,33 +143,31 @@ STAIR_TERRAINS_CFG = TerrainGeneratorCfg(
     vertical_scale=0.005,  # Vertical scale of the terrain (in m)
     slope_threshold=0.75,  # The slope threshold above which surfaces are made vertical (in rad)
     use_cache=False,
-    # https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/sub_terrain_cfg.py
+    # REF1: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/sub_terrain_cfg.py
+    # REF2: https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab_tasks/isaaclab_tasks/direct/go2/go2_env_cfg.py
     sub_terrains={
-        # "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
-        #     proportion=0.2,
-        #     step_height_range=(0.05, 0.23),
-        #     step_width=0.3,
-        #     platform_width=3.0,
-        #     border_width=1.0,
+        # "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
+        #     proportion=0.2,  # Proportion of the terrain to generate
+        #     step_height_range=(0.05, 0.23),  # 每节阶梯的高度范围
+        #     step_width=0.3,  # 每节阶梯的宽度
+        #     platform_width=3.0,  # 平台宽度
+        #     border_width=1.0,  # 边缘宽度
         #     holes=False,
         # ),
-        "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
-            proportion=0.2,  # Proportion of the terrain to generate
-            step_height_range=(0.05, 0.23),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.10),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.15),  # 每节阶梯的高度范围
-            # step_height_range=(0.05, 0.20),  # 每节阶梯的高度范围
-            step_width=0.3,  # 每节阶梯的宽度
-            platform_width=3.0,  # 平台宽度
-            border_width=1.0,  # 边缘宽度
-            holes=False,
+        "parkour_step": MeshParkourStepTerrainCfg(
+            proportion=(3 / 18),
+            size=(23.0, 23.0),
+            start_platform_length=3.0,
+            step_height_range=(0.1, 0.45),
+            step_length_base_range=(0.3, 1.5),
+            steps=6,
         )
     },
 )
 """Stair terrains configuration."""
 
 @configclass
-class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
+class ZsibotZSL1ParkourEnvCfg(LocomotionVelocityParkourEnvCfg):
     base_link_name = "BASE_LINK"
     foot_link_name = ".*_FOOT_LINK"
     # fmt: off
@@ -75,7 +189,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "generator"  # “plane”, “usd”, and “generator”
-        self.scene.terrain.terrain_generator = STAIR_TERRAINS_CFG
+        self.scene.terrain.terrain_generator = PARKOUR_TERRAINS_CFG
 
         # ------------------------------Observations------------------------------
         self.observations.policy.base_lin_vel.scale = 2.0
@@ -206,7 +320,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.climbing_progress.params["elevation_weight"] = 5.0  # Moderate elevation reward
 
         # If the weight of rewards is 0, set rewards to None
-        if self.__class__.__name__ == "ZsibotZSL1StairEnvCfg":
+        if self.__class__.__name__ == "ZsibotZSL1ParkourEnvCfg":
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------

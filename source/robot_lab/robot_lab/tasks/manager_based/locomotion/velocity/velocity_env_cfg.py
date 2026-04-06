@@ -839,3 +839,119 @@ class LocomotionVelocityStairEnvCfg(ManagerBasedRLEnvCfg):
                 reward_attr = getattr(self.rewards, attr)
                 if not callable(reward_attr) and reward_attr.weight == 0:
                     setattr(self.rewards, attr, None)
+
+@configclass
+class LocomotionVelocityParkourEnvCfg(ManagerBasedRLEnvCfg):
+    """Configuration for the locomotion velocity-tracking environment."""
+
+    # Scene settings
+    scene: MySceneCfg = MySceneCfg(num_envs=4096, env_spacing=2.5)
+    # Basic settings
+    observations: ObservationsCfg = ObservationsCfg()
+    actions: ActionsCfg = ActionsCfg()
+    commands: CommandsCfg = CommandsCfg()
+    # MDP settings
+    rewards: RewardsCfg = RewardsCfg()
+    terminations: TerminationsCfg = TerminationsCfg()
+    events: EventCfg = EventCfg()
+    curriculum: CurriculumCfg = CurriculumCfg()
+
+    def __post_init__(self):
+        """Post initialization."""
+        # general settings
+        self.decimation = 4  # Number of control action updates @ sim.dt per policy dt. 
+        # Since sim.dt=0.005 and decimation=4, policy is updated every 4*0.005=0.02s(policy dt=0.02s).
+        self.episode_length_s = 20.0  # Duration of an episode (in seconds).
+        # simulation settings
+        self.sim.dt = 0.005  # The physics simulation time-step (in seconds). For instance, 
+        # if the simulation dt is 0.01s and the policy dt is 0.1s, then the decimation is 10. 
+        # This means that the control action is updated every 10 simulation steps.
+        self.sim.render_interval = self.decimation  # The number of physics simulation steps per rendering step.
+        self.sim.physics_material = self.scene.terrain.physics_material
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+        # update sensor update periods
+        # we tick all the sensors based on the smallest update period (physics update period)
+        if self.scene.height_scanner is not None:
+            self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+            # Override height_scanner offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner.offset.pos = (0.0, 0.0, 1.0)
+        if self.scene.height_scanner_base is not None:
+            # Override height_scanner_base offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner_base.offset.pos = (0.0, 0.0, 1.0)
+        if self.scene.contact_forces is not None:
+            self.scene.contact_forces.update_period = self.sim.dt
+
+        # check if terrain levels curriculum is enabled - if so, enable curriculum for terrain generator
+        # this generates terrains with increasing difficulty and is useful for training
+        if getattr(self.curriculum, "terrain_levels", None) is not None:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = True
+        else:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = False
+
+    def disable_zero_weight_rewards(self):
+        """If the weight of rewards is 0, set rewards to None"""
+        for attr in dir(self.rewards):
+            if not attr.startswith("__"):
+                reward_attr = getattr(self.rewards, attr)
+                if not callable(reward_attr) and reward_attr.weight == 0:
+                    setattr(self.rewards, attr, None)
+
+@configclass
+class LocomotionVelocityGapEnvCfg(ManagerBasedRLEnvCfg):
+    """Configuration for the locomotion velocity-tracking environment."""
+
+    # Scene settings
+    scene: MySceneCfg = MySceneCfg(num_envs=4096, env_spacing=2.5)
+    # Basic settings
+    observations: ObservationsCfg = ObservationsCfg()
+    actions: ActionsCfg = ActionsCfg()
+    commands: CommandsCfg = CommandsCfg()
+    # MDP settings
+    rewards: RewardsCfg = RewardsCfg()
+    terminations: TerminationsCfg = TerminationsCfg()
+    events: EventCfg = EventCfg()
+    curriculum: CurriculumCfg = CurriculumCfg()
+
+    def __post_init__(self):
+        """Post initialization."""
+        # general settings
+        self.decimation = 4  # Number of control action updates @ sim.dt per policy dt. 
+        # Since sim.dt=0.005 and decimation=4, policy is updated every 4*0.005=0.02s(policy dt=0.02s).
+        self.episode_length_s = 20.0  # Duration of an episode (in seconds).
+        # simulation settings
+        self.sim.dt = 0.005  # The physics simulation time-step (in seconds). For instance, 
+        # if the simulation dt is 0.01s and the policy dt is 0.1s, then the decimation is 10. 
+        # This means that the control action is updated every 10 simulation steps.
+        self.sim.render_interval = self.decimation  # The number of physics simulation steps per rendering step.
+        self.sim.physics_material = self.scene.terrain.physics_material
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+        # update sensor update periods
+        # we tick all the sensors based on the smallest update period (physics update period)
+        if self.scene.height_scanner is not None:
+            self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+            # Override height_scanner offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner.offset.pos = (0.0, 0.0, 1.0)
+        if self.scene.height_scanner_base is not None:
+            # Override height_scanner_base offset z from 20.0 to 1.0 for stair environment
+            self.scene.height_scanner_base.offset.pos = (0.0, 0.0, 1.0)
+        if self.scene.contact_forces is not None:
+            self.scene.contact_forces.update_period = self.sim.dt
+
+        # check if terrain levels curriculum is enabled - if so, enable curriculum for terrain generator
+        # this generates terrains with increasing difficulty and is useful for training
+        if getattr(self.curriculum, "terrain_levels", None) is not None:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = True
+        else:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = False
+
+    def disable_zero_weight_rewards(self):
+        """If the weight of rewards is 0, set rewards to None"""
+        for attr in dir(self.rewards):
+            if not attr.startswith("__"):
+                reward_attr = getattr(self.rewards, attr)
+                if not callable(reward_attr) and reward_attr.weight == 0:
+                    setattr(self.rewards, attr, None)

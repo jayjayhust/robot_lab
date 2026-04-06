@@ -14,6 +14,13 @@
 - [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced documentation of simulation timing relationships and decimation parameter in velocity_env_cfg.py
+- Added detailed explanations of policy update intervals and render interval settings
+- Clarified the relationship between sim.dt, decimation factor, and policy update frequencies
+- Updated performance considerations section to reflect timing optimization strategies
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -63,21 +70,21 @@ Ev --> BaseCfg
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L35)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L681)
-- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
-- [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
-- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L127)
+- [velocity_env_cfg.py:696-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
+- [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
+- [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [observations.py:16-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L35)
+- [rewards.py:22-681](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L681)
+- [curriculums.py:20-97](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
+- [events.py:203-270](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
+- [utils.py:42-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L127)
 
 **Section sources**
-- [README.md](file://README.md#L15-L42)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [README.md:15-42](file://README.md#L15-L42)
+- [velocity_env_cfg.py:42-95](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
+- [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
+- [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
 
 ## Core Components
 - ManagerBasedRLEnv configuration: Defines scene, commands, observations, actions, rewards, terminations, and curriculum.
@@ -89,11 +96,11 @@ Ev --> BaseCfg
 - Terrain: Generator-based rough terrains and plane-based flat scenes.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L127)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L257-L373)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
+- [velocity_env_cfg.py:102-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L127)
+- [velocity_env_cfg.py:130-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
+- [velocity_env_cfg.py:257-373](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L257-L373)
+- [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
+- [velocity_env_cfg.py:667-688](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
 
 ## Architecture Overview
 The ManagerBasedRLEnv orchestrates the RL loop:
@@ -124,11 +131,11 @@ Env-->>Env : Repeat until termination
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L42-L85)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
-- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
-- [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
+- [velocity_env_cfg.py:696-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
+- [commands.py:42-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L42-L85)
+- [rewards.py:22-76](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
+- [curriculums.py:20-97](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
+- [events.py:203-270](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
 
 ## Detailed Component Analysis
 
@@ -142,15 +149,43 @@ Env-->>Env : Repeat until termination
 - Curriculum: Terrain levels and command range progression.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L127)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
+- [velocity_env_cfg.py:42-95](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
+- [velocity_env_cfg.py:102-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L127)
+- [velocity_env_cfg.py:130-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
+- [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
+- [velocity_env_cfg.py:667-688](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
+
+### Simulation Timing and Decimation Configuration
+
+**Updated** Enhanced documentation clarifies the relationship between simulation timestep, decimation factor, and policy update intervals.
+
+The velocity-based locomotion tasks implement a carefully tuned simulation timing configuration that balances computational efficiency with control precision:
+
+- **Physics timestep (sim.dt)**: Set to 0.005 seconds (200 Hz physics rate)
+- **Decimation factor**: Controls how many physics steps occur between policy updates
+- **Policy update interval**: Calculated as decimation × sim.dt
+- **Render interval**: Directly linked to decimation factor for efficient visualization
+
+```mermaid
+flowchart TD
+Start(["Environment Initialization"]) --> Config["Configure sim.dt = 0.005s"]
+Config --> Decimation["Set decimation = 4"]
+Decimation --> Policy["Policy Update Interval = 4 × 0.005s = 0.02s"]
+Policy --> Render["Render Interval = decimation = 4"]
+Render --> Sensors["Update Sensor Periods"]
+Sensors --> Complete(["Ready for Training"])
+```
+
+**Diagram sources**
+- [velocity_env_cfg.py:804-811](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L804-L811)
+
+**Section sources**
+- [velocity_env_cfg.py:804-811](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L804-L811)
+- [velocity_env_cfg.py:753-757](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L753-L757)
 
 ### Velocity Command Generation and Tracking
 - Command specification defines SE(2) velocity ranges and heading control stiffness.
-- Terrain-aware restriction: On “pits” terrain, commands are restricted to forward-only movement with lateral and yaw set to zero; heading is forced to zero.
+- Terrain-aware restriction: On "pits" terrain, commands are restricted to forward-only movement with lateral and yaw set to zero; heading is forced to zero.
 - Thresholding: Small lateral/rotational commands are set to zero to stabilize low-speed behavior.
 - Tracking rewards: Exponential kernels penalize deviation from commanded linear and angular velocities in body frame; gravity alignment factor is applied.
 
@@ -166,15 +201,15 @@ Track --> End(["Done"])
 ```
 
 **Diagram sources**
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L42-L85)
-- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L72-L127)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
+- [commands.py:42-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L42-L85)
+- [utils.py:72-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L72-L127)
+- [rewards.py:22-76](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L117)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
-- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L127)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
+- [velocity_env_cfg.py:102-117](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L117)
+- [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
+- [utils.py:42-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L42-L127)
+- [rewards.py:22-76](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L76)
 
 ### MDP Formulation
 
@@ -196,8 +231,8 @@ Track --> End(["Done"])
   - Policy and critic groups concatenate terms in order.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L35)
+- [velocity_env_cfg.py:130-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
+- [observations.py:16-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L35)
 
 #### Action Space Configuration
 - Joint position control with scaling factors per joint group.
@@ -205,8 +240,8 @@ Track --> End(["Done"])
 - Preserve joint ordering for deterministic mapping.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L121-L127)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L49-L54)
+- [velocity_env_cfg.py:121-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L121-L127)
+- [rough_env_cfg.py:49-54](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L49-L54)
 
 #### Reward Functions
 - Velocity tracking:
@@ -255,12 +290,12 @@ RewardsCfg --> GaitReward : "uses"
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L153-L334)
+- [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
+- [rewards.py:153-334](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L153-L334)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L681)
+- [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
+- [rewards.py:22-681](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L681)
 
 #### Termination Conditions
 - Episode timeout.
@@ -268,7 +303,7 @@ RewardsCfg --> GaitReward : "uses"
 - Illegal contact termination via contact sensor thresholds.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L647-L665)
+- [velocity_env_cfg.py:647-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L647-L665)
 
 ### Terrain Configuration Options
 - Rough terrain:
@@ -282,9 +317,9 @@ RewardsCfg --> GaitReward : "uses"
   - Curriculum for terrain levels disabled.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L11-L29)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L30-L80)
+- [velocity_env_cfg.py:42-95](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
+- [flat_env_cfg.py:11-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L11-L29)
+- [rough_env_cfg.py:30-80](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L30-L80)
 
 ### Observation Preprocessing, Noise Injection, and Corruption
 - Noise:
@@ -297,8 +332,8 @@ RewardsCfg --> GaitReward : "uses"
   - Controlled via observation group flags.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L192)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L198-L250)
+- [velocity_env_cfg.py:138-192](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L138-L192)
+- [velocity_env_cfg.py:198-250](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L198-L250)
 
 ### Task Parameterization Examples
 
@@ -310,7 +345,7 @@ RewardsCfg --> GaitReward : "uses"
 - Terrain-aware curriculum disabled in this example.
 
 **Section sources**
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L18-L160)
+- [rough_env_cfg.py:18-160](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L18-L160)
 
 #### Wheeled Robots
 - Wheel velocity penalty term designed for wheeled robots.
@@ -318,14 +353,14 @@ RewardsCfg --> GaitReward : "uses"
 - Example robot families include unitree_b2w, unitree_go2w, deeprobotics_m20, ddtrobot_tita, zsibot_zsl1w, magiclab_magicdogw.
 
 **Section sources**
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L129-L150)
-- [README.md](file://README.md#L26-L31)
+- [rewards.py:129-150](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L129-L150)
+- [README.md:26-31](file://README.md#L26-L31)
 
 #### Humanoid Variants
 - Humanoid families include unitree_g1, unitree_h1, fftai_gr1t1, fftai_gr1t2, booster_t1, robotera_xbot, openloong_loong, roboparty_atom01, magiclab_magicbot_gen1, magiclab_magicbot_z1.
 
 **Section sources**
-- [README.md](file://README.md#L32-L42)
+- [README.md:32-42](file://README.md#L32-L42)
 
 ### Curriculum Learning Implementation
 - Terrain levels curriculum: Progressive difficulty for generator-based terrains.
@@ -346,12 +381,12 @@ Next --> Loop
 ```
 
 **Diagram sources**
-- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
+- [curriculums.py:20-97](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
+- [velocity_env_cfg.py:667-688](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
-- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
+- [velocity_env_cfg.py:667-688](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
+- [curriculums.py:20-97](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L20-L97)
 
 ### Training Optimization Strategies
 - Disable zero-weight rewards to reduce computation overhead.
@@ -359,12 +394,15 @@ Next --> Loop
 - Use terrain-aware resets to avoid unstable initial conditions on risky terrains.
 - Employ mirrored and synchronized action terms to improve gait consistency for quadrupeds.
 - Apply curriculum to gradually increase task difficulty and reward signal strength.
+- Optimize simulation timing: Use appropriate decimation factors to balance policy update frequency and computational cost.
+
+**Updated** Enhanced timing optimization strategies based on improved documentation of simulation parameters.
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L737-L744)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L30-L160)
-- [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L255-L334)
+- [velocity_env_cfg.py:737-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L737-L744)
+- [rough_env_cfg.py:30-160](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L30-L160)
+- [events.py:203-270](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
+- [rewards.py:255-334](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L255-L334)
 
 ## Dependency Analysis
 The velocity task configuration composes multiple modules:
@@ -385,26 +423,30 @@ Rough["rough_env_cfg.py"] --> Base
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L1-L185)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L35)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L681)
-- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L1-L97)
-- [events.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L1-L270)
-- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L1-L127)
+- [velocity_env_cfg.py:12-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
+- [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
+- [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [commands.py:1-185](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L1-L185)
+- [observations.py:1-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L35)
+- [rewards.py:1-681](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L681)
+- [curriculums.py:1-97](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L1-L97)
+- [events.py:1-270](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L1-L270)
+- [utils.py:1-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L1-L127)
 
 **Section sources**
-- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
-- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [velocity_env_cfg.py:12-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
+- [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
+- [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
 
 ## Performance Considerations
 - Disable unused or zero-weighted rewards to reduce computational overhead.
 - Tune observation scales to balance signal strength and numerical stability.
 - Prefer generator-based terrains with appropriate GPU patch counts for large-scale training.
 - Use curriculum updates at episode boundaries to avoid excessive resampling frequency.
+- Optimize simulation timing: Configure decimation factor appropriately for target policy update frequency.
+- Balance physics timestep (sim.dt) with computational budget for stable training performance.
+
+**Updated** Added guidance on simulation timing optimization and decimation factor tuning.
 
 [No sources needed since this section provides general guidance]
 
@@ -412,12 +454,13 @@ Rough["rough_env_cfg.py"] --> Base
 - Symmetry and data augmentation: Enable symmetry data augmentation for quadrupeds to improve generalization.
 - Distillation: Train a teacher agent on flat terrain, then distill into a student agent for faster convergence.
 - Multi-node distributed training: Use torch.distributed runner for multi-GPU and multi-node setups.
+- Timing issues: Adjust decimation factor if experiencing slow/fast policy updates relative to physics simulation.
 
 **Section sources**
-- [README.md](file://README.md#L291-L312)
+- [README.md:291-312](file://README.md#L291-L312)
 
 ## Conclusion
-The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough), with practical training optimizations and terrain-aware behaviors to improve stability and generalization.
+The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough), with practical training optimizations and terrain-aware behaviors to improve stability and generalization. Enhanced documentation clarifies the critical simulation timing relationships that enable efficient and stable training across different hardware configurations.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -428,4 +471,22 @@ The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configu
 - Training and evaluation scripts are provided for RSL-RL and SKRL.
 
 **Section sources**
-- [README.md](file://README.md#L193-L332)
+- [README.md:193-332](file://README.md#L193-L332)
+
+### Appendix B: Simulation Timing Configuration Reference
+
+**Updated** Added detailed reference for simulation timing parameters.
+
+The velocity-based locomotion tasks use a standardized simulation timing configuration:
+
+- **Default Physics Timestep (sim.dt)**: 0.005 seconds
+- **Default Decimation Factor**: 4
+- **Default Policy Update Interval**: 0.02 seconds (4 × 0.005)
+- **Default Render Interval**: 4 steps
+- **Sensor Update Periods**:
+  - Height scanners: decimation × sim.dt
+  - Contact forces: sim.dt
+
+**Section sources**
+- [velocity_env_cfg.py:804-811](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L804-L811)
+- [velocity_env_cfg.py:753-757](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L753-L757)
