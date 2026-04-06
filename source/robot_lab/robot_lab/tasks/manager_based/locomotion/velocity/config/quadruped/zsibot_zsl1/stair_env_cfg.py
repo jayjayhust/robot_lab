@@ -129,7 +129,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
 
         # ------------------------------Rewards------------------------------
         # General
-        self.rewards.is_terminated.weight = 0
+        self.rewards.is_terminated.weight = 0  # Reward for termination
 
         # Root penalties
         self.rewards.lin_vel_z_l2.weight = -1.0  # Moderate penalty to discourage jumping while allowing climbing
@@ -142,16 +142,16 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.body_lin_acc_l2.params["asset_cfg"].body_names = [self.base_link_name]
 
         # Joint penalties
-        self.rewards.joint_torques_l2.weight = -2.5e-5
-        self.rewards.joint_vel_l2.weight = 0
-        self.rewards.joint_acc_l2.weight = -5.0e-7
+        self.rewards.joint_torques_l2.weight = -2.5e-5  # Penalize joint torques applied on the articulation using L2 squared kernel.
+        self.rewards.joint_vel_l2.weight = 0  # Penalize joint velocities on the articulation using L2 squared kernel.
+        self.rewards.joint_acc_l2.weight = -5.0e-7  # Penalize joint accelerations on the articulation using L2 squared kernel.
         # self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_hip_l1", -0.2, [".*_hip_joint"])
-        self.rewards.joint_pos_limits.weight = -5.0
-        self.rewards.joint_vel_limits.weight = 0
-        self.rewards.joint_power.weight = -1e-5  # -2e-5(strong penalty)/-1e-5(weak penalty)
-        self.rewards.stand_still.weight = -2.0
+        self.rewards.joint_pos_limits.weight = -5.0  # Penalize joint positions if they cross the soft limits
+        self.rewards.joint_vel_limits.weight = 0  # Penalize joint velocities if they cross the soft limits
+        self.rewards.joint_power.weight = -1e-5  # -2e-5(strong penalty)/-1e-5(weak penalty). Reward joint_power
+        self.rewards.stand_still.weight = -2.0  # Penalize offsets from the default joint positions when the command is very small
         self.rewards.joint_pos_penalty.weight = -0.1  # Further reduced to allow extreme joint positions for 0.23m steps
-        self.rewards.joint_mirror.weight = -0.05
+        self.rewards.joint_mirror.weight = -0.05  # Reward the difference for each pair and add to the total reward
         self.rewards.joint_mirror.params["mirror_joints"] = [
             ["FAR_(ABAD|HIP|KNEE).*", "RBL_(ABAD|HIP|KNEE).*"],
             ["FBL_(ABAD|HIP|KNEE).*", "RAR_(ABAD|HIP|KNEE).*"],
@@ -161,31 +161,32 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
         self.rewards.action_rate_l2.weight = -0.02  # Increased to smooth out jumping motions
 
         # Contact sensor
-        self.rewards.undesired_contacts.weight = -1.0
+        self.rewards.undesired_contacts.weight = -1.0  # Penalize undesired contacts as the number of violations that are above a threshold
         self.rewards.undesired_contacts.params["sensor_cfg"].body_names = [f"^(?!.*{self.foot_link_name}).*"]
-        self.rewards.contact_forces.weight = -1.5e-4
+        self.rewards.contact_forces.weight = -1.5e-4  # Penalize contact forces as the amount of violations of the net contact force
+        self.rewards.contact_forces.params["threshold"] = 100.0
         self.rewards.contact_forces.params["sensor_cfg"].body_names = [self.foot_link_name]
 
         # Velocity-tracking rewards - reduced to prioritize climbing
-        self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        self.rewards.track_ang_vel_z_exp.weight = 0.5
+        self.rewards.track_lin_vel_xy_exp.weight = 1.5  # Reward tracking of linear velocity commands (xy axes) using exponential kernel
+        self.rewards.track_ang_vel_z_exp.weight = 0.5  # Reward tracking of angular velocity commands (yaw) using exponential kernel.
 
         # Others
         self.rewards.feet_air_time.weight = 0.8  # Reduced to discourage jumping
         self.rewards.feet_air_time.params["threshold"] = 0.35  # Lower threshold for controlled stepping
         self.rewards.feet_air_time.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_air_time_variance.weight = -1.0
+        self.rewards.feet_air_time_variance.weight = -1.0  # Penalize variance in the amount of time each foot spends in the air/on the ground relative to each other
         self.rewards.feet_air_time_variance.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_contact.weight = 0
+        self.rewards.feet_contact.weight = 0  # Reward for feet contact
         self.rewards.feet_contact.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_contact_without_cmd.weight = 0.1
+        self.rewards.feet_contact_without_cmd.weight = 0.1  # Reward for feet contact without command
         self.rewards.feet_contact_without_cmd.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_stumble.weight = 0
+        self.rewards.feet_stumble.weight = 0  # Penalize feet hitting vertical surfaces
         self.rewards.feet_stumble.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_slide.weight = -0.1
+        self.rewards.feet_slide.weight = -0.1  # Penalize feet sliding on the ground
         self.rewards.feet_slide.params["sensor_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_slide.params["asset_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_height.weight = 0
+        self.rewards.feet_height.weight = 0  # Reward the swinging feet for clearing a specified height off the ground
         self.rewards.feet_height.params["target_height"] = 0.05
         self.rewards.feet_height.params["asset_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_height_body.weight = -0.5  # Further reduced to allow higher foot lifts for 0.23m steps
@@ -196,7 +197,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
             ("FL_FOOT_LINK", "RR_FOOT_LINK"),
             ("FR_FOOT_LINK", "RL_FOOT_LINK"),
         )
-        self.rewards.upward.weight = 0.15  # Slightly increased to maintain some horizontal posture
+        self.rewards.upward.weight = 0.15  # Reward z-axis base linear velocity using L2 squared kernel. Slightly increased to maintain some horizontal posture
 
         # Climbing rewards - balanced for controlled stepping
         self.rewards.heading_alignment.weight = 0  # Removed heading alignment requirement
@@ -210,7 +211,7 @@ class ZsibotZSL1StairEnvCfg(LocomotionVelocityStairEnvCfg):
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------
-        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD"]
+        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD_LINK"]
         self.terminations.illegal_contact = None
 
         # ------------------------------Curriculums------------------------------

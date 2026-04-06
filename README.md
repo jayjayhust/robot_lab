@@ -197,6 +197,10 @@ You can use the following commands to run all environments:
 RSL-RL:
 
 ```bash
+# View scene
+# e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Parkour-Zsibot-ZSL1-v0
+python scripts/tools/zero_agent.py --task=<ENV_NAME>
+
 # Train
 # <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-Opendoge-Apx-v0 --headless

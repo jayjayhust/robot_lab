@@ -6,6 +6,9 @@
 - [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py)
 - [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py)
 - [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py)
+- [gap_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py)
+- [parkour_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py)
+- [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
 - [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py)
 - [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py)
 - [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py)
@@ -16,10 +19,11 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced documentation of simulation timing relationships and decimation parameter in velocity_env_cfg.py
-- Added detailed explanations of policy update intervals and render interval settings
-- Clarified the relationship between sim.dt, decimation factor, and policy update frequencies
-- Updated performance considerations section to reflect timing optimization strategies
+- Enhanced documentation to include new gap and parkour environment configurations
+- Added specialized reward functions for climbing progress and gap traversal
+- Integrated advanced terrain generation capabilities for gap and parkour scenarios
+- Updated environment-specific configurations for ZSIBOT ZSL1 quadruped
+- Expanded terrain configuration options with custom mesh terrains
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -27,28 +31,35 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Advanced Environment Configurations](#advanced-environment-configurations)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
-This document explains the velocity-based locomotion task configurations implemented in the repository. It focuses on the ManagerBasedRLEnv architecture, velocity command generation and tracking, MDP formulation (state representation, action space, rewards, and terminations), terrain configuration options, observation preprocessing and corruption, and practical task parameterization for quadrupeds, wheeled robots, and humanoid variants. It also covers curriculum learning implementation and training optimization strategies.
+This document explains the velocity-based locomotion task configurations implemented in the repository. It focuses on the ManagerBasedRLEnv architecture, velocity command generation and tracking, MDP formulation (state representation, action space, rewards, and terminations), terrain configuration options, observation preprocessing and corruption, and practical task parameterization for quadrupeds, wheeled robots, and humanoid variants. The framework now includes enhanced support for gap traversal and parkour-style navigation through specialized reward functions and advanced terrain generation capabilities.
 
 ## Project Structure
-The velocity-based locomotion tasks are organized under a manager-based RL environment framework. Key elements include:
+The velocity-based locomotion tasks are organized under a manager-based RL environment framework with enhanced support for specialized locomotion scenarios. Key elements include:
 - Environment configuration templates and robot-specific overrides
 - MDP modules for commands, observations, rewards, events, and curriculum
-- Terrain and sensor definitions integrated into the interactive scene
+- Advanced terrain generation for gap and parkour environments
+- Specialized reward functions for climbing and gap traversal
 - Flat vs rough terrain variants per robot family
 
 ```mermaid
 graph TB
-subgraph "Environment Templates"
+subgraph "Basic Environment Templates"
 BaseCfg["velocity_env_cfg.py<br/>Base environment config"]
 FlatCfg["flat_env_cfg.py<br/>Flat override"]
 RoughCfg["rough_env_cfg.py<br/>Rough override"]
+end
+subgraph "Advanced Environment Templates"
+GapCfg["gap_env_cfg.py<br/>Gap traversal config"]
+ParkourCfg["parkour_env_cfg.py<br/>Parkour navigation config"]
+StairCfg["stair_env_cfg.py<br/>Stair climbing config"]
 end
 subgraph "MDP Modules"
 Cmd["commands.py<br/>Velocity command generator"]
@@ -65,6 +76,9 @@ BaseCfg --> Cur
 BaseCfg --> Ev
 FlatCfg --> BaseCfg
 RoughCfg --> BaseCfg
+GapCfg --> BaseCfg
+ParkourCfg --> BaseCfg
+StairCfg --> BaseCfg
 Cur --> Rew
 Ev --> BaseCfg
 ```
@@ -73,6 +87,9 @@ Ev --> BaseCfg
 - [velocity_env_cfg.py:696-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
 - [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
 - [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [gap_env_cfg.py:160-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L160-L339)
+- [parkour_env_cfg.py:170-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L170-L349)
+- [stair_env_cfg.py:56-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L235)
 - [commands.py:21-85](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L21-L85)
 - [observations.py:16-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L16-L35)
 - [rewards.py:22-681](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L22-L681)
@@ -90,10 +107,10 @@ Ev --> BaseCfg
 - ManagerBasedRLEnv configuration: Defines scene, commands, observations, actions, rewards, terminations, and curriculum.
 - Commands: Velocity command generator with terrain-aware restrictions.
 - Observations: Concatenated policy and critic groups with noise and clipping.
-- Rewards: Velocity tracking, stability, contact-based, and gait-related terms.
+- Rewards: Velocity tracking, stability, contact-based, gait-related, and climbing progress terms.
 - Events: Physics and kinematic randomization, resets, and perturbations.
 - Curriculum: Command range progression based on reward performance.
-- Terrain: Generator-based rough terrains and plane-based flat scenes.
+- Terrain: Generator-based rough terrains and plane-based flat scenes with advanced gap and parkour terrain generation.
 
 **Section sources**
 - [velocity_env_cfg.py:102-127](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L102-L127)
@@ -103,11 +120,11 @@ Ev --> BaseCfg
 - [velocity_env_cfg.py:667-688](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L667-L688)
 
 ## Architecture Overview
-The ManagerBasedRLEnv orchestrates the RL loop:
-- Scene initializes terrain, robot, sensors, and lighting.
+The ManagerBasedRLEnv orchestrates the RL loop with enhanced support for specialized locomotion scenarios:
+- Scene initializes terrain, robot, sensors, and lighting with advanced terrain generation.
 - Commands module generates SE(2) velocity targets with optional heading control.
 - Observations module constructs concatenated tensors for policy and critic.
-- Rewards module computes shaped feedback for velocity tracking, stability, and contact dynamics.
+- Rewards module computes shaped feedback for velocity tracking, stability, contact dynamics, and climbing progress.
 - Events module injects robustness via parameter randomization and controlled perturbations.
 - Curriculum module progressively increases command difficulty.
 
@@ -120,11 +137,11 @@ participant Obs as "ObservationsCfg"
 participant Rew as "RewardsCfg"
 participant Cur as "CurriculumCfg"
 participant Ev as "EventCfg"
-Env->>Scene : Initialize terrain, robot, sensors
+Env->>Scene : Initialize terrain (basic/advanced)
 Env->>Cmd : Sample/resample velocity commands
 Env->>Obs : Build policy/critic observations
 Env->>Env : Step physics and sensors
-Env->>Rew : Evaluate reward terms
+Env->>Rew : Evaluate reward terms (including climbing progress)
 Env->>Cur : Update command ranges based on performance
 Env->>Ev : Apply randomization/reset/perturbations
 Env-->>Env : Repeat until termination
@@ -144,7 +161,7 @@ Env-->>Env : Repeat until termination
 - Commands: SE(2) velocity command with thresholding, heading control, and periodic resampling.
 - Actions: Joint position action with scaling and clipping per joint group.
 - Observations: Policy and critic groups with base velocities, gravity projection, commands, joint positions/velocities, actions, and height scans; includes noise injection and corruption toggles.
-- Rewards: Comprehensive set covering velocity tracking, stability, joint limits/power, contact dynamics, and gait.
+- Rewards: Comprehensive set covering velocity tracking, stability, joint limits/power, contact dynamics, gait, and climbing progress.
 - Terminations: Episode timeouts and terrain bounds; contact-based illegal contact.
 - Curriculum: Terrain levels and command range progression.
 
@@ -254,6 +271,8 @@ Track --> End(["Done"])
   - Undesired contacts, contact forces, feet air time, contact counts, stumble/sliding detection.
 - Gait:
   - Quadruped gait reward enforcing synchronized and anti-synchronized foot contacts.
+- Climbing Progress:
+  - Specialized reward for forward progress and elevation gain during climbing scenarios.
 - Mirrors and sync:
   - Joint/action mirroring and action synchronization across groups.
 
@@ -280,18 +299,21 @@ class RewardsCfg {
 +action_sync
 +action_mirror
 +joint_mirror
++climbing_progress
++heading_alignment
 }
-class GaitReward {
+class ClimbingProgress {
 +__call__()
--_sync_reward_func()
--_async_reward_func()
++forward_weight : float
++elevation_weight : float
++alignment_threshold : float
 }
-RewardsCfg --> GaitReward : "uses"
+RewardsCfg --> ClimbingProgress : "uses"
 ```
 
 **Diagram sources**
 - [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
-- [rewards.py:153-334](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L153-L334)
+- [rewards.py:670-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L670-L732)
 
 **Section sources**
 - [velocity_env_cfg.py:374-665](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L374-L665)
@@ -315,6 +337,9 @@ RewardsCfg --> GaitReward : "uses"
   - Height scanner disabled.
   - Base height term disabled.
   - Curriculum for terrain levels disabled.
+- Advanced terrains:
+  - Custom mesh terrains for gap traversal and parkour navigation.
+  - Stair climbing terrains with inverted pyramid designs.
 
 **Section sources**
 - [velocity_env_cfg.py:42-95](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
@@ -346,6 +371,17 @@ RewardsCfg --> GaitReward : "uses"
 
 **Section sources**
 - [rough_env_cfg.py:18-160](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L18-L160)
+
+#### Advanced Quadruped: ZSIBOT ZSL1 (Gap and Parkour)
+- Enhanced joint position scaling for climbing scenarios.
+- Specialized reward configurations for gap traversal and parkour navigation.
+- Custom terrain generation for gap strips and parkour steps.
+- Reduced base height penalties and modified contact sensor configurations.
+
+**Section sources**
+- [gap_env_cfg.py:160-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L160-L339)
+- [parkour_env_cfg.py:170-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L170-L349)
+- [stair_env_cfg.py:56-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L235)
 
 #### Wheeled Robots
 - Wheel velocity penalty term designed for wheeled robots.
@@ -395,6 +431,7 @@ Next --> Loop
 - Employ mirrored and synchronized action terms to improve gait consistency for quadrupeds.
 - Apply curriculum to gradually increase task difficulty and reward signal strength.
 - Optimize simulation timing: Use appropriate decimation factors to balance policy update frequency and computational cost.
+- Leverage specialized reward functions for climbing scenarios to improve training efficiency.
 
 **Updated** Enhanced timing optimization strategies based on improved documentation of simulation parameters.
 
@@ -404,10 +441,77 @@ Next --> Loop
 - [events.py:203-270](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/events.py#L203-L270)
 - [rewards.py:255-334](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L255-L334)
 
+## Advanced Environment Configurations
+
+### Gap Traversal Environment
+The gap traversal environment is specifically designed for quadruped locomotion over gaps and obstacles:
+
+- **Custom Terrain Generation**: Implements mesh-based gap terrains with configurable gap widths and landing platforms.
+- **Specialized Reward Function**: Climbing progress reward optimized for gap traversal scenarios.
+- **Enhanced Joint Scaling**: Increased scaling factors for hip and knee joints to enable leg lifting over gaps.
+- **Modified Contact Sensors**: Reduced contact penalties to encourage controlled stepping behavior.
+- **Height Scan Optimization**: Enhanced height scanning for terrain perception during gap traversal.
+
+```mermaid
+flowchart TD
+GapStart["Gap Environment Init"] --> TerrainGen["Generate Gap Terrain"]
+TerrainGen --> JointScale["Adjust Joint Position Scaling"]
+JointScale --> RewardCfg["Configure Gap-Specific Rewards"]
+RewardCfg --> ContactCfg["Modify Contact Sensor Settings"]
+ContactCfg --> HeightScan["Optimize Height Scanning"]
+HeightScan --> Ready["Ready for Training"]
+```
+
+**Diagram sources**
+- [gap_env_cfg.py:27-104](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L104)
+- [gap_env_cfg.py:234-314](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L234-L314)
+
+**Section sources**
+- [gap_env_cfg.py:160-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L160-L339)
+
+### Parkour Navigation Environment
+The parkour environment provides advanced obstacle navigation capabilities:
+
+- **Parkour Step Terrains**: Generates staircase-like terrains with rising and falling steps.
+- **Dynamic Step Heights**: Configurable step heights ranging from 0.1m to 0.45m based on difficulty.
+- **Specialized Reward System**: Climbing progress reward with forward and elevation weighting.
+- **Enhanced Stability Controls**: Modified base height penalties and angular velocity constraints.
+- **Advanced Gait Control**: Reduced feet contact rewards to encourage dynamic stepping.
+
+```mermaid
+flowchart TD
+ParkourStart["Parkour Environment Init"] --> StepGen["Generate Parkour Steps"]
+StepGen --> HeightRange["Configure Step Height Range"]
+HeightRange --> RewardSetup["Setup Climbing Progress Rewards"]
+RewardSetup --> StabilityCfg["Configure Stability Parameters"]
+StabilityCfg --> GaitControl["Adjust Gait Rewards"]
+GaitControl --> Ready["Ready for Training"]
+```
+
+**Diagram sources**
+- [parkour_env_cfg.py:27-117](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L27-L117)
+- [parkour_env_cfg.py:315-324](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L315-L324)
+
+**Section sources**
+- [parkour_env_cfg.py:170-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L170-L349)
+
+### Stair Climbing Environment
+The stair climbing environment focuses on vertical navigation capabilities:
+
+- **Inverted Pyramid Stairs**: Advanced stair terrain generation with configurable step dimensions.
+- **Target Height Configuration**: Specific base height targets for optimal stair climbing performance.
+- **Enhanced Air Time Rewards**: Modified feet air time rewards to encourage controlled stair ascent.
+- **Reduced Contact Penalties**: Lower undesired contact penalties to allow for dynamic stair navigation.
+- **Specialized Joint Scaling**: Optimized joint position scaling for stair climbing mechanics.
+
+**Section sources**
+- [stair_env_cfg.py:56-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L56-L235)
+
 ## Dependency Analysis
-The velocity task configuration composes multiple modules:
+The velocity task configuration composes multiple modules with enhanced support for specialized environments:
 - Base environment configuration depends on MDP modules for commands, observations, rewards, curriculum, and events.
 - Robot-specific configurations inherit from the base and override scales, joint names, and reward weights.
+- Advanced environment configurations extend the base with specialized terrain generation and reward functions.
 - Utilities support terrain-aware checks and environment assignments.
 
 ```mermaid
@@ -420,12 +524,18 @@ Base --> Ev["events.py"]
 Base --> Util["utils.py"]
 Flat["flat_env_cfg.py"] --> Base
 Rough["rough_env_cfg.py"] --> Base
+Gap["gap_env_cfg.py"] --> Base
+Parkour["parkour_env_cfg.py"] --> Base
+Stair["stair_env_cfg.py"] --> Base
 ```
 
 **Diagram sources**
 - [velocity_env_cfg.py:12-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
 - [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/flat_env_cfg.py#L1-L30)
 - [rough_env_cfg.py:1-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/rough_env_cfg.py#L1-L162)
+- [gap_env_cfg.py:1-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L1-L339)
+- [parkour_env_cfg.py:1-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L1-L349)
+- [stair_env_cfg.py:1-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L235)
 - [commands.py:1-185](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L1-L185)
 - [observations.py:1-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/observations.py#L1-L35)
 - [rewards.py:1-681](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L1-L681)
@@ -445,6 +555,8 @@ Rough["rough_env_cfg.py"] --> Base
 - Use curriculum updates at episode boundaries to avoid excessive resampling frequency.
 - Optimize simulation timing: Configure decimation factor appropriately for target policy update frequency.
 - Balance physics timestep (sim.dt) with computational budget for stable training performance.
+- Leverage specialized reward functions for climbing scenarios to improve training efficiency.
+- Use advanced terrain generation for complex locomotion scenarios to enhance generalization.
 
 **Updated** Added guidance on simulation timing optimization and decimation factor tuning.
 
@@ -455,12 +567,14 @@ Rough["rough_env_cfg.py"] --> Base
 - Distillation: Train a teacher agent on flat terrain, then distill into a student agent for faster convergence.
 - Multi-node distributed training: Use torch.distributed runner for multi-GPU and multi-node setups.
 - Timing issues: Adjust decimation factor if experiencing slow/fast policy updates relative to physics simulation.
+- Advanced terrain issues: Ensure proper mesh generation parameters for gap and parkour terrains.
+- Reward balance: Monitor climbing progress rewards to ensure proper balance between forward progress and elevation gain.
 
 **Section sources**
 - [README.md:291-312](file://README.md#L291-L312)
 
 ## Conclusion
-The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough), with practical training optimizations and terrain-aware behaviors to improve stability and generalization. Enhanced documentation clarifies the critical simulation timing relationships that enable efficient and stable training across different hardware configurations.
+The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework now includes enhanced support for specialized locomotion scenarios through gap traversal, parkour navigation, and stair climbing environments. These additions provide advanced terrain generation capabilities and specialized reward functions that improve training efficiency and generalization for complex locomotion tasks. The modular architecture supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough/advanced), with practical training optimizations and terrain-aware behaviors to improve stability and generalization.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -469,6 +583,7 @@ The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configu
 ### Appendix A: Environment Registration and Launch
 - Environments are registered with ManagerBasedRLEnv entry points and robot-specific configuration modules.
 - Training and evaluation scripts are provided for RSL-RL and SKRL.
+- Advanced environment configurations support specialized training scenarios.
 
 **Section sources**
 - [README.md:193-332](file://README.md#L193-L332)
@@ -490,3 +605,20 @@ The velocity-based locomotion tasks use a standardized simulation timing configu
 **Section sources**
 - [velocity_env_cfg.py:804-811](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L804-L811)
 - [velocity_env_cfg.py:753-757](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L753-L757)
+
+### Appendix C: Advanced Terrain Generation Reference
+
+**Updated** Added reference for advanced terrain generation capabilities.
+
+The velocity-based locomotion framework supports advanced terrain generation for specialized locomotion scenarios:
+
+- **Gap Terrains**: Configurable gap widths with landing platforms and run-up sections.
+- **Parkour Terrains**: Dynamic step heights with rising and falling staircases.
+- **Stair Terrains**: Inverted pyramid designs with adjustable step dimensions.
+- **Mesh Generation**: Custom terrain generation functions for complex geometries.
+- **Difficulty Scaling**: Procedural terrain generation with difficulty-based parameter variation.
+
+**Section sources**
+- [gap_env_cfg.py:27-104](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L104)
+- [parkour_env_cfg.py:27-117](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L27-L117)
+- [stair_env_cfg.py:21-53](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L21-L53)

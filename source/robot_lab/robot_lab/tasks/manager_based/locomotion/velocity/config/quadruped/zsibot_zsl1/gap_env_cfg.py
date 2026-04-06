@@ -314,7 +314,7 @@ class ZsibotZSL1GapEnvCfg(LocomotionVelocityGapEnvCfg):
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------
-        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD"]
+        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD_LINK"]
         self.terminations.illegal_contact = None
 
         # ------------------------------Curriculums------------------------------

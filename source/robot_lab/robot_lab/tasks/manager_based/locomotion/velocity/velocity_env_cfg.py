@@ -134,7 +134,8 @@ class ObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
         """Observations for policy group."""
-
+        # === Base observations ===
+        # https://isaac-sim.github.io/IsaacLab/main/source/api/lab/isaaclab.envs.mdp.html#module-isaaclab.envs.mdp.observations
         # observation terms (order preserved)
         base_lin_vel = ObsTerm(
             func=mdp.base_lin_vel,
@@ -200,6 +201,7 @@ class ObservationsCfg:
         """
 
         # === Base observations (same as policy) ===
+        # https://isaac-sim.github.io/IsaacLab/main/source/api/lab/isaaclab.envs.mdp.html#module-isaaclab.envs.mdp.observations
         base_lin_vel = ObsTerm(
             func=mdp.base_lin_vel,
             clip=(-100.0, 100.0),
@@ -533,6 +535,7 @@ class RewardsCfg:
             "threshold": 1.0,
         },
     )
+    # Penalize contact forces as the amount of violations of the net contact force.
     contact_forces = RewTerm(
         func=mdp.contact_forces,
         weight=0.0,
@@ -696,7 +699,8 @@ class TerminationsCfg:
         time_out=True,
     )
 
-    # Contact sensor(Terminate when the contact force on the sensor exceeds the force threshold)
+    # Terminate when the contact force on the sensor exceeds the force threshold.
+    # REF: https://isaac-sim.github.io/IsaacLab/main/_modules/isaaclab/envs/mdp/terminations.html#illegal_contact
     illegal_contact = DoneTerm(
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=""), "threshold": 1.0},

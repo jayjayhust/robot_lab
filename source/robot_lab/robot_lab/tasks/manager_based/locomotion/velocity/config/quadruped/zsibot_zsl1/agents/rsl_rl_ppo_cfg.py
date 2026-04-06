@@ -52,6 +52,9 @@ class ZsibotZSL1StairPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     save_interval = 100
     experiment_name = "zsibot_zsl1_stair"
     policy = RslRlPpoActorCriticCfg(
+        # The policy class name. Defaults to ActorCritic.
+        # REF: https://github.com/isaac-sim/IsaacLab/blob/f4aa17f87e2e5db5484f0b5974918573e8918ce2/source/isaaclab_rl/isaaclab_rl/rsl_rl/rl_cfg.py#L356
+        class_name="ActorCritic",
         init_noise_std=1.0,
         actor_obs_normalization=False,
         critic_obs_normalization=False,
@@ -81,6 +84,9 @@ class ZsibotZSL1ParkourPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     save_interval = 100
     experiment_name = "zsibot_zsl1_parkour"
     policy = RslRlPpoActorCriticCfg(
+        # The policy class name. Defaults to ActorCritic.
+        # REF: https://github.com/isaac-sim/IsaacLab/blob/f4aa17f87e2e5db5484f0b5974918573e8918ce2/source/isaaclab_rl/isaaclab_rl/rsl_rl/rl_cfg.py#L356
+        class_name="ActorCritic",
         init_noise_std=1.0,
         actor_obs_normalization=False,
         critic_obs_normalization=False,

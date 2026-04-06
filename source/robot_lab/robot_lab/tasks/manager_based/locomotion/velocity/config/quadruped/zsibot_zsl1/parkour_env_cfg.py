@@ -136,13 +136,13 @@ class MeshParkourStepTerrainCfg(SubTerrainBaseCfg):
 
 PARKOUR_TERRAINS_CFG = TerrainGeneratorCfg(
     size=(8.0, 8.0),  # The width (along x) and length (along y) of each sub-terrain (in m)
-    border_width=10.0,  # The width of the border around the terrain (in m)
+    border_width=2.0,  # The width of the border around the terrain (in m)
     num_rows=10,  # Number of rows of sub-terrains to generate
     num_cols=10,  # Number of columns of sub-terrains to generate
-    horizontal_scale=0.1,  # Horizontal scale of the terrain (in m)
-    vertical_scale=0.005,  # Vertical scale of the terrain (in m)
-    slope_threshold=0.75,  # The slope threshold above which surfaces are made vertical (in rad)
-    use_cache=False,
+    # horizontal_scale=0.1,  # Horizontal scale of the terrain (in m)
+    # vertical_scale=0.005,  # Vertical scale of the terrain (in m)
+    # slope_threshold=0.75,  # The slope threshold above which surfaces are made vertical (in rad)
+    # use_cache=False,
     # REF1: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab/isaaclab/terrains/sub_terrain_cfg.py
     # REF2: https://github.com/jayjayhust/extreme-quadruped-parkour/blob/self-dev/source/isaaclab_tasks/isaaclab_tasks/direct/go2/go2_env_cfg.py
     sub_terrains={
@@ -324,8 +324,8 @@ class ZsibotZSL1ParkourEnvCfg(LocomotionVelocityParkourEnvCfg):
             self.disable_zero_weight_rewards()
 
         # ------------------------------Terminations------------------------------
-        # self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD"]
-        self.terminations.illegal_contact = None
+        self.terminations.illegal_contact.params["sensor_cfg"].body_names = [self.base_link_name, ".*_ABAD_LINK"]
+        # self.terminations.illegal_contact = None
 
         # ------------------------------Curriculums------------------------------
         # self.curriculum.command_levels_lin_vel.params["range_multiplier"] = (0.2, 1.0)

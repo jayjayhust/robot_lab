@@ -15,16 +15,21 @@
 - [unitree_a1/__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/__init__.py)
 - [zsibot_zsl1/__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py)
 - [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
+- [gap_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py)
+- [parkour_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py)
+- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py)
+- [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py)
 - [README.md](file://README.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added documentation for the new stair environment registration system
-- Updated environment naming scheme to include Stair terrain type
-- Added Zsibot ZSL1 stair environment configuration details
-- Enhanced examples with stair climbing environment registration patterns
-- Updated README.md references to reflect new stair climbing capabilities
+- Added documentation for new gap and parkour environment registration system
+- Updated environment naming scheme to include Gap and Parkour terrain types
+- Added Zsibot ZSL1 gap and parkour environment configuration details
+- Enhanced examples with gap traversal and parkour-style stepping environment registration patterns
+- Updated README.md references to reflect new gap and parkour capabilities
+- Added specialized terrain generation and reward systems for gap and parkour environments
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -40,7 +45,7 @@
 ## Introduction
 This document explains the environment registration framework used by the Robot Lab project to integrate Gymnasium-compatible environments with the ManagerBasedRLEnv class. It focuses on the standardized naming convention for environments (for example, RobotLab-Isaac-Velocity-Flat-Unitree-A1-v0), the registration mechanism via gym.register(), and how environment names map to configuration classes and the underlying RL environment implementation. The guide also covers common registration issues, naming conflicts, and debugging techniques for environment setup.
 
-**Updated** Added support for stair environment registration with specialized stair climbing configurations for Zsibot ZSL1.
+**Updated** Added support for gap traversal and parkour-style stepping environments with specialized terrain generation and reward systems for Zsibot ZSL1.
 
 ## Project Structure
 The environment registration system is organized around a set of modular configuration packages under the manager-based locomotion velocity task. Each robot family (for example, Unitree G1, Unitree H1, Booster T1, FFTAI GR1T1, Magiclab Magicbot Gen1, OpenLoong Loong, Roboparty Atom01, Robotera XBot, Zsibot ZSL1) defines its own registration entry points and configuration classes. The top-level package initializer triggers task-level registrations.
@@ -91,7 +96,7 @@ Humanoid --> REX
 - [roboparty_atom01/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/roboparty_atom01/__init__.py#L11-L23)
 - [robotera_xbot/__init__.py:7-18](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/robotera_xbot/__init__.py#L7-L18)
 - [unitree_a1/__init__.py:12-32](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/__init__.py#L12-L32)
-- [zsibot_zsl1/__init__.py:12-40](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L40)
+- [zsibot_zsl1/__init__.py:12-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L60)
 
 **Section sources**
 - [robot_lab/__init__.py:8-12](file://source/robot_lab/robot_lab/__init__.py#L8-L12)
@@ -99,7 +104,7 @@ Humanoid --> REX
 ## Core Components
 - Environment Naming Convention: RobotLab-Isaac-{TaskType}-{Terrain}-{RobotCategory}-{Model}-{Version}
   - TaskType: Velocity
-  - Terrain: Flat, Rough, or Stair (newly added)
+  - Terrain: Flat, Rough, Stair, Gap (newly added), Parkour (newly added)
   - RobotCategory: Unitree, FFTAI, Magiclab, OpenLoong, Roboparty, Robotera, Zsibot
   - Model: A1, G1, H1, GR1T1, GR1T2, Magicbot Gen1/Z1, Loong, Atom01, XBot, ZSL1
   - Version: v0
@@ -108,12 +113,12 @@ Humanoid --> REX
   - entry_point: "isaaclab.envs:ManagerBasedRLEnv"
   - disable_env_checker: True
   - kwargs:
-    - env_cfg_entry_point: "{package}.flat_env_cfg:{ClassName}" or "{package}.stair_env_cfg:{ClassName}"
+    - env_cfg_entry_point: "{package}.flat_env_cfg:{ClassName}" or "{package}.{terrain}_env_cfg:{ClassName}"
     - rsl_rl_cfg_entry_point: "{package}.agents.rsl_rl_ppo_cfg:{ClassName}"
 
 Examples of registration patterns are visible in the humanoid configurations for Unitree G1, Unitree H1, Booster T1, FFTAI GR1T1, Magiclab Magicbot Gen1, OpenLoong Loong, Roboparty Atom01, and Robotera XBot, as well as the quadruped configurations for Unitree A1 and Zsibot ZSL1.
 
-**Updated** Added stair environment registration pattern for Zsibot ZSL1 with specialized stair climbing configuration.
+**Updated** Added gap and parkour environment registration patterns for Zsibot ZSL1 with specialized terrain generation and reward systems.
 
 **Section sources**
 - [beyondmimic_g1/__init__.py:21-29](file://source/robot_lab/robot_lab/tasks/direct/g1_amp/__init__.py#L21-L29)
@@ -126,14 +131,14 @@ Examples of registration patterns are visible in the humanoid configurations for
 - [roboparty_atom01/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/roboparty_atom01/__init__.py#L11-L23)
 - [robotera_xbot/__init__.py:7-18](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/robotera_xbot/__init__.py#L7-L18)
 - [unitree_a1/__init__.py:12-32](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/__init__.py#L12-L32)
-- [zsibot_zsl1/__init__.py:12-40](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L40)
+- [zsibot_zsl1/__init__.py:12-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L60)
 
 ## Architecture Overview
 The environment registration architecture connects standardized environment names to configuration classes through ManagerBasedRLEnv. The flow below illustrates how a gym.register() call maps to the RL training configuration and environment configuration classes.
 
 ```mermaid
 sequenceDiagram
-participant Reg as "Registration Script<br/>(.../humanoid/*/__init__.py or .../quadruped/*/stair_env_cfg.py)"
+participant Reg as "Registration Script<br/>(.../humanoid/*/__init__.py or .../quadruped/*/gap_env_cfg.py or .../quadruped/*/parkour_env_cfg.py)"
 participant Gym as "Gymnasium Registry"
 participant Env as "ManagerBasedRLEnv<br/>(entry_point)"
 participant Cfg as "Environment Config Class<br/>(env_cfg_entry_point)"
@@ -151,23 +156,27 @@ Env-->>Gym : "Return configured environment instance"
 - [beyondmimic_g1/__init__.py:21-29](file://source/robot_lab/robot_lab/tasks/direct/g1_amp/__init__.py#L21-L29)
 - [unitree_g1/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/__init__.py#L11-L23)
 - [stair_env_cfg.py:50-219](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L50-L219)
+- [gap_env_cfg.py:159-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L159-L339)
+- [parkour_env_cfg.py:169-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L169-L349)
 
 ## Detailed Component Analysis
 
 ### Environment Naming Scheme Breakdown
 - RobotLab-Isaac: Project and ecosystem prefix
 - Velocity: Task type indicating locomotion policy training
-- Flat/Rough/Stair: Terrain type for the environment (Stair is newly added)
+- Flat/Rough/Stair/Gap/Parkour: Terrain type for the environment (Gap and Parkour are newly added)
 - Unitree/A1: Robot category and model
 - v0: Version identifier
 
 This scheme ensures uniqueness and discoverability across robots and terrains while keeping names concise and readable.
 
-**Updated** Added Stair terrain type to support specialized stair climbing environments.
+**Updated** Added Gap and Parkour terrain types to support specialized traversal and stepping environments.
 
 **Section sources**
 - [README.md:17-41](file://README.md#L17-L41)
 - [stair_env_cfg.py:20-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L20-L47)
+- [gap_env_cfg.py:159-160](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L159-L160)
+- [parkour_env_cfg.py:169-170](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L169-L170)
 
 ### Registration Pattern in Manager-Based Environments
 Each humanoid configuration package registers one or more environments using gym.register(). The pattern includes:
@@ -175,7 +184,7 @@ Each humanoid configuration package registers one or more environments using gym
 - entry_point: "isaaclab.envs:ManagerBasedRLEnv"
 - disable_env_checker: True
 - kwargs:
-  - env_cfg_entry_point: "{package}.flat_env_cfg:{ClassName}" or "{package}.stair_env_cfg:{ClassName}"
+  - env_cfg_entry_point: "{package}.flat_env_cfg:{ClassName}" or "{package}.{terrain}_env_cfg:{ClassName}"
   - rsl_rl_cfg_entry_point: "{package}.agents.rsl_rl_ppo_cfg:{ClassName}"
 
 Concrete examples:
@@ -192,9 +201,11 @@ Concrete examples:
 - Unitree A1 Rough: RobotLab-Isaac-Velocity-Rough-Unitree-A1-v0
 - Zsibot ZSL1 Flat: RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0
 - Zsibot ZSL1 Rough: RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0
-- **Zsibot ZSL1 Stair: RobotLab-Isaac-Velocity-Stair-Zsibot-ZSL1-v0 (NEW)**
+- Zsibot ZSL1 Stair: RobotLab-Isaac-Velocity-Stair-Zsibot-ZSL1-v0
+- **Zsibot ZSL1 Gap: RobotLab-Isaac-Velocity-Gap-Zsibot-ZSL1-v0 (NEW)**
+- **Zsibot ZSL1 Parkour: RobotLab-Isaac-Velocity-Parkour-Zsibot-ZSL1-v0 (NEW)**
 
-**Updated** Added Zsibot ZSL1 stair environment registration pattern.
+**Updated** Added Zsibot ZSL1 gap and parkour environment registration patterns with specialized terrain generation.
 
 These registrations demonstrate consistent mapping between environment names and configuration classes.
 
@@ -208,30 +219,47 @@ These registrations demonstrate consistent mapping between environment names and
 - [roboparty_atom01/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/roboparty_atom01/__init__.py#L11-L23)
 - [robotera_xbot/__init__.py:7-18](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/robotera_xbot/__init__.py#L7-L18)
 - [unitree_a1/__init__.py:12-32](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_a1/__init__.py#L12-L32)
-- [zsibot_zsl1/__init__.py:12-40](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L40)
+- [zsibot_zsl1/__init__.py:12-60](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L60)
 
-### Specialized Stair Environment Configuration
-The Zsibot ZSL1 stair environment introduces specialized configuration for stair climbing scenarios:
+### Specialized Gap Environment Configuration
+The Zsibot ZSL1 gap environment introduces specialized configuration for gap traversal scenarios:
 
-- **Stair Terrain Generation**: Uses MeshInvertedPyramidStairsTerrainCfg with step heights ranging from 0.05m to 0.23m
-- **Enhanced Rewards System**: 
-  - Increased feet_air_time reward weight (0.5) for longer stride and better obstacle clearance
-  - Reduced upward weight (0.3) to allow body tilt during leg lifting
-  - Specialized feet_height rewards encouraging leg lifting during stair ascent
-- **Action Scaling**: Modified joint position scaling for more aggressive stair climbing motions
-- **Contact Sensors**: Enhanced contact force monitoring for stair climbing stability
+- **Custom Gap Terrain Generation**: Uses MeshGapTerrainCfg and MeshGapStripTerrainCfg with configurable gap widths (0.1m to 0.8m) and landing platforms
+- **Enhanced Reward System**: 
+  - Specialized gap traversal rewards encouraging successful crossing
+  - Reduced jumping tendencies while maintaining stability
+  - Customized action scaling for precise gap navigation
+- **Run-up Platform**: Extended start platform (8.0m) for approach running
+- **Landing Strips**: Repeated gap-landing combinations for continuous traversal training
 
-**New** Specialized stair environment configuration with dedicated terrain generation and reward systems.
+**New** Specialized gap environment configuration with custom terrain generation and reward systems for gap traversal.
 
 **Section sources**
-- [stair_env_cfg.py:20-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L20-L47)
-- [stair_env_cfg.py:118-200](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L118-L200)
-- [stair_env_cfg.py:38-45](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L38-L45)
+- [gap_env_cfg.py:27-157](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L157)
+- [gap_env_cfg.py:159-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L159-L339)
+
+### Specialized Parkour Environment Configuration
+The Zsibot ZSL1 parkour environment introduces specialized configuration for parkour-style stepping scenarios:
+
+- **Custom Parkour Terrain Generation**: Uses MeshParkourStepTerrainCfg with configurable step heights (0.1m to 0.45m) and varying step lengths
+- **Dynamic Step Patterns**: Alternating ascending and descending steps creating complex terrain challenges
+- **Enhanced Reward System**: 
+  - Specialized climbing rewards for step progression
+  - Customized action scaling for dynamic stepping motions
+  - Reduced jumping tendencies while encouraging controlled climbing
+- **Side Walls**: Thin side walls added for safety and realism
+- **Complex Terrain Curricula**: Multiple step configurations for progressive difficulty
+
+**New** Specialized parkour environment configuration with custom terrain generation and reward systems for complex stepping challenges.
+
+**Section sources**
+- [parkour_env_cfg.py:27-167](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L27-L167)
+- [parkour_env_cfg.py:169-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L169-L349)
 
 ### Relationship Between Names, Configuration Classes, and ManagerBasedRLEnv
 - Environment Name: Determines the registry id used by gym.make()
 - Configuration Classes:
-  - Environment Config: Loaded via env_cfg_entry_point pointing to a class in the package's flat_env_cfg or stair_env_cfg module
+  - Environment Config: Loaded via env_cfg_entry_point pointing to a class in the package's flat_env_cfg, gap_env_cfg, or parkour_env_cfg module
   - RL Runner Config: Loaded via rsl_rl_cfg_entry_point pointing to a class in the package's agents.rsl_rl_ppo_cfg module
 - ManagerBasedRLEnv: The entry_point class that consumes the configuration classes to construct the environment and training runner
 
@@ -255,6 +283,16 @@ class RLRunnerConfigClass {
 +policy_arch
 +value_arch
 }
+class GapEnvConfigClass {
++gap_terrain_cfg
++custom_action_scaling
++gap_traversal_rewards
+}
+class ParkourEnvConfigClass {
++parkour_step_terrain_cfg
++dynamic_step_patterns
++climbing_rewards
+}
 class StairEnvConfigClass {
 +stair_terrain_cfg
 +aggressive_action_scaling
@@ -262,6 +300,8 @@ class StairEnvConfigClass {
 }
 ManagerBasedRLEnv --> EnvConfigClass : "loads via env_cfg_entry_point"
 ManagerBasedRLEnv --> RLRunnerConfigClass : "loads via rsl_rl_cfg_entry_point"
+GapEnvConfigClass --|> EnvConfigClass : "extends"
+ParkourEnvConfigClass --|> EnvConfigClass : "extends"
 StairEnvConfigClass --|> EnvConfigClass : "extends"
 ```
 
@@ -269,26 +309,33 @@ StairEnvConfigClass --|> EnvConfigClass : "extends"
 - [beyondmimic_g1/__init__.py:21-29](file://source/robot_lab/robot_lab/tasks/direct/g1_amp/__init__.py#L21-L29)
 - [unitree_g1/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/__init__.py#L11-L23)
 - [stair_env_cfg.py:50-219](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L50-L219)
+- [gap_env_cfg.py:159-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L159-L339)
+- [parkour_env_cfg.py:169-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L169-L349)
 
 ## Dependency Analysis
 The registration system depends on:
 - Gymnasium for environment registration and creation
 - ManagerBasedRLEnv as the entry_point class
 - Package-specific configuration modules for environment and RL runner settings
-- **Stair terrain generation utilities** for specialized stair climbing environments
+- **Specialized terrain generation utilities** for gap and parkour environments
+- **Custom terrain generator configurations** for gap traversal and parkour-style stepping
 
 ```mermaid
 graph TB
 Gymnasium["Gymnasium Library"]
-RegScripts["Registration Scripts<br/>.../humanoid/*/__init__.py<br/>.../quadruped/*/stair_env_cfg.py"]
+RegScripts["Registration Scripts<br/>.../humanoid/*/__init__.py<br/>.../quadruped/*/gap_env_cfg.py<br/>.../quadruped/*/parkour_env_cfg.py"]
 EnvClass["ManagerBasedRLEnv<br/>(entry_point)"]
-EnvCfg["Environment Config Modules<br/>.../flat_env_cfg.py<br/>.../stair_env_cfg.py"]
+EnvCfg["Environment Config Modules<br/>.../flat_env_cfg.py<br/>.../gap_env_cfg.py<br/>.../parkour_env_cfg.py<br/>.../stair_env_cfg.py"]
 RLCfg["RL Runner Config Modules<br/>.../agents/rsl_rl_ppo_cfg.py"]
+GapTerrains["Gap Terrain Generation<br/>MeshGapTerrainCfg/MeshGapStripTerrainCfg"]
+ParkourTerrains["Parkour Terrain Generation<br/>MeshParkourStepTerrainCfg"]
 StairTerrains["Stair Terrain Generation<br/>MeshInvertedPyramidStairsTerrainCfg"]
 Gymnasium --> RegScripts
 RegScripts --> EnvClass
 EnvClass --> EnvCfg
 EnvClass --> RLCfg
+EnvCfg --> GapTerrains
+EnvCfg --> ParkourTerrains
 EnvCfg --> StairTerrains
 ```
 
@@ -296,43 +343,49 @@ EnvCfg --> StairTerrains
 - [beyondmimic_g1/__init__.py:21-29](file://source/robot_lab/robot_lab/tasks/direct/g1_amp/__init__.py#L21-L29)
 - [unitree_g1/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/__init__.py#L11-L23)
 - [stair_env_cfg.py:17-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L17-L47)
+- [gap_env_cfg.py:27-157](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L157)
+- [parkour_env_cfg.py:27-167](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L27-L167)
 
 **Section sources**
 - [beyondmimic_g1/__init__.py:21-29](file://source/robot_lab/robot_lab/tasks/direct/g1_amp/__init__.py#L21-L29)
 - [unitree_g1/__init__.py:11-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/__init__.py#L11-L23)
 - [stair_env_cfg.py:17-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L17-L47)
+- [gap_env_cfg.py:27-157](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L157)
+- [parkour_env_cfg.py:27-167](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L27-L167)
 
 ## Performance Considerations
 - Keep registration scripts lightweight; avoid heavy imports during import time.
 - Use disable_env_checker=True to reduce overhead during registration.
 - Centralize configuration loading to minimize repeated disk reads.
 - Ensure environment and runner configuration classes are efficient and avoid unnecessary computations at initialization.
-- **Stair environments require specialized terrain generation** which may increase initial setup time but provides more realistic stair climbing scenarios.
+- **Gap and parkour environments require specialized terrain generation** which may increase initial setup time but provides more realistic traversal scenarios.
+- **Custom terrain generation functions** may require additional computational resources for procedural terrain creation.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
 - Environment name not found
   - Verify the exact name matches the registered id and includes the correct task type, terrain, robot category, model, and version.
   - Confirm the registration script is imported by the package initializer.
-  - **For stair environments, ensure the stair_env_cfg module exists and is properly imported.**
+  - **For gap and parkour environments, ensure the gap_env_cfg.py and parkour_env_cfg.py modules exist and are properly imported.**
 - Entry point resolution errors
   - Ensure entry_point is exactly "isaaclab.envs:ManagerBasedRLEnv".
   - Verify that the environment and RL runner configuration entry points resolve to existing classes in their respective modules.
 - Configuration class not found
   - Check that env_cfg_entry_point and rsl_rl_cfg_entry_point point to valid modules and class names.
   - Confirm the modules exist and export the expected classes.
-  - **For stair environments, verify that stair_env_cfg.py contains the ZsibotZSL1StairEnvCfg class.**
+  - **For gap and parkour environments, verify that gap_env_cfg.py and parkour_env_cfg.py contain the ZsibotZSL1GapEnvCfg and ZsibotZSL1ParkourEnvCfg classes respectively.**
 - Naming conflicts
   - Ensure unique ids across robots and terrains to avoid collisions.
   - Use the standardized naming scheme consistently to prevent ambiguity.
-  - **Include the Stair terrain type in the naming convention for stair environments.**
+  - **Include the Gap and Parkour terrain types in the naming convention for specialized environments.**
 - Debugging techniques
   - List registered environments using a helper script to confirm registration.
   - Temporarily print or log configuration class names during registration to validate imports.
   - Test gym.make() with verbose logging to capture instantiation errors.
-  - **For stair environments, verify terrain generation configuration and reward system setup.**
+  - **For gap and parkour environments, verify terrain generation configuration and reward system setup.**
+  - **Check custom terrain generation functions for proper parameter validation and error handling.**
 
 ## Conclusion
-The Robot Lab environment registration framework leverages a standardized naming scheme and consistent registration patterns to integrate Gymnasium environments with ManagerBasedRLEnv. By organizing configurations per robot family and terrain, the system achieves clarity, maintainability, and scalability across diverse robotic platforms. The addition of stair environment support demonstrates the framework's extensibility for specialized locomotion tasks. Following the documented patterns and troubleshooting steps ensures reliable environment setup and training workflows.
+The Robot Lab environment registration framework leverages a standardized naming scheme and consistent registration patterns to integrate Gymnasium environments with ManagerBasedRLEnv. By organizing configurations per robot family and terrain, the system achieves clarity, maintainability, and scalability across diverse robotic platforms. The addition of gap traversal and parkour-style stepping environments demonstrates the framework's extensibility for specialized locomotion tasks with custom terrain generation and reward systems. Following the documented patterns and troubleshooting steps ensures reliable environment setup and training workflows.
 
-**Updated** Enhanced with stair environment registration capabilities and specialized stair climbing configurations for Zsibot ZSL1, expanding the framework's support for diverse terrain types and locomotion challenges.
+**Updated** Enhanced with gap and parkour environment registration capabilities and specialized terrain generation systems for Zsibot ZSL1, expanding the framework's support for diverse terrain types and locomotion challenges including gap traversal and complex stepping scenarios.
