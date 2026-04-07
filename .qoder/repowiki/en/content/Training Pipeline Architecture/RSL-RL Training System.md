@@ -18,7 +18,9 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced with dedicated stair-specific PPO runner configuration (ZsibotZSL1StairPPORunnerCfg)
+- Enhanced with explicit class name declarations in RSL-RL policy configuration files
+- Documented that the default policy class is ActorCritic for clarity in customization
+- Added comprehensive stair-specific PPO runner configuration (ZsibotZSL1StairPPORunnerCfg)
 - Added comprehensive debugging improvements for height scanner visualization
 - Updated environment variants section to include stair climbing scenarios
 - Enhanced reward system documentation with stair-specific optimizations
@@ -40,7 +42,7 @@
 ## Introduction
 This document explains the RSL-RL training system implemented in the repository. It covers the Proximal Policy Optimization (PPO) algorithm configuration, the training pipeline, and the CLI argument system. It also documents the OnPolicyRunner and DistillationRunner classes, their differences and use cases, the environment wrapper system, action clipping, and video recording. Finally, it provides guidance on distributed training, experiment logging, checkpoint management, and common training issues.
 
-**Updated** Enhanced with dedicated stair-specific PPO runner configuration and comprehensive debugging improvements for height scanner visualization capabilities.
+**Updated** Enhanced with explicit class name declarations in policy configuration files, documenting that the default policy class is ActorCritic, providing clarity for users customizing policy architecture.
 
 ## Project Structure
 The RSL-RL training system is organized around three primary scripts and configuration modules:
@@ -114,11 +116,12 @@ Runner-->>Log : periodic checkpoints
 - Algorithm hyperparameters: Includes value loss coefficient, clipped value loss, clipping parameter, entropy coefficient, epochs, mini-batches, learning rate schedule, discount factor gamma, GAE lambda, desired KL divergence, and max gradient norm. See [rsl_rl_ppo_cfg.py:25-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/agents/rsl_rl_ppo_cfg.py#L25-L38).
 - Environment variants: Flat and Rough variants adjust terrain and reward terms. See [flat_env_cfg.py:9-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/anymal_d/flat_env_cfg.py#L9-L29).
 
-**Updated** Enhanced with stair-specific PPO runner configuration featuring optimized hyperparameters for stair climbing scenarios.
+**Updated** Enhanced with explicit class name declarations in policy configuration files, documenting that the default policy class is ActorCritic for clarity in customization.
 
 ```mermaid
 flowchart TD
-Start(["Load PPO Config"]) --> Arch["Set Actor/Critic Hidden Dims<br/>Activation"]
+Start(["Load PPO Config"]) --> Class["Set Policy Class Name<br/>Default: ActorCritic"]
+Class --> Arch["Set Actor/Critic Hidden Dims<br/>Activation"]
 Arch --> Algo["Configure PPO Algorithm<br/>Clip Param, Entropy, LR Schedule"]
 Algo --> Env["Select Env Variant<br/>Flat/Rough/Stair"]
 Env --> Train["Run Training Loop"]
@@ -326,7 +329,7 @@ Play --> Export["Export JIT/ONNX"]
 ## Conclusion
 The RSL-RL training system integrates environment creation, optional video recording, environment wrapping, runner selection, and robust logging and checkpointing. PPO and distillation configurations are cleanly separated and templated per environment variant. The CLI system supports distributed training, experiment naming, and exporting trained policies. Following the examples and guidance herein enables efficient multi-GPU training, reproducible experiments, and reliable deployment of policies.
 
-**Updated** The system now includes dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios, enhanced debugging capabilities with improved height scanner visualization, and comprehensive debugging improvements for better development experience.
+**Updated** The system now includes dedicated stair-specific PPO runner configuration with optimized hyperparameters for stair climbing scenarios, enhanced debugging capabilities with improved height scanner visualization, comprehensive debugging improvements for better development experience, and explicit class name declarations in policy configuration files documenting that the default policy class is ActorCritic for clarity in customization.
 
 ## Appendices
 
@@ -354,6 +357,7 @@ The ZsibotZSL1StairPPORunnerCfg provides optimized hyperparameters specifically 
   - actor_hidden_dims: [512, 256, 128] (deeper network for complex stair patterns)
   - critic_hidden_dims: [512, 256, 128] (symmetric critic architecture)
   - activation: "elu" (smooth activation for stair dynamics)
+  - **class_name: "ActorCritic"** (explicitly declared default policy class)
 
 - **Algorithm Hyperparameters**:
   - value_loss_coef: 1.0 (balanced value function learning)
@@ -368,10 +372,26 @@ The ZsibotZSL1StairPPORunnerCfg provides optimized hyperparameters specifically 
   - desired_kl: 0.01 (target KL divergence)
   - max_grad_norm: 1.0 (gradient clipping)
 
+**Updated** Enhanced with explicit class name declaration for clarity in policy customization.
+
 **Section sources**
 - [rsl_rl_ppo_cfg.py:39-65](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L39-L65)
 
-### Appendix C: Stair Environment Reward System Optimizations
+### Appendix C: Policy Class Name Declarations and Customization
+**Updated** Enhanced with explicit class name declarations for policy customization clarity:
+
+The RSL-RL policy configuration system now includes explicit class name declarations to clarify the default policy architecture:
+
+- **Default Policy Class**: All PPO configurations inherit from RslRlPpoActorCriticCfg, which uses the default class_name "ActorCritic"
+- **Explicit Declaration**: Some configurations explicitly declare class_name="ActorCritic" for clarity and future customization
+- **Custom Policy Classes**: Users can specify alternative policy classes by setting the class_name field in the policy configuration
+- **Backward Compatibility**: Omitting class_name preserves the default ActorCritic behavior
+
+**Section sources**
+- [rsl_rl_ppo_cfg.py:54-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L54-L57)
+- [rsl_rl_ppo_cfg.py:86-89](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L86-L89)
+
+### Appendix D: Stair Environment Reward System Optimizations
 The stair environment implements specialized reward functions optimized for stair climbing:
 
 - **Action Scaling**: Increased joint position scaling with reduced ABAD joint influence and enhanced HIP/KNEE power for stair ascent
@@ -384,7 +404,7 @@ The stair environment implements specialized reward functions optimized for stai
 **Section sources**
 - [stair_env_cfg.py:86-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L86-L204)
 
-### Appendix D: Enhanced Debugging and Visualization Features
+### Appendix E: Enhanced Debugging and Visualization Features
 **Updated** Comprehensive debugging improvements for enhanced development experience:
 
 - **Height Scanner Debug Visualization**: Dynamic toggle based on headless mode for better terrain perception debugging

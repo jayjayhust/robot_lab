@@ -15,7 +15,20 @@
 - [magiclab/magicdog_w/urdf/magicdog_w.urdf](file://source/robot_lab/data/Robots/magiclab/magicdog_w/urdf/magicdog_w.urdf)
 - [zsibot/zsl1_description/urdf/zsl1.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf)
 - [zsibot/zsl1w_description/urdf/zsl1w.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf)
+- [zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py)
+- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py)
+- [parkour_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py)
+- [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
+- [gap_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py)
+- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced ZSL1 robot configuration documentation with improved illegal contact sensor configuration
+- Updated reward system refinements for ZSL1 across different environment types
+- Added detailed coverage of illegal contact sensor improvements and reward system optimizations
+- Updated termination conditions and reward configurations for ZSL1 quadruped robot
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -46,15 +59,15 @@ E --> H["Booster URDF<br/>booster/*/urdf/robot.urdf"]
 ```
 
 **Diagram sources**
-- [README.md](file://README.md#L17-L41)
-- [assets/__init__.py](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L1-L637)
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L1-L115)
-- [assets/booster.py](file://source/robot_lab/robot_lab/assets/booster.py#L1-L110)
+- [README.md:17-41](file://README.md#L17-L41)
+- [assets/__init__.py:18-30](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
+- [assets/unitree.py:1-637](file://source/robot_lab/robot_lab/assets/unitree.py#L1-L637)
+- [assets/zsibot.py:1-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L1-L115)
+- [assets/booster.py:1-110](file://source/robot_lab/robot_lab/assets/booster.py#L1-L110)
 
 **Section sources**
-- [README.md](file://README.md#L17-L41)
-- [assets/__init__.py](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
+- [README.md:17-41](file://README.md#L17-L41)
+- [assets/__init__.py:18-30](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
 
 ## Core Components
 - Quadruped robots:
@@ -67,7 +80,7 @@ E --> H["Booster URDF<br/>booster/*/urdf/robot.urdf"]
 Environments are registered per model and task (e.g., velocity locomotion on flat or rough terrain), and the repository includes training and evaluation scripts for reinforcement learning.
 
 **Section sources**
-- [README.md](file://README.md#L17-L41)
+- [README.md:17-41](file://README.md#L17-L41)
 
 ## Architecture Overview
 The runtime architecture ties together environment registration, asset configurations, and URDF specifications. Asset configurations define actuator groups and initial poses, while URDFs encode inertial, geometric, and kinematic properties.
@@ -96,10 +109,10 @@ B --> UR
 ```
 
 **Diagram sources**
-- [README.md](file://README.md#L383-L426)
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L1-L637)
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L1-L115)
-- [assets/booster.py](file://source/robot_lab/robot_lab/assets/booster.py#L1-L110)
+- [README.md:383-426](file://README.md#L383-L426)
+- [assets/unitree.py:1-637](file://source/robot_lab/robot_lab/assets/unitree.py#L1-L637)
+- [assets/zsibot.py:1-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L1-L115)
+- [assets/booster.py:1-110](file://source/robot_lab/robot_lab/assets/booster.py#L1-L110)
 
 ## Detailed Component Analysis
 
@@ -128,12 +141,12 @@ SimProps --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L19-L69)
-- [unitree/a1_description/urdf/a1.urdf](file://source/robot_lab/data/Robots/unitree/a1_description/urdf/a1.urdf#L1-L200)
+- [assets/unitree.py:19-69](file://source/robot_lab/robot_lab/assets/unitree.py#L19-L69)
+- [unitree/a1_description/urdf/a1.urdf:1-200](file://source/robot_lab/data/Robots/unitree/a1_description/urdf/a1.urdf#L1-L200)
 
 **Section sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L19-L69)
-- [unitree/a1_description/urdf/a1.urdf](file://source/robot_lab/data/Robots/unitree/a1_description/urdf/a1.urdf#L1-L200)
+- [assets/unitree.py:19-69](file://source/robot_lab/robot_lab/assets/unitree.py#L19-L69)
+- [unitree/a1_description/urdf/a1.urdf:1-200](file://source/robot_lab/data/Robots/unitree/a1_description/urdf/a1.urdf#L1-L200)
 
 #### Unitree Go2
 - Physical characteristics:
@@ -155,12 +168,12 @@ SimProps --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L119)
-- [unitree/go2_description/urdf/go2_description.urdf](file://source/robot_lab/data/Robots/unitree/go2_description/urdf/go2_description.urdf#L1-L200)
+- [assets/unitree.py:71-119](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L119)
+- [unitree/go2_description/urdf/go2_description.urdf:1-200](file://source/robot_lab/data/Robots/unitree/go2_description/urdf/go2_description.urdf#L1-L200)
 
 **Section sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L119)
-- [unitree/go2_description/urdf/go2_description.urdf](file://source/robot_lab/data/Robots/unitree/go2_description/urdf/go2_description.urdf#L1-L200)
+- [assets/unitree.py:71-119](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L119)
+- [unitree/go2_description/urdf/go2_description.urdf:1-200](file://source/robot_lab/data/Robots/unitree/go2_description/urdf/go2_description.urdf#L1-L200)
 
 #### Deeprobotics Lite3
 - Physical characteristics:
@@ -180,34 +193,48 @@ Actuators --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [deeprobotics/lite3_description/urdf/lite3.urdf](file://source/robot_lab/data/Robots/deeprobotics/lite3_description/urdf/lite3.urdf#L1-L200)
+- [deeprobotics/lite3_description/urdf/lite3.urdf:1-200](file://source/robot_lab/data/Robots/deeprobotics/lite3_description/urdf/lite3.urdf#L1-L200)
 
 **Section sources**
-- [deeprobotics/lite3_description/urdf/lite3.urdf](file://source/robot_lab/data/Robots/deeprobotics/lite3_description/urdf/lite3.urdf#L1-L200)
+- [deeprobotics/lite3_description/urdf/lite3.urdf:1-200](file://source/robot_lab/data/Robots/deeprobotics/lite3_description/urdf/lite3.urdf#L1-L200)
 
 #### Zsibot ZSL1
 - Physical characteristics:
   - Base with mass/inertia; four legs with ABAD/hip/knee joints; foot contact geometry.
+  - Enhanced with improved illegal contact sensor configuration and refined reward system.
 - Actuator configuration:
   - Single actuator group for base legs with effort/velocity limits and stiffness/damping.
 - Initial pose:
   - Defined joint positions for ABAD/hip/knee and zero joint velocities.
+- **Enhanced Illegal Contact Sensor Configuration**:
+  - Improved contact sensor setup for better collision detection and termination handling.
+  - Enhanced reward system with refined contact force penalties and undesired contact avoidance.
+- **Environment-Specific Optimizations**:
+  - Flat terrain: Simplified reward configuration with base height and terrain adjustments.
+  - Rough terrain: Comprehensive reward system with contact sensors, joint penalties, and velocity tracking.
+  - Parkour: Specialized reward configuration for climbing and obstacle navigation.
+  - Stair climbing: Enhanced reward system for controlled stair ascent with reduced jumping tendencies.
+  - Gap traversal: Optimized reward configuration for safe gap crossing with improved stability.
 
 ```mermaid
 flowchart TD
-Start(["Load Zsibot ZSL1"]) --> Spawn["Spawn from URDF"]
+Start(["Load Zsibot ZSL1"]) --> Spawn["Spawn from URDF<br/>activate_contact_sensors=True"]
 Spawn --> Init["Initialize pose"]
 Init --> Actuators["Configure actuators"]
-Actuators --> Ready(["Ready for RL"])
+Actuators --> Sensors["Enhanced Contact Sensors<br/>Illegal Contact Detection"]
+Sensors --> Rewards["Refined Reward System<br/>Contact Forces & Penalties"]
+Rewards --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L58)
-- [zsibot/zsl1_description/urdf/zsl1.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf#L1-L200)
+- [assets/zsibot.py:14-58](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L58)
+- [zsibot/zsl1_description/urdf/zsl1.urdf:1-200](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf#L1-L200)
+- [rough_env_cfg.py:110-146](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L110-L146)
 
 **Section sources**
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L58)
-- [zsibot/zsl1_description/urdf/zsl1.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf#L1-L200)
+- [assets/zsibot.py:14-58](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L58)
+- [zsibot/zsl1_description/urdf/zsl1.urdf:1-200](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf#L1-L200)
+- [rough_env_cfg.py:110-146](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L110-L146)
 
 #### Magiclab MagicDog
 - Physical characteristics:
@@ -227,10 +254,10 @@ Actuators --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [magiclab/magicdog/urdf/magicdog.urdf](file://source/robot_lab/data/Robots/magiclab/magicdog/urdf/magicdog.urdf#L1-L200)
+- [magiclab/magicdog/urdf/magicdog.urdf:1-200](file://source/robot_lab/data/Robots/magiclab/magicdog/urdf/magicdog.urdf#L1-L200)
 
 **Section sources**
-- [magiclab/magicdog/urdf/magicdog.urdf](file://source/robot_lab/data/Robots/magiclab/magicdog/urdf/magicdog.urdf#L1-L200)
+- [magiclab/magicdog/urdf/magicdog.urdf:1-200](file://source/robot_lab/data/Robots/magiclab/magicdog/urdf/magicdog.urdf#L1-L200)
 
 #### FFTAI GR1T1
 - Physical characteristics:
@@ -250,10 +277,10 @@ Actuators --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [fftai/gr1t1_description/urdf/GR1T1.urdf](file://source/robot_lab/data/Robots/fftai/gr1t1_description/urdf/GR1T1.urdf#L1-L200)
+- [fftai/gr1t1_description/urdf/GR1T1.urdf:1-200](file://source/robot_lab/data/Robots/fftai/gr1t1_description/urdf/GR1T1.urdf#L1-L200)
 
 **Section sources**
-- [fftai/gr1t1_description/urdf/GR1T1.urdf](file://source/robot_lab/data/Robots/fftai/gr1t1_description/urdf/GR1T1.urdf#L1-L200)
+- [fftai/gr1t1_description/urdf/GR1T1.urdf:1-200](file://source/robot_lab/data/Robots/fftai/gr1t1_description/urdf/GR1T1.urdf#L1-L200)
 
 ### Wheeled Robots
 
@@ -278,11 +305,11 @@ Wheels --> Ready
 ```
 
 **Diagram sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L121-L177)
-- [unitree/go2w_description/urdf/go2w_description.urdf](file://source/robot_lab/data/Robots/unitree/go2w_description/urdf/go2w_description.urdf#L1-L200)
+- [assets/unitree.py:121-177](file://source/robot_lab/robot_lab/assets/unitree.py#L121-L177)
+- [unitree/go2w_description/urdf/go2w_description.urdf:1-200](file://source/robot_lab/data/Robots/unitree/go2w_description/urdf/go2w_description.urdf#L1-L200)
 
 **Section sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L121-L177)
+- [assets/unitree.py:121-177](file://source/robot_lab/robot_lab/assets/unitree.py#L121-L177)
 
 #### Unitree B2W
 - Physical characteristics:
@@ -307,10 +334,10 @@ Wheel --> Ready
 ```
 
 **Diagram sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L248-L323)
+- [assets/unitree.py:248-323](file://source/robot_lab/robot_lab/assets/unitree.py#L248-L323)
 
 **Section sources**
-- [assets/unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py#L248-L323)
+- [assets/unitree.py:248-323](file://source/robot_lab/robot_lab/assets/unitree.py#L248-L323)
 
 #### Zsibot ZSL1W
 - Physical characteristics:
@@ -331,12 +358,12 @@ Wheels --> Ready
 ```
 
 **Diagram sources**
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L60-L115)
-- [zsibot/zsl1w_description/urdf/zsl1w.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L200)
+- [assets/zsibot.py:60-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L60-L115)
+- [zsibot/zsl1w_description/urdf/zsl1w.urdf:1-200](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L200)
 
 **Section sources**
-- [assets/zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py#L60-L115)
-- [zsibot/zsl1w_description/urdf/zsl1w.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L200)
+- [assets/zsibot.py:60-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L60-L115)
+- [zsibot/zsl1w_description/urdf/zsl1w.urdf:1-200](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L200)
 
 #### Magiclab MagicDog-W
 - Physical characteristics:
@@ -355,10 +382,10 @@ Actuators --> Ready(["Ready for RL"])
 ```
 
 **Diagram sources**
-- [magiclab/magicdog_w/urdf/magicdog_w.urdf](file://source/robot_lab/data/Robots/magiclab/magicdog_w/urdf/magicdog_w.urdf#L1-L200)
+- [magiclab/magicdog_w/urdf/magicdog_w.urdf:1-200](file://source/robot_lab/data/Robots/magiclab/magicdog_w/urdf/magicdog_w.urdf#L1-L200)
 
 **Section sources**
-- [magiclab/magicdog_w/urdf/magicdog_w.urdf](file://source/robot_lab/data/Robots/magiclab/magicdog_w/urdf/magicdog_w.urdf#L1-L200)
+- [magiclab/magicdog_w/urdf/magicdog_w.urdf:1-200](file://source/robot_lab/data/Robots/magiclab/magicdog_w/urdf/magicdog_w.urdf#L1-L200)
 
 ### Humanoid Robots
 
@@ -383,11 +410,11 @@ Arms --> Ready
 ```
 
 **Diagram sources**
-- [assets/booster.py](file://source/robot_lab/robot_lab/assets/booster.py#L10-L110)
-- [booster/t1_description/urdf/robot.urdf](file://source/robot_lab/data/Robots/booster/t1_description/urdf/robot.urdf#L1-L200)
+- [assets/booster.py:10-110](file://source/robot_lab/robot_lab/assets/booster.py#L10-L110)
+- [booster/t1_description/urdf/robot.urdf:1-200](file://source/robot_lab/data/Robots/booster/t1_description/urdf/robot.urdf#L1-L200)
 
 **Section sources**
-- [assets/booster.py](file://source/robot_lab/robot_lab/assets/booster.py#L10-L110)
+- [assets/booster.py:10-110](file://source/robot_lab/robot_lab/assets/booster.py#L10-L110)
 
 ## Dependency Analysis
 - Asset configurations depend on URDF paths resolved from the extension data directory.
@@ -401,12 +428,12 @@ REG --> RUN["Training/Evaluation Scripts"]
 ```
 
 **Diagram sources**
-- [assets/__init__.py](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
-- [README.md](file://README.md#L383-L426)
+- [assets/__init__.py:18-30](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
+- [README.md:383-426](file://README.md#L383-L426)
 
 **Section sources**
-- [assets/__init__.py](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
-- [README.md](file://README.md#L383-L426)
+- [assets/__init__.py:18-30](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
+- [README.md:383-426](file://README.md#L383-L426)
 
 ## Performance Considerations
 - Actuator limits:
@@ -416,10 +443,9 @@ REG --> RUN["Training/Evaluation Scripts"]
   - Increased position/velocity iteration counts improve constraint satisfaction but raise computational cost.
 - Contact modeling:
   - Friction and contact parameters affect traction and stability on rough terrain.
+  - **Enhanced Contact Sensors**: Improved illegal contact detection reduces unwanted collisions and improves safety.
 - Mass and inertia:
   - Larger mass/inertia can improve robustness but may reduce acceleration and agility.
-
-[No sources needed since this section provides general guidance]
 
 ## Troubleshooting Guide
 - If simulations fail to initialize or exhibit instability:
@@ -427,12 +453,16 @@ REG --> RUN["Training/Evaluation Scripts"]
   - Confirm URDF paths and asset resolution in the asset module.
 - If contact forces appear unrealistic:
   - Review contact materials and friction parameters in URDFs.
+  - **Check Illegal Contact Sensor Configuration**: Ensure contact sensors are properly configured for the specific environment.
 - If environment registration errors occur:
   - Ensure environment registration entries match the expected naming convention and entry points.
+- **ZSL1 Specific Issues**:
+  - **Illegal Contact Sensor Problems**: Verify that the illegal contact sensor configuration matches the intended body parts for termination detection.
+  - **Reward System Issues**: Check reward weight configurations and ensure they match the intended behavior for the specific environment type.
 
 **Section sources**
-- [assets/__init__.py](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
-- [README.md](file://README.md#L383-L426)
+- [assets/__init__.py:18-30](file://source/robot_lab/robot_lab/assets/__init__.py#L18-L30)
+- [README.md:383-426](file://README.md#L383-L426)
 
 ## Conclusion
-This document mapped the supported robot families to their asset configurations and URDF specifications, highlighting actuator groups, initial poses, and simulation parameters. By understanding these components, users can select appropriate models for reinforcement learning tasks, tune actuator and solver parameters for stability, and leverage the environment registration system for training and evaluation.
+This document mapped the supported robot families to their asset configurations and URDF specifications, highlighting actuator groups, initial poses, and simulation parameters. The ZSL1 robot has received significant enhancements including improved illegal contact sensor configuration and refined reward systems across different environment types. By understanding these components, users can select appropriate models for reinforcement learning tasks, tune actuator and solver parameters for stability, and leverage the environment registration system for training and evaluation. The enhanced ZSL1 configuration provides better safety monitoring and more sophisticated reward shaping for various locomotion challenges including flat terrain, rough terrain, parkour, stair climbing, and gap traversal scenarios.

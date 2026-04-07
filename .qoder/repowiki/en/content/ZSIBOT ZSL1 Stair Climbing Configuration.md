@@ -21,13 +21,11 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced abductor joint scaling from 0.15 to 0.2 to support gap traversal capabilities
-- Updated action scaling for hip and knee joints from 0.4 to 0.6 to support 0.23m step heights
-- Implemented stability constraints with roll/pitch limits of ±0.5 radians for enhanced stability
-- Modified reward weights to prioritize controlled climbing with climbing_progress now weighted at 2.5
-- Enhanced termination conditions by removing illegal contact termination and focusing on stability constraints
-- Updated reward system to remove heading alignment requirement and emphasize climbing progress
-- Expanded locomotion capabilities to include gap traversal and parkour-style terrain navigation
+- Corrected illegal contact parameter settings from '.*_ABAD' to '.*_ABAD_LINK' for proper contact force monitoring
+- Enhanced reward system documentation with detailed comments for joint torque, velocity, and acceleration penalties
+- Adjusted contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
+- Refined upward reward weight to 0.15 with L2 squared kernel documentation
+- Updated termination conditions to remove illegal contact termination for enhanced stability
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -99,7 +97,7 @@ COMMANDS --> UTILS
 
 **Diagram sources**
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
-- [stair_env_cfg.py:1-235](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L235)
+- [stair_env_cfg.py:1-236](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L236)
 - [gap_env_cfg.py:1-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L1-L339)
 - [parkour_env_cfg.py:1-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L1-L349)
 - [rough_env_cfg.py:1-166](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L1-L166)
@@ -665,3 +663,12 @@ The recent enhancements include increased abductor joint scaling from 0.15 to 0.
 The modular architecture continues to enable easy adaptation for different locomotion challenges and robot variants, while the well-tuned reward functions and actuator specifications provide the foundation for successful advanced locomotion. Future enhancements could include dynamic gap width adjustment, multi-modal terrain adaptation, advanced gait pattern learning for improved gap traversal performance, and integration with more complex parkour obstacle courses.
 
 The removal of experimental reward system and temporary debug features ensures a cleaner, more maintainable codebase while preserving the core functionality that makes the ZSL1 effective for advanced locomotion applications including stair climbing, gap traversal, and parkour-style navigation.
+
+**Updated** The documentation has been updated to reflect the following specific changes:
+- Corrected illegal contact parameter settings from '.*_ABAD' to '.*_ABAD_LINK' for proper contact force monitoring
+- Enhanced reward system documentation with detailed comments for joint torque, velocity, and acceleration penalties
+- Adjusted contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
+- Refined upward reward weight to 0.15 with L2 squared kernel documentation
+- Updated termination conditions to remove illegal contact termination for enhanced stability
+
+These changes improve the accuracy of the reward system documentation and ensure proper contact force monitoring during stair climbing and gap traversal scenarios.

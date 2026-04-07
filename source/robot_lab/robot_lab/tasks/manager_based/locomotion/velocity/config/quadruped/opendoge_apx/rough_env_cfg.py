@@ -40,6 +40,8 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.observations.policy.height_scan = None
         self.observations.policy.joint_pos.params["asset_cfg"].joint_names = self.joint_names
         self.observations.policy.joint_vel.params["asset_cfg"].joint_names = self.joint_names
+        self.observations.critic.feet_height = None
+        self.observations.critic.joint_effort = None
 
         # ------------------------------Actions------------------------------
         # reduce action scale

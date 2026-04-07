@@ -39,7 +39,7 @@ OPENDOGE_APX_CFG = ArticulationCfg(
         joint_pos={
             ".*_hip_joint": 0.0,
             ".*_thigh_joint": 0.43,
-            ".*_calf_joint": -0.86,
+            ".*_calf_joint": -1.04,  # -0.86,
         },
         joint_vel={".*": 0.0},
     ),
