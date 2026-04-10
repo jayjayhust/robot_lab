@@ -19,7 +19,7 @@ from . import agents
 # -- Flat terrain --
 
 gym.register(
-    id="ZSL1-Parkour-Flat-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Flat-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -31,7 +31,7 @@ gym.register(
 # -- Rough terrain --
 
 gym.register(
-    id="ZSL1-Parkour-Rough-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -41,7 +41,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -53,7 +53,7 @@ gym.register(
 # -- Ablation 1: no scan in policy --
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl1-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl1-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -63,7 +63,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl1-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl1-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -85,7 +85,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl2_5-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl2_5-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -95,9 +95,8 @@ gym.register(
 )
 
 # -- Ablation 3.5: explicit scan encoder (same env cfg as Rough) --
-
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl3_5-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -107,7 +106,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl3_5-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -119,7 +118,7 @@ gym.register(
 # -- Ablation 4.0: no scan encoding for critic (same env cfg as Rough) --
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl4_0-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl4_0-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -129,7 +128,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl4_0-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl4_0-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -141,7 +140,7 @@ gym.register(
 # -- Ablation 7.0: reduced privileged encoder (same env cfg as Rough) --
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl7_0-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl7_0-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -151,7 +150,7 @@ gym.register(
 )
 
 gym.register(
-    id="ZSL1-Parkour-Rough-Abl7_0-Play-v0",
+    id="RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl7_0-Play-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={

@@ -202,8 +202,8 @@ python scripts/tools/list_envs.py
 
 # View scene
 # e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Parkour-Zsibot-ZSL1-v0
-# e.g.: python scripts/tools/zero_agent.py --task=Go2-Parkour-Rough-Abl3_5-Play-v0
-# e.g.: python scripts/tools/zero_agent.py --task=ZSL1-Parkour-Rough-Abl3_5-Play-v0
+# e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-Play-v0
+# e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-Play-v0
 python scripts/tools/zero_agent.py --task=<ENV_NAME>
 
 # Train
@@ -214,8 +214,8 @@ python scripts/tools/zero_agent.py --task=<ENV_NAME>
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --headless
-# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=Go2-Parkour-Rough-Abl3_5-Play-v0 --headless
-# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=ZSL1-Parkour-Rough-Abl3_5-Play-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-Play-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-Play-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):
@@ -229,6 +229,8 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Sdog-Sdog2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --num_envs 1 --keyboard
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-Play-v0 --num_envs 1 --keyboard
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-Play-v0 --num_envs 1 --keyboard
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME> --num_envs=<NUM_ENVS> --keyboard
 
