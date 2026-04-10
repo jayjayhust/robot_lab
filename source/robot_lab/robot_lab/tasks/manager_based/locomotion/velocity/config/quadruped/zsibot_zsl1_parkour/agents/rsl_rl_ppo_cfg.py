@@ -18,7 +18,7 @@ from isaaclab.utils import configclass
 
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoAlgorithmCfg
 
-# Local copy — no cross-dependency on direct/go2
+# Local copy — no cross-dependency on direct/zsl1
 from .actor_critic_scan import ActorCriticScan  # noqa: F401  (must be importable at runtime)
 
 # Register custom class into rsl_rl runner's namespace so eval("ActorCriticScan") works
@@ -92,7 +92,7 @@ class ActorCriticScanCfg:
 # ---------------------------------------------------------------------------
 
 
-def _make_go2_parkour_rough_policy_cfg(
+def _make_zsl1_parkour_rough_policy_cfg(
     *,
     num_actor_scan_obs: int | None = None,
     num_critic_scan_obs: int | None = None,
@@ -131,11 +131,11 @@ def _make_go2_parkour_rough_policy_cfg(
 
 
 @configclass
-class Go2ParkourFlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class ZSL1ParkourFlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 5000
     save_interval = 50
-    experiment_name = "go2_parkour_flat"
+    experiment_name = "zsl1_parkour_flat"
     empirical_normalization = True
     policy = ActorCriticScanCfg(
         class_name="ActorCriticScan",
@@ -165,11 +165,11 @@ class Go2ParkourFlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class Go2ParkourRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class ZSL1ParkourRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 20000
     save_interval = 50
-    experiment_name = "go2_parkour_rough"
+    experiment_name = "zsl1_parkour_rough"
     empirical_normalization = True
     policy = ActorCriticScanCfg(
         class_name="ActorCriticScan",
@@ -199,14 +199,14 @@ class Go2ParkourRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class Go2ParkourRoughAbl1PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
-    experiment_name = "go2_parkour_rough_abl1"
-    policy = _make_go2_parkour_rough_policy_cfg(num_actor_scan_obs=0)
+class ZSL1ParkourRoughAbl1PPORunnerCfg(ZSL1ParkourRoughPPORunnerCfg):
+    experiment_name = "zsl1_parkour_rough_abl1"
+    policy = _make_zsl1_parkour_rough_policy_cfg(num_actor_scan_obs=0)
 
 
 @configclass
-class Go2ParkourRoughAbl2_5PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
-    experiment_name = "go2_parkour_rough_abl2_5"
+class ZSL1ParkourRoughAbl2_5PPORunnerCfg(ZSL1ParkourRoughPPORunnerCfg):
+    experiment_name = "zsl1_parkour_rough_abl2_5"
     policy = ActorCriticScanCfg(
         class_name="ActorCritic",
         init_noise_std=1.0,
@@ -218,24 +218,24 @@ class Go2ParkourRoughAbl2_5PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
 
 
 @configclass
-class Go2ParkourRoughAbl3_5PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
-    experiment_name = "go2_parkour_rough_abl3_5"
-    policy = _make_go2_parkour_rough_policy_cfg(scan_encoder_dims=[128, 64, 32])
+class ZSL1ParkourRoughAbl3_5PPORunnerCfg(ZSL1ParkourRoughPPORunnerCfg):
+    experiment_name = "zsl1_parkour_rough_abl3_5"
+    policy = _make_zsl1_parkour_rough_policy_cfg(scan_encoder_dims=[128, 64, 32])
 
 
 @configclass
-class Go2ParkourRoughAbl4_0PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
-    experiment_name = "go2_parkour_rough_abl4_0"
-    policy = _make_go2_parkour_rough_policy_cfg(
+class ZSL1ParkourRoughAbl4_0PPORunnerCfg(ZSL1ParkourRoughPPORunnerCfg):
+    experiment_name = "zsl1_parkour_rough_abl4_0"
+    policy = _make_zsl1_parkour_rough_policy_cfg(
         scan_encoder_dims=[128, 64, 32],
         encode_scan_for_critic=False,
     )
 
 
 @configclass
-class Go2ParkourRoughAbl7_0PPORunnerCfg(Go2ParkourRoughPPORunnerCfg):
-    experiment_name = "go2_parkour_rough_abl7_0"
-    policy = _make_go2_parkour_rough_policy_cfg(
+class ZSL1ParkourRoughAbl7_0PPORunnerCfg(ZSL1ParkourRoughPPORunnerCfg):
+    experiment_name = "zsl1_parkour_rough_abl7_0"
+    policy = _make_zsl1_parkour_rough_policy_cfg(
         scan_encoder_dims=[128, 64, 32],
         priv_encoder_dims=[64, 20],
     )
