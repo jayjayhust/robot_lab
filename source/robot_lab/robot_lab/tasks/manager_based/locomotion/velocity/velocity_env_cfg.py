@@ -71,7 +71,7 @@ class MySceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Robot/base",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
         ray_alignment="yaw",
-        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),  # Height scanner: resolution=0.1, size=[1.6, 1.0]
         # channels=100, vertical_fov_range=[-90, 90], horizontal_fov_range=[-90, 90], horizontal_res=1.0
         debug_vis=False,
         mesh_prim_paths=["/World/ground"],
@@ -84,7 +84,7 @@ class MySceneCfg(InteractiveSceneCfg):
         debug_vis=False,
         mesh_prim_paths=["/World/ground"],
     )
-    contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
+    contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)  # Contact sensor
     # lights
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
@@ -142,51 +142,76 @@ class ObservationsCfg:
             noise=Unoise(n_min=-0.1, n_max=0.1),
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         base_ang_vel = ObsTerm(
             func=mdp.base_ang_vel,
             noise=Unoise(n_min=-0.2, n_max=0.2),
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         projected_gravity = ObsTerm(
             func=mdp.projected_gravity,
             noise=Unoise(n_min=-0.05, n_max=0.05),
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         velocity_commands = ObsTerm(
             func=mdp.generated_commands,
             params={"command_name": "base_velocity"},
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
             params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
             noise=Unoise(n_min=-0.01, n_max=0.01),
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D
         joint_vel = ObsTerm(
             func=mdp.joint_vel_rel,
             params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
             noise=Unoise(n_min=-1.5, n_max=1.5),
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D
         actions = ObsTerm(
             func=mdp.last_action,
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D(last action)
         height_scan = ObsTerm(
             func=mdp.height_scan,
             params={"sensor_cfg": SceneEntityCfg("height_scanner")},
             noise=Unoise(n_min=-0.1, n_max=0.1),
             clip=(-1.0, 1.0),
             scale=1.0,
-        )
+        )  # 178D
+        
+        # === Enhanced observations for complex terrain ===
+        # Foot contact states - helps critic understand ground contact patterns
+        foot_contact = ObsTerm(
+            func=mdp.foot_contact_states,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_LINK"),
+                "asset_cfg": SceneEntityCfg("robot"),
+                "force_threshold": 1.0,
+            },
+            clip=(0.0, 1.0),
+            scale=1.0,
+        )  # 4D
+        # Height scan encoded - compresses 187D height scan into 32D latent via neural encoder
+        height_scan_encoded = ObsTerm(
+            func=mdp.height_scan_encoded,
+            params={
+                "sensor_cfg": SceneEntityCfg("height_scanner"),
+                "in_dim": 187,
+                "encoder_dims": [128, 64, 32],
+                "activation": "elu",
+            },
+            clip=(-1.0, 1.0),
+            scale=1.0,
+        )  # 32D
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -206,63 +231,115 @@ class ObservationsCfg:
             func=mdp.base_lin_vel,
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         base_ang_vel = ObsTerm(
             func=mdp.base_ang_vel,
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         projected_gravity = ObsTerm(
             func=mdp.projected_gravity,
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         velocity_commands = ObsTerm(
             func=mdp.generated_commands,
             params={"command_name": "base_velocity"},
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 3D
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
             params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D
         joint_vel = ObsTerm(
             func=mdp.joint_vel_rel,
             params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D
         actions = ObsTerm(
             func=mdp.last_action,
             clip=(-100.0, 100.0),
             scale=1.0,
-        )
+        )  # 12D(last action)
         height_scan = ObsTerm(
             func=mdp.height_scan,
             params={"sensor_cfg": SceneEntityCfg("height_scanner")},
             clip=(-1.0, 1.0),
             scale=1.0,
-        )
+        )  # 187D
 
         # === Enhanced observations for complex terrain ===
-        # Feet height relative to body - helps critic understand terrain clearance
-        feet_height = ObsTerm(
-            func=mdp.feet_height_in_body_frame,
-            params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT_LINK")},
-            clip=(-0.5, 0.5),
-            scale=2.0,
-        )
-
-        # Joint effort - helps critic estimate energy consumption and stability
-        joint_effort = ObsTerm(
-            func=mdp.joint_effort,
-            params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*")},
+        # # Feet height relative to body - helps critic understand terrain clearance
+        # feet_height = ObsTerm(
+        #     func=mdp.feet_height_in_body_frame,
+        #     params={"asset_cfg": SceneEntityCfg("robot", body_names=".*_FOOT_LINK")},
+        #     clip=(-0.5, 0.5),
+        #     scale=2.0,
+        # )  # 4D
+        # # Joint effort - helps critic estimate energy consumption and stability
+        # joint_effort = ObsTerm(
+        #     func=mdp.joint_effort,
+        #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*")},
+        #     clip=(-100.0, 100.0),
+        #     scale=0.01,
+        # )  # 12D
+        # Foot contact states - helps critic understand ground contact patterns
+        foot_contact = ObsTerm(
+            func=mdp.foot_contact_states,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_FOOT_LINK"),
+                "asset_cfg": SceneEntityCfg("robot"),
+                "force_threshold": 1.0,
+            },
+            clip=(0.0, 1.0),
+            scale=1.0,
+        )  # 4D
+        # Height scan encoded - compresses 187D height scan into 32D latent via neural encoder
+        height_scan_encoded = ObsTerm(
+            func=mdp.height_scan_encoded,
+            params={
+                "sensor_cfg": SceneEntityCfg("height_scanner"),
+                "in_dim": 187,
+                "encoder_dims": [128, 64, 32],
+                "activation": "elu",
+            },
+            clip=(-1.0, 1.0),
+            scale=1.0,
+        )  # 32D
+        # priv_obs: 29D = mass(1D), COM(3D), friction coeff(1D), P gain scale(12D), D gain scale(12D)
+        base_mass = ObsTerm(
+            func=mdp.base_mass,
+            params={"asset_cfg": SceneEntityCfg("robot", body_names=".*BASE.*")},
             clip=(-100.0, 100.0),
-            scale=0.01,
-        )
+            scale=1.0,
+        )  # 1D
+        base_com = ObsTerm(
+            func=mdp.base_com,
+            params={"asset_cfg": SceneEntityCfg("robot", body_names=".*BASE.*")},
+            clip=(-100.0, 100.0),
+            scale=1.0,
+        )  # 3D
+        friction_coeff_obs = ObsTerm(
+            func=mdp.friction_coeff,
+            clip=(-100.0, 100.0),
+            scale=1.0,
+        )  # 1D
+        p_gain_scale = ObsTerm(
+            func=mdp.p_gain_scale,
+            params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
+            clip=(-100.0, 100.0),
+            scale=1.0,
+        )  # 12D
+        d_gain_scale = ObsTerm(
+            func=mdp.d_gain_scale,
+            params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*", preserve_order=True)},
+            clip=(-100.0, 100.0),
+            scale=1.0,
+        )  # 12D
 
         def __post_init__(self):
             self.enable_corruption = False
@@ -711,7 +788,13 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    terrain_levels = CurrTerm(func=mdp.terrain_levels_vel)
+    # REF: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L27
+    terrain_levels = CurrTerm(
+        func=mdp.terrain_levels_vel,
+        params={
+            "asset_cfg": SceneEntityCfg("robot")  # Name of your robot actor
+        },
+    )
 
     command_levels_lin_vel = CurrTerm(
         func=mdp.command_levels_lin_vel,

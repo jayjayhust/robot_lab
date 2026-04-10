@@ -12,11 +12,23 @@
 
 import argparse
 import sys
+import builtins
 
 from isaaclab.app import AppLauncher
 
 # local imports
 import cli_args  # isort: skip
+
+
+def _register_custom_actor():
+    """Register custom actor class after Omniverse is available."""
+    try:
+        from ..robot_lab.tasks.manager_based.locomotion.velocity.config.quadruped.zsibot_zsl1.agents.actor_critic_scan import ActorCriticScan
+
+        builtins.ActorCriticScan = ActorCriticScan
+    except Exception:
+        pass
+
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
@@ -103,6 +115,8 @@ from isaaclab_tasks.utils.hydra import hydra_task_config
 
 import robot_lab.tasks  # noqa: F401  # isort: skip
 
+from scripts.reinforcement_learning.rsl_rl.rl_cfg import RslRlCustomPpoActorCriticCfg
+
 # import logger
 logger = logging.getLogger(__name__)
 
@@ -115,8 +129,9 @@ torch.backends.cudnn.benchmark = False
 
 
 @hydra_task_config(args_cli.task, args_cli.agent)
-def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
+def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlCustomPpoActorCriticCfg):
     """Train with RSL-RL agent."""
+    _register_custom_actor()
     # override configurations with non-hydra CLI arguments
     agent_cfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs

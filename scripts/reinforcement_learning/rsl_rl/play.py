@@ -12,11 +12,23 @@
 
 import argparse
 import sys
+import builtins
 
 from isaaclab.app import AppLauncher
 
 # local imports
 import cli_args  # isort: skip
+
+
+def _register_custom_actor():
+    """Register custom actor class after Omniverse is available."""
+    try:
+        from ..robot_lab.tasks.manager_based.locomotion.velocity.config.quadruped.zsibot_zsl1.agents.actor_critic_scan import ActorCriticScan
+
+        builtins.ActorCriticScan = ActorCriticScan
+    except Exception:
+        pass
+
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
@@ -84,6 +96,7 @@ from isaaclab_tasks.utils import get_checkpoint_path
 from isaaclab_tasks.utils.hydra import hydra_task_config
 
 import robot_lab.tasks  # noqa: F401  # isort: skip
+from scripts.reinforcement_learning.rsl_rl.rl_cfg import RslRlCustomPpoActorCriticCfg
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from rl_utils import camera_follow
@@ -92,8 +105,9 @@ from rl_utils import camera_follow
 
 
 @hydra_task_config(args_cli.task, args_cli.agent)
-def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
+def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlCustomPpoActorCriticCfg):  # pyright: ignore[reportRedeclaration]
     """Play with RSL-RL agent."""
+    _register_custom_actor()
     # grab task name for checkpoint path
     task_name = args_cli.task.split(":")[-1]
 

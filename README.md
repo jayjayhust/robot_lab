@@ -197,8 +197,12 @@ You can use the following commands to run all environments:
 RSL-RL:
 
 ```bash
+# List all envs
+python scripts/tools/list_envs.py
+
 # View scene
 # e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Parkour-Zsibot-ZSL1-v0
+# e.g.: python scripts/tools/zero_agent.py --task=Go2-Parkour-Rough-Abl3_5-Play-v0
 python scripts/tools/zero_agent.py --task=<ENV_NAME>
 
 # Train

@@ -21,9 +21,10 @@
 
 ## Update Summary
 **Changes Made**
+- Enhanced parkour terrain configuration with new `parkour_step_simple_terrain` function (99 lines of new code) that generates more controlled and predictable staircase patterns
+- Updated contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
 - Corrected illegal contact parameter settings from '.*_ABAD' to '.*_ABAD_LINK' for proper contact force monitoring
 - Enhanced reward system documentation with detailed comments for joint torque, velocity, and acceleration penalties
-- Adjusted contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
 - Refined upward reward weight to 0.15 with L2 squared kernel documentation
 - Updated termination conditions to remove illegal contact termination for enhanced stability
 
@@ -35,10 +36,11 @@
 5. [Detailed Component Analysis](#detailed-component-analysis)
 6. [Enhanced Stair Climbing Features](#enhanced-stair-climbing-features)
 7. [Advanced Gap Traversal Capabilities](#advanced-gap-traversal-capabilities)
-8. [Dependency Analysis](#dependency-analysis)
-9. [Performance Considerations](#performance-considerations)
-10. [Troubleshooting Guide](#troubleshooting-guide)
-11. [Conclusion](#conclusion)
+8. [Enhanced Parkour Terrain Configuration](#enhanced-parkour-terrain-configuration)
+9. [Dependency Analysis](#dependency-analysis)
+10. [Performance Considerations](#performance-considerations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
 
 ## Introduction
 This document provides a comprehensive analysis of the ZSIBOT ZSL1 Stair Climbing Configuration within the robot_lab repository. The ZSL1 is a quadruped robot designed for advanced locomotion behaviors, featuring articulated legs and optional wheel attachments for enhanced mobility. The configuration leverages Isaac Lab's reinforcement learning framework to enable stair climbing, gap traversal, and parkour-style navigation capabilities through carefully tuned environment settings, reward functions, and actuator configurations.
@@ -73,6 +75,7 @@ subgraph "Enhanced Systems"
 REWARDS["rewards.py<br/>Specialized reward functions"]
 COMMANDS["commands.py<br/>Adaptive command generation"]
 UTILS["utils.py<br/>Terrain utilities"]
+TERRAIN_GEN["terrain_gen.py<br/>Enhanced terrain generation"]
 end
 ZSIBOT_PY --> STAIR_CFG
 ZSIBOT_PY --> GAP_CFG
@@ -93,13 +96,14 @@ STAIR_CFG --> COMMANDS
 GAP_CFG --> COMMANDS
 PARKOUR_CFG --> COMMANDS
 COMMANDS --> UTILS
+TERRAIN_GEN --> PARKOUR_CFG
 ```
 
 **Diagram sources**
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
 - [stair_env_cfg.py:1-236](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L236)
 - [gap_env_cfg.py:1-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L1-L339)
-- [parkour_env_cfg.py:1-349](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L1-L349)
+- [parkour_env_cfg.py:1-432](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L1-L432)
 - [rough_env_cfg.py:1-166](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L1-L166)
 
 **Section sources**
@@ -181,6 +185,7 @@ GAP_ENV["Gap Environment<br/>Advanced Traversal"]
 PARKOUR_ENV["Parkour Environment<br/>Complex Obstacles"]
 ENHANCED_REWARDS["Enhanced Rewards<br/>Controlled Climbing Focus"]
 TERRAIN_COMMANDS["Terrain-Aware Commands<br/>Pit Detection & Restrictions"]
+TERRAIN_GENERATION["Enhanced Terrain Generation<br/>Simple Step Patterns"]
 end
 subgraph "Training Infrastructure Layer"
 PPO_TRAINER["PPO Trainer<br/>RslRlOnPolicyRunnerCfg"]
@@ -200,8 +205,12 @@ PARKOUR_ENV --> ENHANCED_REWARDS
 STAIR_ENV --> TERRAIN_COMMANDS
 GAP_ENV --> TERRAIN_COMMANDS
 PARKOUR_ENV --> TERRAIN_COMMANDS
+STAIR_ENV --> TERRAIN_GENERATION
+GAP_ENV --> TERRAIN_GENERATION
+PARKOUR_ENV --> TERRAIN_GENERATION
 ENHANCED_REWARDS --> PPO_TRAINER
 TERRAIN_COMMANDS --> PPO_TRAINER
+TERRAIN_GENERATION --> PPO_TRAINER
 STAIR_ENV --> PPO_TRAINER
 GAP_ENV --> PPO_TRAINER
 PARKOUR_ENV --> PPO_TRAINER
@@ -507,7 +516,7 @@ The parkour environment extends gap traversal capabilities to include complex ob
 
 - **Varied Step Heights**: Step height range from 0.1m to 0.45m for diverse challenge scenarios
 - **Complex Terrain Patterns**: Ascending and descending step combinations for realistic parkour challenges
-- **Advanced Reward System**: Specialized rewards for successful obstacle navigation and landing
+- **Enhanced Reward System**: Specialized rewards for successful obstacle navigation and landing
 - **Enhanced Termination Conditions**: Focused on stability and safe landing rather than illegal contacts
 
 ### Specialized Gap Terrain Generation
@@ -523,6 +532,57 @@ Advanced terrain generation creates realistic gap traversal scenarios:
 - [gap_env_cfg.py:148-155](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L148-L155)
 - [parkour_env_cfg.py:157-165](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L157-L165)
 
+## Enhanced Parkour Terrain Configuration
+
+### New Simple Step Terrain Generation
+The parkour environment now features a new `parkour_step_simple_terrain` function that provides more controlled and predictable staircase patterns:
+
+```mermaid
+flowchart TD
+SIMPLE_TERRAIN([Simple Step Terrain]) --> INIT_PARAMS["Initialize Parameters<br/>Ground Thickness: 0.1m<br/>Wall Thickness: 0.1m"]
+INIT_PARAMS --> CALCULATE_HEIGHT["Calculate Step Height<br/>Height = min + difficulty*(max-min)"]
+CALCULATE_HEIGHT --> CALCULATE_LENGTH["Calculate Step Length<br/>Length = base + step_height"]
+CALCULATE_LENGTH --> GENERATE_ASCENDING["Generate Ascending Steps<br/>Steps Up = Total Steps / 2"]
+GENERATE_ASCENDING --> GENERATE_DESCENDING["Generate Descending Steps<br/>Steps Down = Total Steps - Steps Up"]
+GENERATE_DESCENDING --> ADD_SIDE_WALLS["Add Side Walls<br/>Prevent Falls & Open Edges"]
+ADD_SIDE_WALLS --> GENERATE_FLAT_END["Generate Flat End Platform<br/>Complete Terrain Pattern"]
+GENERATE_FLAT_END --> ORIGIN_SET["Set Origin Point<br/>Center of Start Platform"]
+ORIGIN_SET --> RETURN_MESHES["Return Mesh List & Origin"]
+```
+
+**Diagram sources**
+- [parkour_env_cfg.py:118-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L118-L208)
+
+Key features of the new simple terrain generation:
+
+- **Predictable Step Patterns**: Controlled step heights and lengths for consistent training
+- **Enhanced Safety**: Side walls prevent falls and close open edges
+- **Configurable Parameters**: Adjustable step height range (0.1-0.45m), step length range (0.3-1.5m), and total steps (6)
+- **Consistent Origin**: Centralized origin point for robot spawning and navigation
+- **Simplified Algorithm**: Streamlined generation process replacing complex terrain algorithms
+
+### MeshParkourStepTerrainCfg Configuration
+The new terrain configuration class provides comprehensive control over parkour step generation:
+
+- **Function Assignment**: Uses `parkour_step_simple_terrain` as the generation function
+- **Start Platform**: 3.0m run-up length for approach preparation
+- **Step Parameters**: Configurable step height and length ranges for progressive difficulty
+- **Step Distribution**: Balanced ascending and descending steps for realistic parkour challenges
+- **Terrain Dimensions**: 23.0m × 6.0m size with 2.0m border for safe boundaries
+
+### Enhanced Terrain Generation Process
+The new terrain generation process offers several advantages over previous implementations:
+
+- **Improved Predictability**: Consistent step patterns enable reliable training outcomes
+- **Enhanced Safety**: Comprehensive side wall coverage prevents robot falls
+- **Configurable Complexity**: Adjustable difficulty levels through step height and length parameters
+- **Streamlined Implementation**: Simplified codebase reduces maintenance overhead
+- **Better Performance**: Optimized mesh generation for faster simulation startup
+
+**Section sources**
+- [parkour_env_cfg.py:118-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L118-L208)
+- [parkour_env_cfg.py:210-250](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L210-L250)
+
 ## Dependency Analysis
 The ZSL1 configuration exhibits a well-structured dependency hierarchy that enables modular development and testing across multiple specialized environments:
 
@@ -532,6 +592,8 @@ subgraph "External Dependencies"
 ISAACLAB["Isaac Lab Framework"]
 RSL_RL["RSL-RL Library"]
 GYMNASIUM["Gymnasium API"]
+TRIMESH["Trimesh Library"]
+NUMPY["NumPy Library"]
 end
 subgraph "Internal Dependencies"
 ASSETS["Robot Assets Module"]
@@ -539,6 +601,7 @@ ENV_CONFIG["Environment Configurations"]
 TRAINING["Training Infrastructure"]
 SCRIPTS["Utility Scripts"]
 MDP["MDP Components"]
+TERRAIN_GEN["Enhanced Terrain Generation"]
 end
 subgraph "ZSL1 Specific"
 ZSL1_CFG["ZSL1 Configuration"]
@@ -577,6 +640,9 @@ TERRAIN_COMMANDS --> MDP
 MDP --> STAIR_CFG
 MDP --> GAP_CFG
 MDP --> PARKOUR_CFG
+TERRAIN_GEN --> PARKOUR_CFG
+TRIMESH --> TERRAIN_GEN
+NUMPY --> TERRAIN_GEN
 ```
 
 **Diagram sources**
@@ -606,6 +672,7 @@ Several factors influence the performance of ZSL1 advanced locomotion with the e
 - **Memory Management**: Optimized experience buffer sizing for efficient training cycles across multiple environments
 - **Zero Weight Reward Elimination**: Automatic removal of inactive rewards reduces computational load
 - **Terrain-Aware Command Processing**: Efficient grid-based terrain detection minimizes processing overhead
+- **Enhanced Terrain Generation**: Simplified mesh generation algorithms improve simulation startup performance
 
 ### Training Stability
 - **Reward Engineering**: Modified reward functions prioritize controlled climbing and gap traversal over velocity tracking
@@ -660,15 +727,18 @@ The ZSIBOT ZSL1 Advanced Locomotion Configuration represents a comprehensive app
 
 The recent enhancements include increased abductor joint scaling from 0.15 to 0.2 to support gap traversal capabilities, increased action scaling from 0.4 to 0.6 for hip and knee joints to support 0.23m step heights, stability constraints limiting roll and pitch to ±0.5 radians, modified reward weights with climbing progress prioritized at 2.5, and enhanced termination conditions focusing on stability rather than illegal contact. These improvements enable the system to adapt dynamically to different stair configurations, gap widths, and complex parkour obstacles while maintaining stable locomotion performance.
 
+The most significant enhancement is the introduction of the `parkour_step_simple_terrain` function, which provides more controlled and predictable staircase patterns for parkour training. This new terrain generation approach replaces the previous sophisticated algorithm with a streamlined implementation that offers better predictability and easier maintenance while preserving the core functionality needed for advanced locomotion training.
+
 The modular architecture continues to enable easy adaptation for different locomotion challenges and robot variants, while the well-tuned reward functions and actuator specifications provide the foundation for successful advanced locomotion. Future enhancements could include dynamic gap width adjustment, multi-modal terrain adaptation, advanced gait pattern learning for improved gap traversal performance, and integration with more complex parkour obstacle courses.
 
 The removal of experimental reward system and temporary debug features ensures a cleaner, more maintainable codebase while preserving the core functionality that makes the ZSL1 effective for advanced locomotion applications including stair climbing, gap traversal, and parkour-style navigation.
 
 **Updated** The documentation has been updated to reflect the following specific changes:
+- Enhanced parkour terrain configuration with new `parkour_step_simple_terrain` function (99 lines of new code) that generates more controlled and predictable staircase patterns
+- Updated contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
 - Corrected illegal contact parameter settings from '.*_ABAD' to '.*_ABAD_LINK' for proper contact force monitoring
 - Enhanced reward system documentation with detailed comments for joint torque, velocity, and acceleration penalties
-- Adjusted contact force threshold from 1.0 to 100.0 for improved stability during stair climbing
 - Refined upward reward weight to 0.15 with L2 squared kernel documentation
 - Updated termination conditions to remove illegal contact termination for enhanced stability
 
-These changes improve the accuracy of the reward system documentation and ensure proper contact force monitoring during stair climbing and gap traversal scenarios.
+These changes improve the accuracy of the reward system documentation, ensure proper contact force monitoring during stair climbing and gap traversal scenarios, and provide better control over parkour terrain generation for more reliable training outcomes.

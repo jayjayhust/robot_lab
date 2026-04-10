@@ -136,7 +136,7 @@ class MeshGapStripTerrainCfg(SubTerrainBaseCfg):
 GAP_TERRAINS_CFG = TerrainGeneratorCfg(
     size=(23.0, 6.0),  # Terrain Size 23m X 6m
     # border_width=10.0,  # The width of the border around the terrain (in m)
-    num_rows=10,  # Number of rows of sub-terrains to generate
+    num_rows=10,  # Number of rows of sub-terrains to generate, level 0~9 step up
     num_cols=10,  # Number of columns of sub-terrains to generate. gap occupy 10 columns
     # horizontal_scale=0.1,  # Horizontal scale of the terrain (in m)
     # vertical_scale=0.005,  # Vertical scale of the terrain (in m)
