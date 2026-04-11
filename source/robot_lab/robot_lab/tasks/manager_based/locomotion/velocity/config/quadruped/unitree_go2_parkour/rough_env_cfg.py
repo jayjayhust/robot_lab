@@ -38,6 +38,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 import isaaclab_tasks.manager_based.locomotion.velocity.mdp as vel_mdp
+import robot_lab.tasks.manager_based.locomotion.velocity.mdp as robotlab_vel_mdp
 
 from .mdp import observations as parkour_obs
 from .mdp import rewards as parkour_rew
@@ -250,7 +251,7 @@ class Go2ParkourObservationsCfg:
         foot_contacts = ObsTerm(
             func=parkour_obs.foot_contacts,
             params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_foot"), "threshold": 1.0},
-        )
+        )  # 4D
         # -- privileged observations (29D) --
         base_mass = ObsTerm(
             func=parkour_obs.base_mass_obs,
@@ -437,7 +438,28 @@ class Go2ParkourTerminationsCfg:
 class Go2ParkourCurriculumCfg:
     """Curriculum terms for Go2 parkour."""
 
-    terrain_levels = CurrTerm(func=vel_mdp.terrain_levels_vel)
+    # Note: terrain_levels_vel has default asset_cfg=SceneEntityCfg("robot")
+    # Using isaaclab_tasks version for proper Hydra serialization
+    terrain_levels = CurrTerm(
+        func=robotlab_vel_mdp.terrain_levels_vel,
+        params={},
+    )
+
+    command_levels_lin_vel = CurrTerm(
+        func=robotlab_vel_mdp.command_levels_lin_vel,
+        params={
+            "reward_term_name": "track_lin_vel_xy_exp",
+            "range_multiplier": (0.1, 1.0),
+        },
+    )
+
+    command_levels_ang_vel = CurrTerm(
+        func=robotlab_vel_mdp.command_levels_ang_vel,
+        params={
+            "reward_term_name": "track_ang_vel_z_exp",
+            "range_multiplier": (0.1, 1.0),
+        },
+    )
 
 
 ##
@@ -481,6 +503,7 @@ class Go2ParkourRoughEnvCfg(ManagerBasedRLEnvCfg):
             # https://isaac-sim.github.io/IsaacLab/main/source/api/lab/isaaclab.sensors.html#isaaclab.sensors.ContactSensorCfg.debug_vis
             self.scene.contact_forces.debug_vis = True  # debug visualization
 
+        # ------------------------------Curriculums------------------------------
         # enable curriculum for terrain generator
         if getattr(self.curriculum, "terrain_levels", None) is not None:
             if self.scene.terrain.terrain_generator is not None:
@@ -488,6 +511,10 @@ class Go2ParkourRoughEnvCfg(ManagerBasedRLEnvCfg):
         else:
             if self.scene.terrain.terrain_generator is not None:
                 self.scene.terrain.terrain_generator.curriculum = False
+        # self.curriculum.command_levels_lin_vel.params["range_multiplier"] = (0.2, 1.0)
+        # self.curriculum.command_levels_ang_vel.params["range_multiplier"] = (0.2, 1.0)
+        self.curriculum.command_levels_lin_vel = None
+        self.curriculum.command_levels_ang_vel = None
 
         # -- rough terrain reward overrides (from Go2RoughEnvCfg) --
         self.rewards.base_height.weight = 0.0

@@ -20,17 +20,19 @@
 - [actor_critic_scan.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py)
 - [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py)
 - [actor_critic_scan.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py)
+- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py)
+- [parkour_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/parkour_env_cfg.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced with custom RL configuration system for Go2 parkour training
-- Introduced custom RslRlCustomPpoActorCriticCfg replacing standard RslRlPpoActorCriticCfg
-- Added ActorCriticScan network architecture with scan and privileged observation encoders
-- Integrated custom policy registration system for runtime actor class resolution
-- Added comprehensive Go2 and Zsibot parkour training configurations
-- Updated training pipeline to support custom policy classes and scan encoders
-- Enhanced environment wrapper system with custom observation splitting capabilities
+- Enhanced with comprehensive ZSL1 parkour training framework featuring ActorCriticScan neural network architecture
+- Added custom RslRlCustomPpoActorCriticCfg replacing standard RslRlPpoActorCriticCfg for advanced observation processing
+- Integrated ActorCriticScan network architecture with scan encoders and privileged observation handling
+- Implemented advanced observation processing capabilities with configurable observation splitting
+- Added comprehensive ZSL1 parkour environment configuration with custom terrains and reward systems
+- Enhanced custom policy registration system for runtime actor class resolution
+- Updated training pipeline to support both standard and custom policy architectures
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -45,12 +47,12 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the RSL-RL training system implemented in the repository, with enhanced support for custom RL configuration systems and specialized parkour training frameworks. The system now features custom PPO actor-critic configuration classes, specialized training frameworks for Go2 and Zsibot parkour scenarios, and advanced observation processing capabilities including scan encoders and privileged observation handling.
+This document explains the RSL-RL training system implemented in the repository, with enhanced support for custom RL configuration systems and specialized parkour training frameworks. The system now features comprehensive ZSL1 parkour training capabilities, custom PPO actor-critic configuration classes, specialized training frameworks for extreme quadruped locomotion, and advanced observation processing capabilities including scan encoders and privileged observation handling.
 
-**Updated** Enhanced with custom RL configuration system for Go2 parkour training, introducing custom PPO actor-critic configuration classes and specialized training frameworks that replace standard IsaacLab integration patterns.
+**Updated** Enhanced with comprehensive ZSL1 parkour training framework featuring ActorCriticScan neural network architecture, custom PPO configuration system, and advanced observation processing capabilities for extreme quadruped locomotion scenarios.
 
 ## Project Structure
-The RSL-RL training system is organized around three primary scripts and configuration modules, now enhanced with custom policy support:
+The RSL-RL training system is organized around three primary scripts and configuration modules, now enhanced with custom policy support and specialized parkour training frameworks:
 - Training entry point: scripts/reinforcement_learning/rsl_rl/train.py
 - Playback/inference entry point: scripts/reinforcement_learning/rsl_rl/play.py
 - CLI argument helpers: scripts/reinforcement_learning/rsl_rl/cli_args.py
@@ -58,6 +60,7 @@ The RSL-RL training system is organized around three primary scripts and configu
 - Agent configuration templates: source/robot_lab/robot_lab/tasks/.../agents/rsl_rl_ppo_cfg.py and rsl_rl_distillation_cfg.py
 - Custom policy implementations: source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/*/agents/actor_critic_scan.py
 - Environment configuration templates: source/robot_lab/robot_lab/tasks/.../flat_env_cfg.py, rough_env_cfg.py, stair_env_cfg.py, and parkour_env_cfg.py
+- ZSL1 parkour specific configurations: specialized terrains and reward systems for extreme quadruped parkour training
 
 ```mermaid
 graph TB
@@ -86,11 +89,12 @@ D2 --> H2["Policy Export (JIT/ONNX)"]
 - [play.py:1-272](file://scripts/reinforcement_learning/rsl_rl/play.py#L1-L272)
 
 ## Core Components
-- Custom PPO Configuration System: RslRlCustomPpoActorCriticCfg replaces standard configuration with support for scan encoders and privileged observations. See [rl_cfg.py:12-62](file://scripts/reinforcement_learning/rsl_rl/rl_cfg.py#L12-L62).
-- ActorCriticScan Network: Advanced policy architecture with optional scan and privileged observation encoders for enhanced perception. See [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263).
-- Custom Policy Registration: Runtime registration system for custom actor classes using builtins namespace. See [train.py:23-31](file://scripts/reinforcement_learning/rsl_rl/train.py#L23-L31) and [play.py:23-31](file://scripts/reinforcement_learning/rsl_rl/play.py#L23-L31).
-- Parkour-Specific Environments: Specialized terrains and reward systems for extreme quadruped parkour training. See [parkour_env_cfg.py:26-442](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L26-L442).
-- Enhanced Environment Wrapping: Support for custom observation splitting and scan encoder integration. See [train.py:212](file://scripts/reinforcement_learning/rsl_rl/train.py#L212) and [play.py:196](file://scripts/reinforcement_learning/rsl_rl/play.py#L196).
+- **Custom PPO Configuration System**: RslRlCustomPpoActorCriticCfg replaces standard configuration with support for scan encoders and privileged observations. See [rl_cfg.py:12-62](file://scripts/reinforcement_learning/rsl_rl/rl_cfg.py#L12-L62).
+- **ActorCriticScan Network**: Advanced policy architecture with optional scan and privileged observation encoders for enhanced perception. See [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263).
+- **Custom Policy Registration**: Runtime registration system for custom actor classes using builtins namespace. See [train.py:23-31](file://scripts/reinforcement_learning/rsl_rl/train.py#L23-L31) and [play.py:23-31](file://scripts/reinforcement_learning/rsl_rl/play.py#L23-L31).
+- **ZSL1 Parkour-Specific Environments**: Specialized terrains and reward systems for extreme quadruped parkour training. See [parkour_env_cfg.py:26-442](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L26-L442).
+- **Enhanced Environment Wrapping**: Support for custom observation splitting and scan encoder integration. See [train.py:212](file://scripts/reinforcement_learning/rsl_rl/train.py#L212) and [play.py:196](file://scripts/reinforcement_learning/rsl_rl/play.py#L196).
+- **Advanced Observation Processing**: Configurable observation splitting into proprioceptive, scan, and privileged components with independent encoder support. See [actor_critic_scan.py:54-114](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L54-L114).
 
 **Section sources**
 - [rl_cfg.py:12-62](file://scripts/reinforcement_learning/rsl_rl/rl_cfg.py#L12-L62)
@@ -99,7 +103,7 @@ D2 --> H2["Policy Export (JIT/ONNX)"]
 - [parkour_env_cfg.py:26-442](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L26-L442)
 
 ## Architecture Overview
-The enhanced training pipeline integrates custom policy registration, environment creation, optional video recording, environment wrapping with scan encoder support, runner instantiation, checkpoint loading, and algorithm learning loops. The system now supports both standard ActorCritic and custom ActorCriticScan policies with advanced observation processing capabilities.
+The enhanced training pipeline integrates custom policy registration, environment creation, optional video recording, environment wrapping with scan encoder support, runner instantiation, checkpoint loading, and algorithm learning loops. The system now supports both standard ActorCritic and custom ActorCriticScan policies with advanced observation processing capabilities for extreme quadruped locomotion scenarios.
 
 ```mermaid
 sequenceDiagram
@@ -133,7 +137,7 @@ Runner-->>Log : periodic checkpoints
 - **ActorCriticScan Architecture**: Advanced policy with optional scan encoders for actor and critic, privileged observation processing, and configurable observation splitting. See [actor_critic_scan.py:24-134](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L24-L134).
 - **Custom Policy Registration**: Runtime registration system enabling custom actor classes through builtins namespace. See [train.py:23-31](file://scripts/reinforcement_learning/rsl_rl/train.py#L23-L31).
 
-**Updated** Enhanced with custom RL configuration system supporting scan encoders and privileged observations for advanced perception capabilities.
+**Updated** Enhanced with custom RL configuration system supporting scan encoders and privileged observations for advanced perception capabilities in extreme quadruped locomotion scenarios.
 
 ```mermaid
 flowchart TD
@@ -155,12 +159,59 @@ Train --> Save["Save Periodic Checkpoints"]
 - [rl_cfg.py:12-62](file://scripts/reinforcement_learning/rsl_rl/rl_cfg.py#L12-L62)
 - [actor_critic_scan.py:24-134](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L24-L134)
 
+### Comprehensive ZSL1 Parkour Training Framework
+- **ActorCriticScan Policy**: Custom policy with integrated scan encoders for depth sensor processing and privileged observation handling. See [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L263).
+- **Parkour Runner Configurations**: Multiple runner configurations for flat and rough terrains with ablation studies. See [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237).
+- **Scan Encoder Integration**: Configurable scan encoder dimensions and selective encoding for critic inputs. See [rsl_rl_ppo_cfg.py:169-179](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py#L169-L179).
+- **Advanced Observation Processing**: Configurable observation splitting with independent scan encoders for actor and critic networks. See [actor_critic_scan.py:54-114](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L54-L114).
+
+**Updated** Enhanced with comprehensive ZSL1 parkour training framework featuring custom ActorCriticScan policy, specialized runner configurations, and advanced observation processing capabilities for extreme quadruped locomotion scenarios.
+
+```mermaid
+classDiagram
+class ActorCriticScan {
++num_actor_obs : int
++num_critic_obs : int
++num_prop_obs : 52
++num_scan_obs : 187
++actor_scan_encoder : optional
++critic_scan_encoder : optional
++priv_encoder : optional
++encode_scan_for_critic : bool
++update_distribution()
++evaluate()
+}
+class ZSL1ParkourRunnerCfg {
++num_steps_per_env : 24
++max_iterations : 20000
++experiment_name : "zsl1_parkour_rough"
++policy : ActorCriticScanCfg
++algorithm : RslRlPpoAlgorithmCfg
+}
+class ScanEncoderConfig {
++scan_encoder_dims : [128, 64, 32]
++actor_scan_encoder_dims : optional
++critic_scan_encoder_dims : optional
++encode_scan_for_critic : bool
+}
+ActorCriticScan --> ScanEncoderConfig : "uses"
+ZSL1ParkourRunnerCfg --> ActorCriticScan : "instantiates"
+```
+
+**Diagram sources**
+- [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L263)
+- [rsl_rl_ppo_cfg.py:128-194](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py#L128-L194)
+
+**Section sources**
+- [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L263)
+- [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237)
+
 ### Enhanced Environment Configuration for Parkour Training
 - **Parkour Terrains**: Custom mesh terrains generating stepped platforms with configurable difficulty and step patterns. See [parkour_env_cfg.py:26-249](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L26-L249).
 - **Enhanced Reward System**: Specialized rewards for climbing, air time control, and foothold precision with reduced jumping incentives. See [parkour_env_cfg.py:337-418](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L337-L418).
 - **Action Scaling**: Increased joint position scaling for HIP/KNEE joints to enable leg lifting for 0.23m step heights. See [parkour_env_cfg.py:299-308](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L299-L308).
 
-**Updated** Enhanced with comprehensive parkour training environment configuration featuring custom terrains and specialized reward systems optimized for extreme quadruped locomotion.
+**Updated** Enhanced with comprehensive parkour training environment configuration featuring custom terrains and specialized reward systems optimized for extreme quadruped locomotion with ZSL1 robot platform.
 
 ```mermaid
 classDiagram
@@ -195,52 +246,6 @@ ParkourEnvCfg --> RewardSystem : "configures"
 **Section sources**
 - [parkour_env_cfg.py:26-442](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L26-L442)
 
-### Go2 Parkour Training Framework
-- **ActorCriticScan Policy**: Custom policy with integrated scan encoders for depth sensor processing and privileged observation handling. See [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263).
-- **Parkour Runner Configurations**: Multiple runner configurations for flat and rough terrains with ablation studies. See [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237).
-- **Scan Encoder Integration**: Configurable scan encoder dimensions and selective encoding for critic inputs. See [rsl_rl_ppo_cfg.py:169-179](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L169-L179).
-
-**Updated** Enhanced with comprehensive Go2 parkour training framework featuring custom ActorCriticScan policy and specialized runner configurations.
-
-```mermaid
-classDiagram
-class ActorCriticScan {
-+num_actor_obs : int
-+num_critic_obs : int
-+num_prop_obs : 52
-+num_scan_obs : 187
-+actor_scan_encoder : optional
-+critic_scan_encoder : optional
-+priv_encoder : optional
-+encode_scan_for_critic : bool
-+update_distribution()
-+evaluate()
-}
-class Go2ParkourRunnerCfg {
-+num_steps_per_env : 24
-+max_iterations : 20000
-+experiment_name : "go2_parkour_rough"
-+policy : ActorCriticScanCfg
-+algorithm : RslRlPpoAlgorithmCfg
-}
-class ScanEncoderConfig {
-+scan_encoder_dims : [128, 64, 32]
-+actor_scan_encoder_dims : optional
-+critic_scan_encoder_dims : optional
-+encode_scan_for_critic : bool
-}
-ActorCriticScan --> ScanEncoderConfig : "uses"
-Go2ParkourRunnerCfg --> ActorCriticScan : "instantiates"
-```
-
-**Diagram sources**
-- [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263)
-- [rsl_rl_ppo_cfg.py:128-194](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L194)
-
-**Section sources**
-- [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263)
-- [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237)
-
 ### Enhanced CLI Argument System
 Key CLI arguments for training and playback with custom policy support:
 - Video recording: --video, --video_length, --video_interval
@@ -252,7 +257,7 @@ Key CLI arguments for training and playback with custom policy support:
 - Custom policy registration: automatic via _register_custom_actor()
 - RSL-RL specific: --experiment_name, --run_name, --resume, --load_run, --checkpoint, --logger, --log_project_name
 
-**Updated** Enhanced with automatic custom policy registration system supporting both standard and custom actor classes.
+**Updated** Enhanced with automatic custom policy registration system supporting both standard and custom actor classes for ZSL1 parkour training scenarios.
 
 ```mermaid
 flowchart TD
@@ -329,7 +334,7 @@ Video --> |No| Skip["Skip video"]
 - Export model checkpoints: After loading a checkpoint in playback, the policy is exported to JIT and ONNX under the checkpoint's exported/ directory. See [play.py:229-232](file://scripts/reinforcement_learning/rsl_rl/play.py#L229-L232).
 - Custom policy training: Use ActorCriticScan class with scan encoders for advanced perception tasks. See [rsl_rl_ppo_cfg.py:128-194](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L194).
 
-**Updated** Enhanced with comprehensive examples for custom policy training and parkour environment configuration.
+**Updated** Enhanced with comprehensive examples for custom policy training and ZSL1 parkour environment configuration with advanced observation processing capabilities.
 
 **Section sources**
 - [README.md:197-216](file://README.md#L197-L216)
@@ -395,9 +400,9 @@ Play --> Export["Export JIT/ONNX<br/>(custom policy)"]
 - [actor_critic_scan.py:193-201](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L193-L201)
 
 ## Conclusion
-The enhanced RSL-RL training system now features a comprehensive custom RL configuration system supporting advanced policy architectures like ActorCriticScan with scan encoders and privileged observation processing. The system integrates seamlessly with parkour-specific environments, provides robust distributed training capabilities, and maintains backward compatibility with standard ActorCritic policies. The custom policy registration system enables flexible deployment of specialized architectures while preserving the existing training pipeline infrastructure.
+The enhanced RSL-RL training system now features a comprehensive custom RL configuration system supporting advanced policy architectures like ActorCriticScan with scan encoders and privileged observation processing. The system integrates seamlessly with ZSL1 parkour-specific environments, provides robust distributed training capabilities, and maintains backward compatibility with standard ActorCritic policies. The custom policy registration system enables flexible deployment of specialized architectures while preserving the existing training pipeline infrastructure.
 
-**Updated** The system now includes comprehensive custom RL configuration support, advanced ActorCriticScan policy architecture, specialized parkour training frameworks, and enhanced observation processing capabilities for extreme quadruped locomotion scenarios.
+**Updated** The system now includes comprehensive ZSL1 parkour training framework with ActorCriticScan neural network architecture, custom PPO configuration system, and advanced observation processing capabilities for extreme quadruped locomotion scenarios with both standard and custom policy support.
 
 ## Appendices
 
@@ -425,8 +430,8 @@ The ActorCriticScan network provides advanced perception capabilities through co
 **Section sources**
 - [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263)
 
-### Appendix C: Go2 Parkour Training Configuration
-The Go2 parkour training system provides comprehensive support for extreme quadruped locomotion:
+### Appendix C: ZSL1 Parkour Training Configuration
+The ZSL1 parkour training system provides comprehensive support for extreme quadruped locomotion:
 
 - **Multiple Runner Configurations**: Flat, rough, and ablation study configurations
 - **Scan Encoder Integration**: Configurable scan encoders for depth sensor processing
@@ -436,8 +441,8 @@ The Go2 parkour training system provides comprehensive support for extreme quadr
 **Section sources**
 - [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237)
 
-### Appendix D: Zsibot Parkour Environment Configuration
-The Zsibot parkour environment provides specialized training scenarios for extreme quadruped locomotion:
+### Appendix D: ZSL1 Parkour Environment Configuration
+The ZSL1 parkour environment provides specialized training scenarios for extreme quadruped locomotion:
 
 - **Custom Terrains**: Mesh-based stepped platforms with configurable difficulty and step patterns
 - **Specialized Rewards**: Rewards optimized for climbing, foothold precision, and controlled movement
@@ -475,3 +480,18 @@ The environment wrapper now supports advanced observation processing:
 - [actor_critic_scan.py:54-114](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L54-L114)
 - [train.py:212](file://scripts/reinforcement_learning/rsl_rl/train.py#L212)
 - [play.py:196](file://scripts/reinforcement_learning/rsl_rl/play.py#L196)
+
+### Appendix G: Advanced Observation Processing Capabilities
+**Updated** Enhanced with comprehensive observation processing for ZSL1 parkour training:
+
+The system now supports advanced observation processing with configurable observation splitting:
+
+- **Proprioceptive Observations**: 52-dimensional proprioceptive input for joint positions, velocities, and base dynamics
+- **Scan Observations**: 187-dimensional scan input for depth sensor processing with configurable encoder dimensions
+- **Privileged Observations**: Optional privileged observation processing for critic networks with dedicated encoder
+- **Independent Encoder Configuration**: Separate scan encoders for actor and critic with customizable hidden dimensions
+- **Flexible Input Composition**: Dynamic composition of actor and critic inputs based on available observation modalities
+
+**Section sources**
+- [actor_critic_scan.py:54-114](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L54-L114)
+- [rsl_rl_ppo_cfg.py:169-179](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/rsl_rl_ppo_cfg.py#L169-L179)

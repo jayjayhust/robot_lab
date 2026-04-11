@@ -445,7 +445,12 @@ class ZSL1ParkourTerminationsCfg:
 class ZSL1ParkourCurriculumCfg:
     """Curriculum terms for ZSL1 parkour."""
 
-    terrain_levels = CurrTerm(func=vel_mdp.terrain_levels_vel)
+    # Note: terrain_levels_vel has default asset_cfg=SceneEntityCfg("robot")
+    # Using empty params to avoid serialization issues with SceneEntityCfg
+    terrain_levels = CurrTerm(
+        func=vel_mdp.terrain_levels_vel,
+        params={},
+    )
 
 
 ##

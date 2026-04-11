@@ -788,12 +788,11 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    # REF: https://github.com/isaac-sim/IsaacLab/blob/main/source/isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L27
+    # Note: terrain_levels_vel has default asset_cfg=SceneEntityCfg("robot")
+    # Using empty params to avoid serialization issues with SceneEntityCfg
     terrain_levels = CurrTerm(
         func=mdp.terrain_levels_vel,
-        params={
-            "asset_cfg": SceneEntityCfg("robot")  # Name of your robot actor
-        },
+        params={},
     )
 
     command_levels_lin_vel = CurrTerm(
