@@ -6,6 +6,7 @@
 import math
 
 from isaaclab.envs import ManagerBasedRLEnvCfg
+from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
@@ -16,6 +17,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 import isaaclab_tasks.manager_based.navigation.mdp as mdp
+import robot_lab.tasks.manager_based.navigation.mdp as anymal_c_nav_mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.anymal_c.flat_env_cfg import AnymalCFlatEnvCfg
 
 LOW_LEVEL_ENV_CFG = AnymalCFlatEnvCfg()
@@ -117,6 +119,31 @@ class TerminationsCfg:
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names="base"), "threshold": 1.0},
     )
 
+@configclass
+class CurriculumCfg:
+    """Curriculum terms for the MDP."""
+    # Note: terrain_levels_vel has default asset_cfg=SceneEntityCfg("robot")
+    # Using isaaclab_tasks version for proper Hydra serialization
+    terrain_levels = CurrTerm(
+        func=anymal_c_nav_mdp.terrain_levels_vel,
+        params={},
+    )
+
+    command_levels_lin_vel = CurrTerm(
+        func=anymal_c_nav_mdp.command_levels_lin_vel,
+        params={
+            "reward_term_name": "track_lin_vel_xy_exp",
+            "range_multiplier": (0.1, 1.0),
+        },
+    )
+
+    command_levels_ang_vel = CurrTerm(
+        func=anymal_c_nav_mdp.command_levels_ang_vel,
+        params={
+            "reward_term_name": "track_ang_vel_z_exp",
+            "range_multiplier": (0.1, 1.0),
+        },
+    )
 
 @configclass
 class NavigationEnvCfg(ManagerBasedRLEnvCfg):
@@ -131,6 +158,7 @@ class NavigationEnvCfg(ManagerBasedRLEnvCfg):
     commands: CommandsCfg = CommandsCfg()
     rewards: RewardsCfg = RewardsCfg()
     terminations: TerminationsCfg = TerminationsCfg()
+    curriculum: CurriculumCfg = CurriculumCfg()
 
     def __post_init__(self):
         """Post initialization."""
@@ -147,6 +175,12 @@ class NavigationEnvCfg(ManagerBasedRLEnvCfg):
         if self.scene.contact_forces is not None:
             self.scene.contact_forces.update_period = self.sim.dt
 
+        # ------------------------------Curriculums------------------------------
+        # self.curriculum.command_levels_lin_vel.params["range_multiplier"] = (0.2, 1.0)
+        # self.curriculum.command_levels_ang_vel.params["range_multiplier"] = (0.2, 1.0)
+        self.curriculum.command_levels_lin_vel = None
+        self.curriculum.command_levels_ang_vel = None
+        self.curriculum.terrain_levels = None
 
 class NavigationEnvCfg_PLAY(NavigationEnvCfg):
     def __post_init__(self) -> None:
