@@ -216,7 +216,9 @@ python scripts/tools/zero_agent.py --task=<ENV_NAME>
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-v0 --headless
-# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Isaac-Navigation-Flat-Anymal-C-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Navigation-Anymal-C-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Navigation-Flat-Unitree-Go2-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-Go2-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-G1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-G1-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
@@ -234,7 +236,9 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --num_envs 1 --keyboard
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-v0 --num_envs 1 --keyboard
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-v0 --num_envs 1 --keyboard
-# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Isaac-Navigation-Flat-Anymal-C-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Anymal-C-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Flat-Unitree-Go2-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-Go2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-G1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-G1-v0
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
@@ -340,6 +344,13 @@ Others (**Experimental**)
   # Play the student agent
   python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Anymal-D-v0 --num_envs 64 --agent rsl_rl_distillation_cfg_entry_point
   ```
+
+- Train navigation for Anymal C(using original isaaclab files)
+  Navigation info is configured in: navigation_env_cfg.py->CommandsCfg->pose_command
+  ```bash
+  python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Isaac-Navigation-Flat-Anymal-C-v0 --headless
+  ```
+
 
 > [!NOTE]
 > If you want to control a **SINGLE ROBOT** with the keyboard during playback, add `--keyboard` at the end of the play script.

@@ -17,7 +17,7 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 import isaaclab_tasks.manager_based.navigation.mdp as mdp
-import robot_lab.tasks.manager_based.navigation.mdp as anymal_c_nav_mdp
+import robot_lab.tasks.manager_based.navigation.mdp as nav_mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.anymal_c.flat_env_cfg import AnymalCFlatEnvCfg
 
 LOW_LEVEL_ENV_CFG = AnymalCFlatEnvCfg()
@@ -50,6 +50,7 @@ class ActionsCfg:
 
     pre_trained_policy_action: mdp.PreTrainedPolicyActionCfg = mdp.PreTrainedPolicyActionCfg(
         asset_name="robot",
+        # a pre-trained Reinforcement Learning model checkpoint for the ANYmal-C quadruped robot
         policy_path=f"{ISAACLAB_NUCLEUS_DIR}/Policies/ANYmal-C/Blind/policy.pt",
         low_level_decimation=4,
         low_level_actions=LOW_LEVEL_ENV_CFG.actions.joint_pos,
@@ -78,7 +79,7 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-400.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-400.0)  # why so high? got pre-trained walk model(*.pt) loaded?
     position_tracking = RewTerm(
         func=mdp.position_command_error_tanh,
         weight=0.5,
@@ -100,12 +101,13 @@ class RewardsCfg:
 class CommandsCfg:
     """Command terms for the MDP."""
 
+    # pose command
     pose_command = mdp.UniformPose2dCommandCfg(
         asset_name="robot",
-        simple_heading=False,
-        resampling_time_range=(8.0, 8.0),
-        debug_vis=True,
-        ranges=mdp.UniformPose2dCommandCfg.Ranges(pos_x=(-3.0, 3.0), pos_y=(-3.0, 3.0), heading=(-math.pi, math.pi)),
+        simple_heading=False,  # Use simple heading command
+        resampling_time_range=(8.0, 8.0),  # Resample command every 8.0 to 8.0 seconds
+        debug_vis=True,  # Visualize command in Isaac Sim
+        ranges=mdp.UniformPose2dCommandCfg.Ranges(pos_x=(-3.0, 3.0), pos_y=(-3.0, 3.0), heading=(-math.pi, math.pi)),  # Command ranges
     )
 
 
@@ -125,12 +127,12 @@ class CurriculumCfg:
     # Note: terrain_levels_vel has default asset_cfg=SceneEntityCfg("robot")
     # Using isaaclab_tasks version for proper Hydra serialization
     terrain_levels = CurrTerm(
-        func=anymal_c_nav_mdp.terrain_levels_vel,
+        func=nav_mdp.terrain_levels_vel,
         params={},
     )
 
     command_levels_lin_vel = CurrTerm(
-        func=anymal_c_nav_mdp.command_levels_lin_vel,
+        func=nav_mdp.command_levels_lin_vel,
         params={
             "reward_term_name": "track_lin_vel_xy_exp",
             "range_multiplier": (0.1, 1.0),
@@ -138,7 +140,7 @@ class CurriculumCfg:
     )
 
     command_levels_ang_vel = CurrTerm(
-        func=anymal_c_nav_mdp.command_levels_ang_vel,
+        func=nav_mdp.command_levels_ang_vel,
         params={
             "reward_term_name": "track_ang_vel_z_exp",
             "range_multiplier": (0.1, 1.0),

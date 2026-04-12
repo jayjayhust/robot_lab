@@ -5,32 +5,23 @@
 - [README.md](file://README.md)
 - [zsibot.py](file://source/robot_lab/robot_lab/assets/zsibot.py)
 - [stair_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py)
-- [gap_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py)
-- [parkour_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py)
+- [flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py)
+- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py)
 - [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py)
-- [play_cs.py](file://scripts/reinforcement_learning/rsl_rl/play_cs.py)
+- [__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py)
 - [zsl1.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf)
 - [zsl1w.urdf](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py)
-- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py)
 - [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py)
-- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py)
-- [mesh_terrains.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mesh_terrains.py)
-- [terrains_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/terrains_cfg.py)
-- [actor_critic_scan.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py)
-- [observations.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/observations.py)
-- [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/rewards.py)
-- [rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py)
-- [__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py)
+- [zsl1_parkour_rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py)
+- [zsl1_parkour_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced terrain-level curriculum system with streamlined parameter specifications using empty params to avoid serialization issues
-- Improved serialization compatibility for curriculum parameters in ZSL1 parkour configuration
-- Added comprehensive terrain-level curriculum support with empty params to prevent serialization problems
-- Enhanced terrain generation capabilities with new parkour_step_terrain function
-- Streamlined curriculum parameter handling for better maintainability and compatibility
+- Updated documentation to reflect the consolidation of specialized locomotion environments into the unified G1 system
+- Removed references to non-existent gap and parkour environment files that were moved to the separate zsibot_zsl1_parkour directory
+- Clarified the current state where stair climbing remains in the dedicated zsibot_zsl1 directory while other environments moved to unified system
+- Updated environment registration to reflect the current working configuration
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -39,27 +30,26 @@
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
 6. [Enhanced Stair Climbing Features](#enhanced-stair-climbing-features)
-7. [Advanced Gap Traversal Capabilities](#advanced-gap-traversal-capabilities)
-8. [Enhanced Parkour Terrain Configuration](#enhanced-parkour-terrain-configuration)
-9. [Advanced Neural Network Architecture](#advanced-neural-network-architecture)
-10. [Custom Reward Systems](#custom-reward-systems)
-11. [Privileged Observation Framework](#privileged-observation-framework)
-12. [Enhanced Curriculum System](#enhanced-curriculum-system)
-13. [Dependency Analysis](#dependency-analysis)
-14. [Performance Considerations](#performance-considerations)
-15. [Troubleshooting Guide](#troubleshooting-guide)
-16. [Conclusion](#conclusion)
+7. [Advanced Neural Network Architecture](#advanced-neural-network-architecture)
+8. [Custom Reward Systems](#custom-reward-systems)
+9. [Enhanced Curriculum System](#enhanced-curriculum-system)
+10. [Dependency Analysis](#dependency-analysis)
+11. [Performance Considerations](#performance-considerations)
+12. [Troubleshooting Guide](#troubleshooting-guide)
+13. [Conclusion](#conclusion)
 
 ## Introduction
-This document provides a comprehensive analysis of the ZSIBOT ZSL1 Stair Climbing Configuration within the robot_lab repository, now enhanced with a comprehensive parkour training system featuring improved curriculum management and serialization compatibility. The ZSL1 is a quadruped robot designed for advanced locomotion behaviors, featuring articulated legs and optional wheel attachments for enhanced mobility. The configuration leverages Isaac Lab's reinforcement learning framework to enable stair climbing, gap traversal, and parkour-style navigation capabilities through carefully tuned environment settings, reward functions, and actuator configurations.
+This document provides a comprehensive analysis of the ZSIBOT ZSL1 Stair Climbing Configuration within the robot_lab repository, reflecting the current state of the unified G1 system. The ZSL1 is a quadruped robot designed for advanced locomotion behaviors, featuring articulated legs and optional wheel attachments for enhanced mobility. The configuration leverages Isaac Lab's reinforcement learning framework to enable stair climbing capabilities through carefully tuned environment settings, reward functions, and actuator configurations.
 
-The repository now includes both traditional stair climbing configurations and advanced parkour training systems, featuring a new ActorCriticScan neural network architecture, mesh-based terrain generation, and comprehensive reward systems. Recent enhancements include increased abductor joint scaling from 0.15 to 0.2 to support gap traversal capabilities, enhanced action scaling for hip and knee joints to support 0.23m step heights, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions.
+**Important Update**: The documentation reflects the current consolidated state where the stair climbing environment remains in the dedicated `zsibot_zsl1/` directory, while specialized gap and parkour environments have been moved to the unified `zsibot_zsl1_parkour/` directory as part of the transition to the Isaaclab G1 framework. This consolidation represents a shift from Unitree G1-specific implementations to a unified G1 system architecture.
+
+The repository currently includes the stair climbing configuration along with basic flat and rough terrain environments, while advanced parkour capabilities are maintained in the separate parkour directory. Recent enhancements include increased abductor joint scaling from 0.15 to 0.2 to support gap traversal capabilities, enhanced action scaling for hip and knee joints to support 0.23m step heights, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions.
 
 **Section sources**
-- [README.md:1-512](file://README.md#L1-L512)
+- [README.md:1-538](file://README.md#L1-L538)
 
 ## Project Structure
-The ZSL1 configuration is organized within the robot_lab extension, featuring multiple specialized environments that build upon a common foundation with enhanced parkour capabilities and improved curriculum management:
+The ZSL1 configuration is organized within the robot_lab extension with a clear separation between the dedicated stair climbing environment and the unified G1 system:
 
 ```mermaid
 graph TB
@@ -68,65 +58,45 @@ ZSIBOT_PY["assets/zsibot.py<br/>Robot configurations"]
 ZSL1_URDF["data/Robots/zsibot/zsl1_description/urdf/zsl1.urdf<br/>Legged ZSL1 model"]
 ZSL1W_URDF["data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf<br/>Wheeled ZSL1 model"]
 end
-subgraph "Traditional Environments"
+subgraph "Dedicated Stair Environment"
 STAIR_CFG["stair_env_cfg.py<br/>Stair-specific settings"]
-GAP_CFG["gap_env_cfg.py<br/>Gap traversal configuration"]
-PARKOUR_OLD["parkour_env_cfg.py<br/>Legacy parkour configuration"]
-ROUGH_CFG["rough_env_cfg.py<br/>Rough terrain base"]
 FLAT_CFG["flat_env_cfg.py<br/>Flat terrain base"]
+ROUGH_CFG["rough_env_cfg.py<br/>Rough terrain base"]
 end
-subgraph "Enhanced Parkour System"
-PARKOUR_NEW["zsibot_zsl1_parkour/<br/>New comprehensive parkour system"]
-MESH_TERRAINS["mesh_terrains.py<br/>Advanced mesh terrain generation"]
-TERRAINS_CFG["terrains_cfg.py<br/>Terrain configuration classes"]
-ACTOR_CRITIC["actor_critic_scan.py<br/>Enhanced neural network"]
-OBSERVATIONS["observations.py<br/>Privileged observations"]
-REWARDS_NEW["rewards.py<br/>Custom reward functions"]
-ROUGH_ENV["rough_env_cfg.py<br/>Manager-based environment"]
-REGISTRATION["__init__.py<br/>Environment registration"]
-CURRICULUM["Enhanced Curriculum System<br/>Empty Params Serialization"]
+subgraph "Unified G1 System"
+PARKOUR_ROUGH["zsibot_zsl1_parkour/rough_env_cfg.py<br/>Advanced parkour system"]
+PARKOUR_INIT["zsibot_zsl1_parkour/__init__.py<br/>14 environment variants"]
 end
 subgraph "Training Infrastructure"
 PPO_CFG["agents/rsl_rl_ppo_cfg.py<br/>PPO algorithm settings"]
-PLAY_CS["scripts/reinforcement_learning/rsl_rl/play_cs.py<br/>Evaluation script"]
+ENV_INIT["zsibot_zsl1/__init__.py<br/>Environment registration"]
 end
 ZSIBOT_PY --> STAIR_CFG
-ZSIBOT_PY --> GAP_CFG
-ZSIBOT_PY --> PARKOUR_OLD
-ZSIBOT_PY --> PARKOUR_NEW
-ZSL1_URDF --> ZSIBOT_PY
-ZSL1W_URDF --> ZSIBOT_PY
-STAIR_CFG --> PPO_CFG
-GAP_CFG --> PPO_CFG
-PARKOUR_OLD --> PPO_CFG
-PARKOUR_NEW --> ACTOR_CRITIC
-PARKOUR_NEW --> MESH_TERRAINS
-PARKOUR_NEW --> TERRAINS_CFG
-PARKOUR_NEW --> OBSERVATIONS
-PARKOUR_NEW --> REWARDS_NEW
-PARKOUR_NEW --> REGISTRATION
-PARKOUR_NEW --> CURRICULUM
-ROUGH_ENV --> ACTOR_CRITIC
-ROUGH_ENV --> OBSERVATIONS
-ROUGH_ENV --> REWARDS_NEW
-ROUGH_ENV --> REGISTRATION
-PPO_CFG --> PLAY_CS
+ZSIBOT_PY --> FLAT_CFG
+ZSIBOT_PY --> ROUGH_CFG
+ZSIBOT_PY --> PARKOUR_ROUGH
+STAIR_CFG --> ENV_INIT
+FLAT_CFG --> ENV_INIT
+ROUGH_CFG --> ENV_INIT
+PARKOUR_ROUGH --> PARKOUR_INIT
+PARKOUR_ROUGH --> PPO_CFG
+PARKOUR_INIT --> PPO_CFG
 ```
 
 **Diagram sources**
-- [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
 - [stair_env_cfg.py:1-236](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L1-L236)
-- [gap_env_cfg.py:1-339](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L1-L339)
-- [parkour_env_cfg.py:1-442](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L1-L442)
-- [mesh_terrains.py:1-800](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mesh_terrains.py#L1-L800)
-- [actor_critic_scan.py:1-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L1-L280)
-- [rough_env_cfg.py:1-784](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L1-L784)
+- [flat_env_cfg.py:1-30](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L1-L30)
+- [rough_env_cfg.py:1-166](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L1-L166)
+- [rsl_rl_ppo_cfg.py:1-216](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L1-L216)
+- [__init__.py:1-71](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L1-L71)
+- [zsl1_parkour_rough_env_cfg.py:1-789](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L1-L789)
+- [zsl1_parkour_init.py:1-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py#L1-L161)
 
 **Section sources**
 - [README.md:360-411](file://README.md#L360-L411)
 
 ## Core Components
-The ZSL1 configuration consists of several interconnected components that work together to enable advanced locomotion behaviors including stair climbing, gap traversal, and parkour navigation:
+The ZSL1 configuration consists of several interconnected components that work together to enable advanced locomotion behaviors, with the stair climbing environment remaining in its dedicated location:
 
 ### Robot Configuration
 The robot configuration defines the physical properties, actuator specifications, and initial conditions for the ZSL1:
@@ -136,22 +106,19 @@ The robot configuration defines the physical properties, actuator specifications
 - **Initial State**: Sets default joint positions and velocities for stable starting conditions
 - **Joint Limits**: Specifies effort and velocity limits based on motor specifications
 
-### Traditional Environment Configurations
-Four primary environment configurations provide different training scenarios for various locomotion challenges:
+### Dedicated Stair Environment Configuration
+The stair climbing environment provides specialized settings for step negotiation:
 
 - **Stair Environment**: Specialized for step negotiation with modified reward functions, enhanced action scaling, and stability constraints
-- **Gap Environment**: Designed for traversing gaps and open spaces with increased abductor joint scaling for lateral stability
-- **Legacy Parkour Environment**: Previous implementation with basic terrain generation capabilities
-- **Rough Terrain**: Base configuration for general quadruped locomotion
-- **Flat Terrain**: Simplified environment for baseline performance testing
+- **Flat Environment**: Simplified environment for baseline performance testing
+- **Rough Environment**: Base configuration for general quadruped locomotion
 
-### Enhanced Parkour System
-The new comprehensive parkour system includes:
+### Unified G1 System Integration
+The advanced parkour capabilities have been moved to the unified G1 system:
 
 - **Advanced Neural Network**: ActorCriticScan architecture with scan and privileged observation encoders
-- **Mesh Terrain Generation**: Sophisticated trimesh-based terrain generation with customizable parameters
-- **Privileged Observations**: Enhanced sensor data including mass, center of mass, friction coefficients, and PD gains
-- **Custom Reward Functions**: Torque summation, mechanical work calculation, and stumble detection
+- **Enhanced Terrain Generation**: Sophisticated trimesh-based terrain generation with customizable parameters
+- **Comprehensive Environment Variants**: 14 different environment configurations for systematic analysis
 - **Manager-Based Architecture**: Modern environment configuration using ManagerBasedRLEnv pattern
 
 ### Enhanced Action Scaling System
@@ -159,7 +126,7 @@ The stair climbing environment features increased action scaling for hip and kne
 
 - **Hip Joint Scaling**: Increased from 0.4 to 0.6 to enable powerful leg swing and lifting motions
 - **Knee Joint Scaling**: Increased from 0.4 to 0.6 to provide adequate leg extension for step negotiation
-- **Abduction Joint Scaling**: Enhanced from 0.15 to 0.2 to provide improved lateral stability during gap traversal
+- **Abduction Joint Scaling**: Enhanced from 0.15 to 0.2 to provide improved lateral stability during stair climbing
 - **Action Clipping**: Applied with broad limits of (-100.0, 100.0) for stability
 
 ### Stability Constraints
@@ -177,24 +144,14 @@ The environment features a reward system prioritizing controlled climbing and ad
 - **Removed Heading Alignment**: Heading alignment requirement eliminated to focus on climbing performance
 - **Reduced Air Time**: Air time threshold lowered to 0.35 seconds for controlled stepping
 - **Enhanced Foot Height Rewards**: Modified targeting for optimal foot positioning during stair negotiation
-- **Advanced Gap Rewards**: Specialized rewards for successful gap traversal and landing
-
-### Advanced Command Generation
-Terrain-aware command generation automatically adapts robot behavior based on terrain conditions:
-
-- **Pit Detection**: Real-time identification of "pits" terrain through grid-based analysis
-- **Dynamic Restrictions**: Automatic application of movement restrictions on challenging terrains
-- **Forward-Only Movement**: Enforced forward-only locomotion on pit terrains with speed constraints
-- **Heading Control**: Automatic heading adjustment to maintain stability on difficult terrain
 
 **Section sources**
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
 - [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
 
 ## Architecture Overview
-The ZSL1 configuration follows a layered architecture that separates concerns between robot modeling, environment definition, and reinforcement learning, with enhanced features for advanced locomotion and improved curriculum management:
+The ZSL1 configuration follows a layered architecture that separates concerns between robot modeling, environment definition, and reinforcement learning, with the current consolidated state reflecting the unified G1 system:
 
 ```mermaid
 graph TB
@@ -203,50 +160,48 @@ URDF_MODEL["URDF Models<br/>zsl1.urdf / zsl1w.urdf"]
 ASSET_CONFIG["Asset Configuration<br/>ArticulationCfg"]
 ACTUATOR_CONFIG["Actuator Configuration<br/>DCMotor & ImplicitActuator"]
 end
-subgraph "Environment Definition Layer"
+subgraph "Dedicated Environment Layer"
 BASE_ENV["Base Environment<br/>LocomotionVelocityRoughEnvCfg"]
 STAIR_ENV["Stair Environment<br/>Enhanced Actions & Stability"]
-GAP_ENV["Gap Environment<br/>Advanced Traversal"]
-PARKOUR_ENV["Enhanced Parkour Environment<br/>Manager-Based Architecture"]
+FLAT_ENV["Flat Environment<br/>Simplified Baseline"]
+ROUGH_ENV["Rough Environment<br/>General Locomotion"]
 ENHANCED_REWARDS["Enhanced Rewards<br/>Controlled Climbing Focus"]
-TERRAIN_COMMANDS["Terrain-Aware Commands<br/>Pit Detection & Restrictions"]
-MESH_GENERATION["Advanced Mesh Generation<br/>Parkour Step Patterns"]
-CURRICULUM_SYSTEM["Enhanced Curriculum System<br/>Empty Params Serialization"]
+STAIR_CURRICULUM["Enhanced Curriculum System<br/>Empty Params Serialization"]
+end
+subgraph "Unified G1 System Layer"
+PARKOUR_ENV["Advanced Parkour Environment<br/>Manager-Based Architecture"]
+PARKOUR_OBS["Enhanced Observation Pipeline<br/>Privileged & Scan Encoders"]
+PARKOUR_REWARDS["Custom Reward Functions<br/>Torque Summation & Work"]
+PARKOUR_TERRAINS["Sophisticated Terrain Generation<br/>Multiple Obstacle Types"]
+PARKOUR_ABLATIONS["14 Environment Variants<br/>Systematic Analysis"]
 end
 subgraph "Training Infrastructure Layer"
 PPO_TRAINER["PPO Trainer<br/>RslRlOnPolicyRunnerCfg"]
-OBSERVATION["Enhanced Observation Pipeline<br/>Privileged & Scan Encoders"]
-REWARD_SYSTEM["Modified Reward System<br/>Climbing Progress Priority"]
+NEURAL_NETWORK["ActorCritic Architecture<br/>Asymmetric Actor-Critic"]
 COMMAND_GENERATION["Advanced Command Generation<br/>Real-time Terrain Adaptation"]
-NEURAL_NETWORK["ActorCriticScan Architecture<br/>Asymmetric Actor-Critic"]
 end
 URDF_MODEL --> ASSET_CONFIG
 ASSET_CONFIG --> ACTUATOR_CONFIG
 ACTUATOR_CONFIG --> BASE_ENV
 BASE_ENV --> STAIR_ENV
-BASE_ENV --> GAP_ENV
-BASE_ENV --> PARKOUR_ENV
+BASE_ENV --> FLAT_ENV
+BASE_ENV --> ROUGH_ENV
 STAIR_ENV --> ENHANCED_REWARDS
-GAP_ENV --> ENHANCED_REWARDS
-PARKOUR_ENV --> ENHANCED_REWARDS
-STAIR_ENV --> TERRAIN_COMMANDS
-GAP_ENV --> TERRAIN_COMMANDS
-PARKOUR_ENV --> TERRAIN_COMMANDS
-PARKOUR_ENV --> MESH_GENERATION
-PARKOUR_ENV --> CURRICULUM_SYSTEM
-ENHANCED_REWARDS --> PPO_TRAINER
-TERRAIN_COMMANDS --> PPO_TRAINER
-MESH_GENERATION --> PPO_TRAINER
-CURRICULUM_SYSTEM --> PPO_TRAINER
+FLAT_ENV --> ENHANCED_REWARDS
+ROUGH_ENV --> ENHANCED_REWARDS
+STAIR_ENV --> STAIR_CURRICULUM
 STAIR_ENV --> PPO_TRAINER
-GAP_ENV --> PPO_TRAINER
+FLAT_ENV --> PPO_TRAINER
+ROUGH_ENV --> PPO_TRAINER
+PARKOUR_ENV --> PARKOUR_OBS
+PARKOUR_ENV --> PARKOUR_REWARDS
+PARKOUR_ENV --> PARKOUR_TERRAINS
+PARKOUR_ENV --> PARKOUR_ABLATIONS
 PARKOUR_ENV --> PPO_TRAINER
-PPO_TRAINER --> OBSERVATION
-PPO_TRAINER --> REWARD_SYSTEM
+ENHANCED_REWARDS --> PPO_TRAINER
+STAIR_CURRICULUM --> PPO_TRAINER
+PPO_TRAINER --> NEURAL_NETWORK
 PPO_TRAINER --> COMMAND_GENERATION
-OBSERVATION --> NEURAL_NETWORK
-REWARD_SYSTEM --> NEURAL_NETWORK
-COMMAND_GENERATION --> NEURAL_NETWORK
 ```
 
 **Diagram sources**
@@ -254,12 +209,11 @@ COMMAND_GENERATION --> NEURAL_NETWORK
 - [zsl1w.urdf:1-959](file://source/robot_lab/data/Robots/zsibot/zsl1w_description/urdf/zsl1w.urdf#L1-L959)
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
 - [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
-- [gap_env_cfg.py:198-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L204)
-- [parkour_env_cfg.py:208-214](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L208-L214)
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
-- [actor_critic_scan.py:20-150](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L150)
-- [mesh_terrains.py:25-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mesh_terrains.py#L25-L208)
+- [flat_env_cfg.py:15-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L15-L29)
+- [rough_env_cfg.py:77-150](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L77-L150)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
+- [zsl1_parkour_rough_env_cfg.py:462-530](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L462-L530)
+- [zsl1_parkour_init.py:19-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py#L19-L161)
 
 ## Detailed Component Analysis
 
@@ -311,7 +265,7 @@ ZSIBOT_ZSL1W_CFG --> ArticulationCfg : "contains"
 
 The configuration demonstrates several key design decisions for advanced locomotion:
 
-- **Joint Specifications**: Leg joints utilize DCMotorCfg with torque limits of 28 N⋅m, providing sufficient power for step negotiation and gap traversal
+- **Joint Specifications**: Leg joints utilize DCMotorCfg with torque limits of 28 N⋅m, providing sufficient power for step negotiation and stair climbing
 - **Wheel Actuation**: Wheeled variant includes ImplicitActuatorCfg for smooth rolling motion
 - **Initial Positioning**: Conservative joint angles (hip at 0.8 rad, knee at -1.5 rad) ensure stability during training
 - **Contact Sensing**: Enabled contact sensors improve foothold detection and stability feedback
@@ -320,21 +274,20 @@ The configuration demonstrates several key design decisions for advanced locomot
 - [zsibot.py:14-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L14-L115)
 
 ### Environment Configuration Analysis
-The specialized environments build upon the base locomotion configuration with modifications tailored to specific locomotion challenges:
+The specialized stair climbing environment builds upon the base locomotion configuration with modifications tailored to stair negotiation:
 
 ```mermaid
 flowchart TD
-START([Environment Initialization]) --> LOAD_BASE["Load Base Configuration"]
-LOAD_BASE --> APPLY_SPECIALIZATION["Apply Specialized Modifications"]
+START([Stair Environment Initialization]) --> LOAD_BASE["Load Base Configuration"]
+LOAD_BASE --> APPLY_SPECIALIZATION["Apply Stair-Specific Modifications"]
 APPLY_SPECIALIZATION --> MODIFY_OBS["Modify Observations"]
 MODIFY_OBS --> ADJUST_ACTIONS["Adjust Action Scaling"]
 ADJUST_ACTIONS --> CONFIG_EVENTS["Configure Stability Constraints"]
 CONFIG_EVENTS --> SETUP_REWARDS["Setup Modified Reward System"]
-SETUP_REWARDS --> ENABLE_TERRAIN["Enable Specialized Terrain"]
-ENABLE_TERRAIN --> ADD_COMMANDS["Add Terrain-Aware Commands"]
-ADD_COMMANDS --> CONFIG_CURRICULUM["Configure Enhanced Curriculum"]
-CONFIG_CURRICULUM --> END([Ready for Training])
-MODIFY_OBS --> |Reduced| HEIGHT_SCAN["Disable Height Scan"]
+SETUP_REWARDS --> ENABLE_TERRAIN["Enable Stair Terrain Generation"]
+ENABLE_TERRAIN --> CONFIG_CURRICULUM["Configure Enhanced Curriculum"]
+CONFIG_CURRICULUM --> END([Ready for Stair Training])
+MODIFY_OBS --> |Disabled| HEIGHT_SCAN["Disable Height Scan"]
 MODIFY_OBS --> |Scaled| JOINT_OBS["Scale Joint Observations"]
 ADJUST_ACTIONS --> |Enhanced| ABAD_SCALE["Abductor Scaling 0.15 → 0.2"]
 ADJUST_ACTIONS --> |Increased| STAIR_ACTIONS["Higher Action Scale for Stairs"]
@@ -345,26 +298,20 @@ SETUP_REWARDS --> |Prioritized| CLIMB_PROGRESS["Climbing Progress Reward 2.5"]
 SETUP_REWARDS --> |Modified| AIR_TIME["Reduced Air Time Threshold 0.35"]
 SETUP_REWARDS --> |Removed| HEADING_ALIGN["Heading Alignment Requirement"]
 SETUP_REWARDS --> |Enhanced| FOOT_HEIGHT["Improved Foot Height Rewards"]
-SETUP_REWARDS --> |Advanced| GAP_REWARDS["Specialized Gap Rewards"]
-ADD_COMMANDS --> |Automatic| PIT_DETECTION["Pit Terrain Detection"]
-ADD_COMMANDS --> |Restrictive| FORWARD_ONLY["Forward-Only Movement"]
-ADD_COMMANDS --> |Heading Control| HEADING_ADJUST["Heading Adjustment"]
 CONFIG_CURRICULUM --> |Empty Params| SERIALIZATION["Serialization Compatibility"]
-CONFIG_CURRICULUM --> |Terrain Levels| LEVEL_CURRICULUM["Terrain-Level Curriculum"]
+CONFIG_CURRICULUM --> |No Terrain Levels| SIMPLE_CURRICULUM["Simplified Curriculum"]
 ```
 
 **Diagram sources**
 - [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
 - [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
-- [gap_env_cfg.py:198-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L204)
-- [parkour_env_cfg.py:208-214](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L208-L214)
 
 Key environmental modifications include:
 
-- **Enhanced Action Scaling**: Increased abductor joint scaling from 0.15 to 0.2 for improved lateral stability during gap traversal
+- **Enhanced Action Scaling**: Increased abductor joint scaling from 0.15 to 0.2 for improved lateral stability during stair climbing
 - **Enhanced Action Scaling**: Increased hip and knee joint scaling from 0.4 to 0.6 to support 0.23m step heights
-- **Stability Constraints**: Roll and pitch limits set to ±0.5 radians for enhanced stability during complex maneuvers
+- **Stability Constraints**: Roll and pitch limits set to ±0.5 radians for enhanced stability during stair negotiation
 - **Modified Reward System**: Climbing progress reward prioritized with weight of 2.5, eliminating heading alignment requirement
 - **Reduced Air Time Threshold**: Lowered to 0.35 seconds for controlled stepping rather than jumping
 - **Enhanced Termination Conditions**: Illegal contact termination removed, focusing on stability constraints
@@ -373,23 +320,21 @@ Key environmental modifications include:
 - [stair_env_cfg.py:94-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L122)
 - [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
-- [gap_env_cfg.py:198-204](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L204)
-- [parkour_env_cfg.py:208-214](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L208-L214)
 
 ### Training Configuration Analysis
-The reinforcement learning configuration employs PPO with hyperparameters optimized for advanced locomotion performance and enhanced reward system:
+The reinforcement learning configuration employs PPO with hyperparameters optimized for stair climbing performance and enhanced reward system:
 
 ```mermaid
 sequenceDiagram
 participant Trainer as "PPO Trainer"
-participant Env as "Specialized Environment"
+participant Env as "Stair Environment"
 participant Agent as "Policy Network"
 participant Memory as "Experience Buffer"
 participant Rewards as "Modified Reward System"
-participant Commands as "Terrain-Aware Commands"
+participant Commands as "Command Generation"
 participant Curriculum as "Enhanced Curriculum"
-Trainer->>Env : Initialize Environment
-Env->>Commands : Generate Terrain-Aware Commands
+Trainer->>Env : Initialize Stair Environment
+Env->>Commands : Generate Stair-Specific Commands
 Commands-->>Env : Return Appropriate Commands
 Env->>Curriculum : Configure Empty Params Curriculum
 Curriculum-->>Env : Return Serialized Curriculum
@@ -408,22 +353,20 @@ Trainer->>Env : Reset if Episode Done
 ```
 
 **Diagram sources**
-- [rsl_rl_ppo_cfg.py:9-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L9-L75)
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
-- [rough_env_cfg.py:445-453](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L445-L453)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
+- [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 
 The training configuration emphasizes:
 
-- **Network Architecture**: Multi-layer perceptrons with 512-256-128 hidden units and ELU activation for nonlinear policy representation
+- **Network Architecture**: Standard ActorCritic with 512-256-128 hidden units and ELU activation for stair-specific policy representation
 - **Learning Parameters**: Adaptive learning rate scheduling with entropy regularization to balance exploration and exploitation
-- **Optimization**: Gradient clipping and mini-batch training for stable convergence on challenging stair tasks
+- **Optimization**: Gradient clipping and mini-batch training for stable convergence on stair climbing tasks
 - **Modified Reward Processing**: Specialized reward computation prioritizing climbing progress over velocity tracking
-- **Terrain-Aware Command Processing**: Dynamic command generation based on environmental conditions
 - **Enhanced Curriculum Processing**: Empty params serialization for improved curriculum compatibility
+- **Command Generation**: Stair-specific command generation focused on forward movement and controlled climbing
 
 **Section sources**
-- [rsl_rl_ppo_cfg.py:9-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L9-L75)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
 
 ## Enhanced Stair Climbing Features
 
@@ -444,25 +387,24 @@ ACTION_END([Enhanced Action System])
 **Diagram sources**
 - [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
 - [stair_env_cfg.py:110-112](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L112)
-- [gap_env_cfg.py:198-202](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L202)
 
 Key action scaling enhancements include:
 
-- **Abductor Joint Scaling**: Increased from 0.15 to 0.2 (33% increase) to provide improved lateral stability during gap traversal and complex maneuvers
+- **Abductor Joint Scaling**: Increased from 0.15 to 0.2 (33% increase) to provide improved lateral stability during stair climbing
 - **Hip Joint Scaling**: Increased from 0.4 to 0.6 to provide 50% more leg swing and lifting power for 0.23m step heights
 - **Knee Joint Scaling**: Increased from 0.4 to 0.6 to enable adequate leg extension during step negotiation
-- **Enhanced Stability**: Combined with roll/pitch limits of ±0.5 radians for safe stair climbing and gap traversal
+- **Enhanced Stability**: Combined with roll/pitch limits of ±0.5 radians for safe stair climbing
 
 ### Stability Constraint System
-Enhanced stability constraints prevent dangerous orientations during stair negotiation and gap traversal:
+Enhanced stability constraints prevent dangerous orientations during stair negotiation:
 
-- **Roll Limit**: ±0.5 radians (±28.6 degrees) prevents excessive side-to-side tilting during climbing and gap crossing
+- **Roll Limit**: ±0.5 radians (±28.6 degrees) prevents excessive side-to-side tilting during climbing
 - **Pitch Limit**: ±0.5 radians (±28.6 degrees) maintains safe forward/backward tilt for stability
-- **Yaw Freedom**: Unrestricted rotation allows natural stair climbing and parkour-style orientation changes
-- **Position Constraints**: Limited base movement prevents falls during step transitions and gap crossings
+- **Yaw Freedom**: Unrestricted rotation allows natural stair climbing orientation changes
+- **Position Constraints**: Limited base movement prevents falls during step transitions
 
 ### Modified Reward System
-The environment features a reward system prioritizing controlled climbing and advanced locomotion:
+The environment features a reward system prioritizing controlled climbing:
 
 ```mermaid
 flowchart TD
@@ -471,8 +413,7 @@ CLIMB_PROGRESS --> REDUCED_AIR_TIME["Reduced Air Time<br/>Threshold: 0.35s"]
 REDUCED_AIR_TIME --> ENHANCED_FOOT_HEIGHT["Enhanced Foot Height<br/>Body Weight: -0.5"]
 ENHANCED_FOOT_HEIGHT --> REMOVED_HEADING["Removed Heading Alignment<br/>Requirement"]
 ENHANCED_FOOT_HEIGHT --> CONTROLLED_GAIT["Controlled Gait<br/>Reduced to 0.15"]
-CONTROLLED_GAIT --> ADVANCED_GAP_REWARDS["Advanced Gap Rewards<br/>Specialized for Gap Traversal"]
-ADVANCED_GAP_REWARDS --> OTHER_REWARDS["Other Stair-Specific Rewards<br/>Slide, Stumble, Contact"]
+OTHER_REWARDS["Other Stair-Specific Rewards<br/>Slide, Stumble, Contact"]
 OTHER_REWARDS --> REWARDS_END([Prioritized Climbing Rewards])
 ```
 
@@ -480,7 +421,6 @@ OTHER_REWARDS --> REWARDS_END([Prioritized Climbing Rewards])
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 - [stair_env_cfg.py:169-178](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L169-L178)
 - [stair_env_cfg.py:188-194](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L188-L194)
-- [gap_env_cfg.py:305-311](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L305-L311)
 
 Key reward modifications include:
 
@@ -489,158 +429,21 @@ Key reward modifications include:
 - **Enhanced Foot Height Rewards**: Modified targeting for optimal foot positioning during stair negotiation
 - **Removed Heading Alignment**: Eliminated to focus on climbing performance rather than orientation
 - **Controlled Gait**: Reduced to 0.15 to allow more flexible gait during climbing
-- **Advanced Gap Rewards**: Specialized rewards for successful gap traversal and landing
-
-### Terrain-Aware Command Generation
-Advanced command generation automatically adapts robot behavior based on terrain conditions:
-
-```mermaid
-flowchart TD
-COMMAND_START([Command Generation]) --> DETECT_TERRAIN["Detect Terrain Type<br/>Grid-Based Analysis"]
-DETECT_TERRAIN --> CHECK_PITS["Check for Pit Terrains<br/>Real-time Detection"]
-CHECK_PITS --> ON_PIT["Robot on Pit Terrain<br/>Apply Restrictions"]
-ON_PIT --> FORWARD_ONLY["Forward-Only Movement<br/>Min/Max Speed Constraints"]
-FORWARD_ONLY --> HEADING_ZERO["Set Heading to Zero<br/>Stability Control"]
-HEADING_ZERO --> RESAMPLE_COMMANDS["Resample Commands<br/>On Pit Exit"]
-RESAMPLE_COMMANDS --> NORMAL_MOVEMENT["Normal Movement<br/>Full Command Range"]
-NORMAL_MOVEMENT --> COMMAND_END([Command Output])
-CHECK_PITS --> |No Pits| NORMAL_MOVEMENT
-```
-
-**Diagram sources**
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
-- [utils.py:73-128](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/utils.py#L73-L128)
-
-Terrain-aware command features:
-
-- **Real-time Pit Detection**: Grid-based analysis to identify "pits" terrain automatically
-- **Dynamic Movement Restrictions**: Automatic application of movement restrictions on challenging terrains
-- **Forward-Only Movement**: Enforced forward-only locomotion on pit terrains with configurable speed limits
-- **Heading Control**: Automatic heading adjustment to maintain stability on difficult terrain
-- **Command Resampling**: Intelligent resampling of commands when robots exit challenging terrain
 
 **Section sources**
 - [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
 - [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
 
-## Advanced Gap Traversal Capabilities
-
-### Enhanced Abductor Joint Scaling
-The gap traversal environment features significantly enhanced abductor joint scaling to support advanced locomotion behaviors:
-
-```mermaid
-flowchart TD
-GAP_START([Gap Traversal]) --> ABAD_ENHANCEMENT["Abductor Joint Scaling<br/>0.15 → 0.2 (33% increase)"]
-ABAD_ENHANCEMENT --> LATERAL_STABILITY["Improved Lateral Stability<br/>Better Side-to-Side Control"]
-LATERAL_STABILITY --> GAP_WIDTH["Extended Gap Width Capability<br/>Supports wider gaps"]
-GAP_WIDTH --> LANDING_STABILITY["Enhanced Landing Stability<br/>Better Impact Absorption"]
-LANDING_STABILITY --> PARKOUR_ADAPTATION["Parkour-Style Adaptation<br/>Complex Obstacle Navigation"]
-PARKOUR_ADAPTATION --> GAP_END([Advanced Gap Traversal])
-```
-
-**Diagram sources**
-- [gap_env_cfg.py:198-202](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L202)
-- [parkour_env_cfg.py:208-214](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L208-L214)
-
-Key gap traversal enhancements include:
-
-- **Abductor Joint Scaling**: Increased from 0.15 to 0.2 (33% increase) to provide improved lateral stability during gap traversal
-- **Lateral Stability**: Better side-to-side control for navigating gaps and maintaining balance during landing
-- **Extended Gap Width**: Support for wider gaps compared to traditional stair climbing scenarios
-- **Enhanced Landing Stability**: Improved impact absorption and landing mechanics for safe gap crossing
-- **Parkour-Style Adaptation**: Complex obstacle navigation capabilities for advanced locomotion behaviors
-
-### Parkour-Style Navigation
-The parkour environment extends gap traversal capabilities to include complex obstacle courses:
-
-- **Varied Step Heights**: Step height range from 0.1m to 0.45m for diverse challenge scenarios
-- **Complex Terrain Patterns**: Ascending and descending step combinations for realistic parkour challenges
-- **Enhanced Reward System**: Specialized rewards for successful obstacle navigation and landing
-- **Enhanced Termination Conditions**: Focused on stability and safe landing rather than illegal contacts
-
-### Specialized Gap Terrain Generation
-Advanced terrain generation creates realistic gap traversal scenarios:
-
-- **Gap Strip Terrains**: Repeated gap and landing strips for continuous traversal training
-- **Variable Gap Widths**: Adjustable gap widths from 0.1m to 0.8m for progressive difficulty
-- **Run-Up Platforms**: Longer run-up platforms for complex gap traversal scenarios
-- **Landing Surfaces**: Dedicated landing platforms between gaps for safe landings
-
-**Section sources**
-- [gap_env_cfg.py:198-202](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L202)
-- [gap_env_cfg.py:148-155](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L148-L155)
-- [parkour_env_cfg.py:157-165](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L157-L165)
-
-## Enhanced Parkour Terrain Configuration
-
-### New Simple Step Terrain Generation
-The parkour environment now features a new `parkour_step_terrain` function that provides more controlled and predictable staircase patterns:
-
-```mermaid
-flowchart TD
-SIMPLE_TERRAIN([Simple Step Terrain]) --> INIT_PARAMS["Initialize Parameters<br/>Ground Thickness: 0.1m<br/>Wall Thickness: 0.1m"]
-INIT_PARAMS --> CALCULATE_HEIGHT["Calculate Step Height<br/>Height = min + difficulty*(max-min)"]
-CALCULATE_HEIGHT --> CALCULATE_LENGTH["Calculate Step Length<br/>Length = base + step_height"]
-CALCULATE_LENGTH --> GENERATE_ASCENDING["Generate Ascending Steps<br/>Steps Up = Total Steps / 2"]
-GENERATE_ASCENDING --> GENERATE_DESCENDING["Generate Descending Steps<br/>Steps Down = Total Steps - Steps Up"]
-GENERATE_DESCENDING --> ADD_SIDE_WALLS["Add Side Walls<br/>Prevent Falls & Open Edges"]
-ADD_SIDE_WALLS --> GENERATE_FLAT_END["Generate Flat End Platform<br/>Complete Terrain Pattern"]
-GENERATE_FLAT_END --> ORIGIN_SET["Set Origin Point<br/>Center of Start Platform"]
-ORIGIN_SET --> RETURN_MESHES["Return Mesh List & Origin"]
-```
-
-**Diagram sources**
-- [parkour_env_cfg.py:118-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L118-L208)
-
-Key features of the new simple terrain generation:
-
-- **Predictable Step Patterns**: Controlled step heights and lengths for consistent training
-- **Enhanced Safety**: Side walls prevent falls and close open edges
-- **Configurable Parameters**: Adjustable step height range (0.1-0.45m), step length range (0.3-1.5m), and total steps (6)
-- **Consistent Origin**: Centralized origin point for robot spawning and navigation
-- **Simplified Algorithm**: Streamlined generation process replacing complex terrain algorithms
-
-### MeshParkourStepTerrainCfg Configuration
-The new terrain configuration class provides comprehensive control over parkour step generation:
-
-- **Function Assignment**: Uses `parkour_step_simple_terrain` as the generation function
-- **Start Platform**: 3.0m run-up length for approach preparation
-- **Step Parameters**: Configurable step height and length ranges for progressive difficulty
-- **Step Distribution**: Balanced ascending and descending steps for realistic parkour challenges
-- **Terrain Dimensions**: 23.0m × 6.0m size with 2.0m border for safe boundaries
-
-### Enhanced Terrain Generation Process
-The new terrain generation process offers several advantages over previous implementations:
-
-- **Improved Predictability**: Consistent step patterns enable reliable training outcomes
-- **Enhanced Safety**: Comprehensive side wall coverage prevents robot falls
-- **Configurable Complexity**: Adjustable difficulty levels through step height and length parameters
-- **Streamlined Implementation**: Simplified codebase reduces maintenance overhead
-- **Better Performance**: Optimized mesh generation for faster simulation startup
-
-**Section sources**
-- [parkour_env_cfg.py:118-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L118-L208)
-- [parkour_env_cfg.py:210-250](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L210-L250)
-
 ## Advanced Neural Network Architecture
 
-### ActorCriticScan Network Design
-The new ActorCriticScan neural network architecture represents a significant advancement in policy representation for quadruped locomotion:
+### Standard ActorCritic Network Design
+The stair climbing environment uses a standard ActorCritic architecture optimized for stair-specific locomotion:
 
 ```mermaid
 classDiagram
-class ActorCriticScan {
+class ActorCritic {
 +is_recurrent : False
-+obs_groups : dict
-+num_actor_obs : int
-+num_critic_obs : int
-+num_prop : int
-+num_scan : int
-+num_priv : int
-+actor_scan_latent_dim : int
-+critic_scan_latent_dim : int
-+priv_latent_dim : int
 +actor : Sequential
 +critic : Sequential
 +noise_std_type : str
@@ -648,83 +451,53 @@ class ActorCriticScan {
 +log_std : Parameter
 +distribution : Normal
 }
-class Encoder {
-+make_encoder() : Sequential
-+encode_actor_scan() : Tensor
-+encode_critic_scan() : Tensor
-+encode_priv_obs() : Tensor
+class ObservationProcessing {
++proprioceptive_stream : MLP
++height_scan_stream : MLP
++privileged_stream : MLP
 }
-class ObservationGroups {
-+policy : dict
-+critic : dict
-+concatenate_terms : bool
+class PolicyNetwork {
++hidden_dims : [512, 256, 128]
++activation : ELU
++output_layer : Linear
 }
-ActorCriticScan --> Encoder : "uses"
-ActorCriticScan --> ObservationGroups : "configures"
+class ValueNetwork {
++hidden_dims : [512, 256, 128]
++activation : ELU
++output_layer : Linear
+}
+ActorCritic --> ObservationProcessing : "uses"
+ActorCritic --> PolicyNetwork : "contains"
+ActorCritic --> ValueNetwork : "contains"
 ```
 
 **Diagram sources**
-- [actor_critic_scan.py:20-150](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L150)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
 
 The network architecture features:
 
-- **Asymmetric Actor-Critic**: Separate processing paths for actor and critic networks
-- **Scan Encoding**: Optional height scan encoding for enhanced terrain perception
-- **Privileged Observation Integration**: Dedicated encoder for robot state information
-- **Flexible Architecture**: Configurable hidden dimensions and activation functions
+- **Standard Architecture**: Asymmetric Actor-Critic with separate processing paths for policy and value estimation
+- **Hidden Layers**: 512-256-128 hidden units with ELU activation for nonlinear policy representation
+- **Observation Processing**: Integrated proprioceptive and height scan observations for terrain awareness
 - **Noise Parameterization**: Support for scalar or log-standard deviation parameterization
 
-### Observation Processing Pipeline
-The enhanced observation system processes multiple data streams for comprehensive policy representation:
-
-```mermaid
-flowchart TD
-OBS_INPUT([Raw Observations]) --> PROP_STREAM["Proprioceptive Stream<br/>52D: joint_pos, joint_vel, gravity, base_vel, commands, actions, contacts"]
-OBS_INPUT --> SCAN_STREAM["Scan Stream<br/>187D: height_scan"]
-OBS_INPUT --> PRIV_STREAM["Privileged Stream<br/>29D: mass, com, friction, p_gain, d_gain"]
-PROP_STREAM --> PROP_ENCODER["Proprioceptive Encoder<br/>MLP: 52 → 256 → 256"]
-SCAN_STREAM --> SCAN_ENCODER["Scan Encoder<br/>MLP: 187 → 256 → 256"]
-PRIV_STREAM --> PRIV_ENCODER["Privileged Encoder<br/>MLP: 29 → 256 → 256"]
-PROP_ENCODER --> ACTOR_INPUT["Actor Input<br/>Concatenated Features"]
-SCAN_ENCODER --> ACTOR_INPUT
-PRIV_ENCODER --> CRITIC_INPUT["Critic Input<br/>Concatenated Features"]
-ACTOR_INPUT --> ACTOR_NET["Actor Network<br/>MLP: 512 → 256 → 256 → action_space"]
-CRITIC_INPUT --> CRITIC_NET["Critic Network<br/>MLP: 512 → 256 → 256 → value"]
-ACTOR_NET --> ACTION_OUTPUT["Action Output"]
-CRITIC_NET --> VALUE_OUTPUT["Value Output"]
-```
-
-**Diagram sources**
-- [actor_critic_scan.py:150-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L150-L280)
-
-Key observation processing features:
-
-- **Multi-Modal Input**: Integration of proprioceptive, scan, and privileged observations
-- **Independent Encoding**: Separate encoders for different observation modalities
-- **Asymmetric Processing**: Different processing paths for actor and critic networks
-- **Configurable Dimensions**: Flexible input/output dimensions for different robot configurations
-- **Efficient Memory Usage**: Optimized tensor operations for real-time inference
-
 ### Training Configuration Analysis
-The reinforcement learning configuration employs PPO with hyperparameters optimized for advanced locomotion performance and enhanced reward system:
+The reinforcement learning configuration employs PPO with hyperparameters optimized for stair climbing performance:
 
 ```mermaid
 sequenceDiagram
 participant Trainer as "PPO Trainer"
-participant Env as "Enhanced Parkour Environment"
-participant Agent as "ActorCriticScan Network"
+participant Env as "Stair Environment"
+participant Agent as "ActorCritic Network"
 participant Memory as "Experience Buffer"
-participant Rewards as "Custom Reward System"
-participant Commands as "Manager-Based Commands"
-Trainer->>Env : Initialize Manager-Based Environment
-Env->>Commands : Generate Terrain-Aware Commands
-Commands-->>Env : Return Appropriate Commands
-Env-->>Trainer : Return Enhanced Observations
-Trainer->>Agent : Forward Pass with Multi-Modal Input
+participant Rewards as "Modified Reward System"
+Trainer->>Env : Initialize Stair Environment
+Env-->>Trainer : Return Initial State
+Trainer->>Agent : Forward Pass
 Agent-->>Trainer : Action Probabilities & Value Estimate
 Trainer->>Env : Execute Action
-Env->>Rewards : Evaluate Custom Rewards
-Rewards-->>Env : Return Prioritized Rewards
+Env->>Rewards : Evaluate Modified Rewards
+Rewards-->>Env : Return Prioritized Climbing Rewards
 Env-->>Trainer : Next State, Reward, Done
 Trainer->>Memory : Store Experience
 Memory-->>Trainer : Sample Batch
@@ -734,170 +507,110 @@ Trainer->>Env : Reset if Episode Done
 ```
 
 **Diagram sources**
-- [actor_critic_scan.py:20-150](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L20-L150)
-- [rough_env_cfg.py:456-526](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L456-L526)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
 
 The training configuration emphasizes:
 
-- **Advanced Network Architecture**: ActorCriticScan with scan and privileged observation encoders
-- **Manager-Based Environment**: Modern environment configuration using ManagerBasedRLEnv pattern
-- **Multi-Modal Observations**: Integration of proprioceptive, scan, and privileged data streams
-- **Custom Reward Processing**: Specialized reward computation for parkour locomotion
-- **Terrain-Aware Command Processing**: Dynamic command generation based on environmental conditions
+- **Network Architecture**: Standard ActorCritic with 512-256-128 hidden units and ELU activation for stair-specific policy representation
+- **Learning Parameters**: Adaptive learning rate scheduling with entropy regularization to balance exploration and exploitation
+- **Optimization**: Gradient clipping and mini-batch training for stable convergence on stair climbing tasks
+- **Modified Reward Processing**: Specialized reward computation prioritizing climbing progress over velocity tracking
 
 **Section sources**
-- [actor_critic_scan.py:1-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L1-L280)
-- [rough_env_cfg.py:1-784](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L1-L784)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
 
 ## Custom Reward Systems
 
-### Advanced Reward Function Architecture
-The enhanced reward system introduces custom reward functions specifically designed for parkour locomotion:
+### Standard Reward Function Architecture
+The stair climbing environment uses a streamlined reward system optimized for controlled stair negotiation:
 
 ```mermaid
 classDiagram
-class CustomRewards {
-+torque_sum : RewardFunction
-+stop_penalty_lin : RewardFunction
-+stop_penalty_ang : RewardFunction
-+hip_pos_l2 : RewardFunction
-+feet_stumble : RewardFunction
-+joint_deviation_l2 : RewardFunction
-+mechanical_work : RewardFunction
+class StandardRewards {
++track_lin_vel_xy_exp : RewardTerm
++track_ang_vel_z_exp : RewardTerm
++lin_vel_z_l2 : RewardTerm
++ang_vel_xy_l2 : RewardTerm
++dof_torques_l2 : RewardTerm
++dof_acc_l2 : RewardTerm
++action_rate_l2 : RewardTerm
++feet_air_time : RewardTerm
++undesired_contacts : RewardTerm
++flat_orientation_l2 : RewardTerm
++base_height : RewardTerm
++climbing_progress : RewardTerm
++feet_height_body : RewardTerm
++feet_gait : RewardTerm
++upward : RewardTerm
 }
-class RewardFunction {
-+__call__(env, asset_cfg) : Tensor
+class RewardTerm {
++__call__(env) : Tensor
 +weight : float
 +params : dict
 }
-class ObservationBasedReward {
-+__call__(env, sensor_cfg) : Tensor
-+threshold : float
-+ratio : float
-}
-CustomRewards --> RewardFunction : "contains"
-CustomRewards --> ObservationBasedReward : "extends"
+StandardRewards --> RewardTerm : "contains"
 ```
 
 **Diagram sources**
-- [rewards.py:35-131](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/rewards.py#L35-L131)
+- [stair_env_cfg.py:130-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L130-L208)
 
-The custom reward functions provide:
+The reward system provides:
 
-- **Torque Summation**: Direct measurement of applied joint torques for mechanical efficiency
-- **Stop Penalties**: Exponential penalties for linear and angular velocity to encourage continuous motion
-- **Hip Position Control**: L2 penalty for hip joint deviations from default positions
-- **Stumble Detection**: Contact force analysis to detect unstable foot placements
-- **Joint Deviation**: L2 kernel for measuring joint position deviations from defaults
-- **Mechanical Work**: Positive work calculation with regeneration clamping
-
-### Privileged Observation Framework
-The privileged observation system provides enhanced sensor data for improved policy performance:
-
-```mermaid
-flowchart TD
-SENSOR_DATA([Sensor Data Collection]) --> CONTACT_SENSOR["Contact Sensor<br/>Foot Forces & Air Time"]
-SENSOR_DATA --> PHYSICS_VIEW["Physics View<br/>Mass, COM, Material Properties"]
-SENSOR_DATA --> ACTUATOR_DATA["Actuator Data<br/>PD Gains & Torques"]
-CONTACT_SENSOR --> FOOT_CONTACTS["Foot Contacts<br/>Binary Flags"]
-CONTACT_SENSOR --> FEET_STUMBLE["Feet Stumble<br/>Force Ratio Analysis"]
-PHYSICS_VIEW --> BASE_MASS["Base Mass<br/>Robot Mass"]
-PHYSICS_VIEW --> BASE_COM["Base COM<br/>Center of Mass"]
-PHYSICS_VIEW --> FRICTION_COEFF["Friction Coeff<br/>Surface Properties"]
-ACTUATOR_DATA --> P_GAIN_SCALE["P-Gain Scale<br/>Stiffness Ratios"]
-ACTUATOR_DATA --> D_GAIN_SCALE["D-Gain Scale<br/>Damping Ratios"]
-FOOT_CONTACTS --> PRIV_OBS["Privileged Observations"]
-FEET_STUMBLE --> PRIV_OBS
-BASE_MASS --> PRIV_OBS
-BASE_COM --> PRIV_OBS
-FRICTION_COEFF --> PRIV_OBS
-P_GAIN_SCALE --> PRIV_OBS
-D_GAIN_SCALE --> PRIV_OBS
-PRIV_OBS --> ENCODER["Privileged Encoder<br/>MLP Processing"]
-ENCODER --> CRITIC_INPUT["Critic Input Stream"]
-```
-
-**Diagram sources**
-- [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/observations.py#L33-L111)
-
-Key privileged observation features:
-
-- **Contact Force Analysis**: Binary foot contact flags with configurable thresholds
-- **Robot State Information**: Base mass, center of mass, and material properties
-- **Actuator Performance**: Current PD gains compared to default values
-- **Dynamic Properties**: Friction coefficients across all robot contact surfaces
-- **Integration with Network**: Dedicated encoder for privileged observation processing
+- **Task Tracking**: Exponential rewards for linear and angular velocity tracking
+- **Penalties**: L2 penalties for unwanted behaviors like jumping and improper contacts
+- **Stability Control**: Orientation and height penalties for safe stair negotiation
+- **Specialized Climbing**: Dedicated climbing progress reward with forward and elevation components
+- **Foot Control**: Height and gait rewards for proper foot placement during stairs
 
 ### Environment Registration System
-The enhanced parkour system includes comprehensive environment registration for multiple training scenarios:
+The stair environment includes comprehensive environment registration for training and evaluation:
 
 ```mermaid
 flowchart TD
-ENV_REGISTRATION([Environment Registration]) --> FLAT_TERRAIN["Flat Terrain<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Flat-v0"]
-ENV_REGISTRATION --> ROUGH_TERRAIN["Rough Terrain<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-v0"]
-ENV_REGISTRATION --> ROUGH_PLAY["Rough Play Mode<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Play-v0"]
-ENV_REGISTRATION --> ABLATION_1["Ablation 1<br/>No Scan in Policy<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl1-v0"]
-ENV_REGISTRATION --> ABLATION_2_5["Ablation 2.5<br/>Scan-First Ordering<br/>ZSL1-Parkour-Rough-Abl2_5-v0"]
-ENV_REGISTRATION --> ABLATION_3_5["Ablation 3.5<br/>Explicit Scan Encoder<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-v0"]
-ENV_REGISTRATION --> ABLATION_4_0["Ablation 4.0<br/>No Scan Encoding<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl4_0-v0"]
-ENV_REGISTRATION --> ABLATION_7_0["Ablation 7.0<br/>Reduced Privileged Encoder<br/>RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl7_0-v0"]
+ENV_REGISTRATION([Environment Registration]) --> FLAT_TERRAIN["Flat Terrain<br/>RobotLab-Isaac-Velocity-Flat-Zsibot-ZSL1-v0"]
+ENV_REGISTRATION --> ROUGH_TERRAIN["Rough Terrain<br/>RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0"]
+ENV_REGISTRATION --> STAIR_TERRAIN["Stair Terrain<br/>RobotLab-Isaac-Velocity-Stair-Zsibot-ZSL1-v0"]
 FLAT_TERRAIN --> TRAINING_PIPELINE["Training Pipeline<br/>Manager-Based RL"]
 ROUGH_TERRAIN --> TRAINING_PIPELINE
-ROUGH_PLAY --> TRAINING_PIPELINE
-ABLATION_1 --> TRAINING_PIPELINE
-ABLATION_2_5 --> TRAINING_PIPELINE
-ABLATION_3_5 --> TRAINING_PIPELINE
-ABLATION_4_0 --> TRAINING_PIPELINE
-ABLATION_7_0 --> TRAINING_PIPELINE
+STAIR_TERRAIN --> TRAINING_PIPELINE
 ```
 
 **Diagram sources**
-- [__init__.py:21-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py#L21-L161)
+- [__init__.py:12-40](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L40)
 
 The registration system supports:
 
-- **Standard Training Environments**: Flat and rough terrain configurations
-- **Play/Evaluation Modes**: Human-playable versions for demonstration
-- **Ablation Studies**: Multiple variants for systematic analysis of observation modalities
-- **Comprehensive Testing**: 14 different environment configurations for thorough evaluation
+- **Standard Training Environments**: Flat and rough terrain configurations for baseline performance
+- **Specialized Stair Environment**: Dedicated stair climbing training with enhanced reward system
+- **Comprehensive Testing**: Three different environment configurations for thorough evaluation
 
 **Section sources**
-- [rewards.py:1-131](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/rewards.py#L1-L131)
-- [observations.py:1-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/observations.py#L1-L111)
-- [__init__.py:1-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py#L1-L161)
+- [stair_env_cfg.py:130-208](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L130-L208)
+- [__init__.py:12-40](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py#L12-L40)
 
 ## Enhanced Curriculum System
 
 ### Streamlined Parameter Specifications
-The enhanced curriculum system features streamlined parameter specifications designed to improve serialization compatibility and maintainability:
+The enhanced curriculum system features streamlined parameter specifications designed to improve serialization compatibility:
 
 ```mermaid
 flowchart TD
 CURRICULUM_START([Curriculum Configuration]) --> EMPTY_PARAMS["Empty Params Specification<br/>params={}"]
 EMPTY_PARAMS --> SERIALIZATION["Serialization Compatibility<br/>Avoid SceneEntityCfg Issues"]
-SERIALIZATION --> TERRAIN_LEVELS["Terrain Levels Curriculum<br/>terrain_levels_vel"]
-TERRAIN_LEVELS --> DEFAULT_ASSET["Default Asset Configuration<br/>SceneEntityCfg('robot')"]
-DEFAULT_ASSET --> PARAM_HANDLING["Parameter Handling<br/>Using robotlab_vel_mdp"]
+SERIALIZATION --> SIMPLE_CURRICULUM["Simple Curriculum System<br/>No Terrain Levels"]
+SIMPLE_CURRICULUM --> PARAM_HANDLING["Parameter Handling<br/>Using robotlab_vel_mdp"]
 PARAM_HANDLING --> CURRICULUM_END([Enhanced Curriculum System])
 ```
 
 **Diagram sources**
-- [rough_env_cfg.py:445-453](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L445-L453)
+- [stair_env_cfg.py:217-222](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L217-L222)
 
 Key curriculum enhancements include:
 
 - **Empty Params Serialization**: Using `params={}` to avoid serialization issues with complex parameter objects
-- **SceneEntityCfg Compatibility**: Proper handling of default asset configurations for terrain-level curriculum
-- **Streamlined Configuration**: Simplified parameter specifications for improved maintainability
+- **Simple Curriculum Design**: Streamlined parameter specifications for improved maintainability
 - **Enhanced Compatibility**: Better integration with curriculum management systems
-
-### Terrain-Level Curriculum Support
-The enhanced curriculum system provides comprehensive terrain-level curriculum support with improved parameter handling:
-
-- **Terrain Levels Velocity**: Curriculum based on robot's walking distance for terrain progression
-- **Empty Parameter Handling**: Streamlined parameter specification avoiding complex object serialization
-- **Default Asset Configuration**: Proper handling of default robot asset configuration
-- **Enhanced Curriculum Terms**: Improved curriculum term configuration for better learning progression
+- **No Terrain Levels**: Simplified curriculum system focusing on command-level progression
 
 ### Serialization Compatibility Improvements
 The curriculum system now features improved serialization compatibility:
@@ -908,7 +621,7 @@ The curriculum system now features improved serialization compatibility:
 - **Enhanced Robustness**: Improved curriculum system reliability and stability
 
 **Section sources**
-- [rough_env_cfg.py:445-453](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L445-L453)
+- [stair_env_cfg.py:217-222](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L217-L222)
 
 ## Dependency Analysis
 The ZSL1 configuration exhibits a well-structured dependency hierarchy that enables modular development and testing across multiple specialized environments with enhanced curriculum management:
@@ -929,78 +642,54 @@ ENV_CONFIG["Environment Configurations"]
 TRAINING["Training Infrastructure"]
 SCRIPTS["Utility Scripts"]
 MDP["MDP Components"]
-TERRAIN_GEN["Enhanced Terrain Generation"]
-NEURAL_NET["Advanced Neural Networks"]
-OBSERVATION_SYS["Privileged Observation System"]
-REWARD_SYS["Custom Reward Functions"]
+NEURAL_NET["Standard Neural Networks"]
 CURRICULUM_SYS["Enhanced Curriculum System"]
 END_SUBGRAPH
 subgraph "ZSL1 Specific"
 ZSL1_CFG["ZSL1 Configuration"]
 STAIR_CFG["Stair Environment"]
-GAP_CFG["Gap Environment"]
-PARKOUR_OLD["Legacy Parkour Environment"]
-PARKOUR_NEW["Enhanced Parkour System"]
 FLAT_CFG["Flat Environment"]
+ROUGH_CFG["Rough Environment"]
 PPO_CFG["PPO Training"]
 MODIFIED_REWARDS["Modified Reward System"]
-TERRAIN_COMMANDS["Terrain-Aware Commands"]
+ENV_INIT["Environment Registration"]
 END_SUBGRAPH
 ISAACLAB --> ASSETS
 RSL_RL --> TRAINING
 GYMNASIUM --> ENV_CONFIG
 ASSETS --> ZSL1_CFG
 ENV_CONFIG --> STAIR_CFG
-ENV_CONFIG --> GAP_CFG
-ENV_CONFIG --> PARKOUR_OLD
-ENV_CONFIG --> PARKOUR_NEW
 ENV_CONFIG --> FLAT_CFG
+ENV_CONFIG --> ROUGH_CFG
 TRAINING --> PPO_CFG
 SCRIPTS --> TRAINING
 ZSL1_CFG --> STAIR_CFG
-ZSL1_CFG --> GAP_CFG
-ZSL1_CFG --> PARKOUR_OLD
-ZSL1_CFG --> PARKOUR_NEW
 ZSL1_CFG --> FLAT_CFG
+ZSL1_CFG --> ROUGH_CFG
 PPO_CFG --> SCRIPTS
 STAIR_CFG --> MODIFIED_REWARDS
-GAP_CFG --> MODIFIED_REWARDS
-PARKOUR_OLD --> MODIFIED_REWARDS
-PARKOUR_NEW --> MODIFIED_REWARDS
-STAIR_CFG --> TERRAIN_COMMANDS
-GAP_CFG --> TERRAIN_COMMANDS
-PARKOUR_OLD --> TERRAIN_COMMANDS
-PARKOUR_NEW --> TERRAIN_COMMANDS
+FLAT_CFG --> MODIFIED_REWARDS
+ROUGH_CFG --> MODIFIED_REWARDS
 MODIFIED_REWARDS --> MDP
-TERRAIN_COMMANDS --> MDP
 MDP --> STAIR_CFG
-MDP --> GAP_CFG
-MDP --> PARKOUR_OLD
-MDP --> PARKOUR_NEW
-TERRAIN_GEN --> PARKOUR_NEW
-NEURAL_NET --> PARKOUR_NEW
-OBSERVATION_SYS --> PARKOUR_NEW
-REWARD_SYS --> PARKOUR_NEW
-CURRICULUM_SYS --> PARKOUR_NEW
-TRIMESH --> TERRAIN_GEN
-NUMPY --> TERRAIN_GEN
-TORCH --> NEURAL_NET
-TORCH --> OBSERVATION_SYS
-TORCH --> REWARD_SYS
+MDP --> FLAT_CFG
+MDP --> ROUGH_CFG
+NEURAL_NET --> STAIR_CFG
+NEURAL_NET --> FLAT_CFG
+NEURAL_NET --> ROUGH_CFG
+CURRICULUM_SYS --> STAIR_CFG
+CURRICULUM_SYS --> FLAT_CFG
+CURRICULUM_SYS --> ROUGH_CFG
+ENV_INIT --> TRAINING
 ```
 
 **Diagram sources**
 - [README.md:360-411](file://README.md#L360-L411)
 - [stair_env_cfg.py:13-13](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L13-L13)
-- [gap_env_cfg.py:15-15](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L15-L15)
-- [parkour_env_cfg.py:15-15](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L15-L15)
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
-- [actor_critic_scan.py:13-18](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L13-L18)
-- [mesh_terrains.py:10-18](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mesh_terrains.py#L10-L18)
-- [observations.py:13-19](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/observations.py#L13-L19)
-- [rewards.py:14-20](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/mdp/rewards.py#L14-L20)
-- [rough_env_cfg.py:445-453](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L445-L453)
+- [flat_env_cfg.py:4-4](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/flat_env_cfg.py#L4-L4)
+- [rough_env_cfg.py:4-4](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/rough_env_cfg.py#L4-L4)
+- [rsl_rl_ppo_cfg.py:9-75](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L9-L75)
+- [stair_env_cfg.py:217-222](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L217-L222)
 
 The dependency structure supports:
 
@@ -1008,95 +697,75 @@ The dependency structure supports:
 - **Enhanced Integration**: Tight coupling between reward systems and command generation for adaptive behavior
 - **Extensibility**: Easy addition of new robots or environments through consistent configuration patterns
 - **Maintainability**: Well-defined interfaces between components facilitate debugging and updates
-- **Advanced Features**: Integration of modern neural network architectures, manager-based environment patterns, and enhanced curriculum systems
+- **Advanced Features**: Integration of modern neural network architectures and enhanced curriculum systems
 
 **Section sources**
 - [README.md:360-411](file://README.md#L360-L411)
 
 ## Performance Considerations
-Several factors influence the performance of ZSL1 advanced locomotion with the enhanced features:
+Several factors influence the performance of ZSL1 stair climbing with the enhanced features:
 
 ### Computational Efficiency
-- **Observation Reduction**: Disabling height scanning reduces computational overhead during training
-- **Action Clipping**: Prevents excessive joint velocities that could destabilize stair negotiation and gap traversal
-- **Memory Management**: Optimized experience buffer sizing for efficient training cycles across multiple environments
+- **Observation Processing**: Disabled height scanning reduces computational overhead during stair training
+- **Action Clipping**: Prevents excessive joint velocities that could destabilize stair negotiation
+- **Memory Management**: Optimized experience buffer sizing for efficient training cycles
 - **Zero Weight Reward Elimination**: Automatic removal of inactive rewards reduces computational load
-- **Terrain-Aware Command Processing**: Efficient grid-based terrain detection minimizes processing overhead
-- **Enhanced Terrain Generation**: Simplified mesh generation algorithms improve simulation startup performance
-- **Neural Network Optimization**: ActorCriticScan architecture designed for efficient multi-modal observation processing
-- **Curriculum Serialization**: Empty params specification reduces serialization overhead and improves performance
-
-### Training Stability
-- **Reward Engineering**: Modified reward functions prioritize controlled climbing and gap traversal over velocity tracking
-- **Randomization**: Controlled environmental randomization improves generalization across different stair types and gap widths
-- **Convergence Monitoring**: Regular evaluation metrics track progress toward advanced locomotion objectives
-- **Enhanced Stability Constraints**: Roll/pitch limits of ±0.5 radians maintain safe locomotion performance across all environments
-- **Terrain-Aware Adaptation**: Dynamic command generation prevents robots from getting stuck on challenging terrains
-- **Privileged Observation Integration**: Enhanced sensor data improves policy stability and learning efficiency
 - **Enhanced Curriculum Management**: Streamlined parameter specifications improve curriculum system stability
 
+### Training Stability
+- **Reward Engineering**: Modified reward functions prioritize controlled climbing over velocity tracking
+- **Randomization**: Controlled environmental randomization improves generalization across different stair configurations
+- **Convergence Monitoring**: Regular evaluation metrics track progress toward stair climbing objectives
+- **Enhanced Stability Constraints**: Roll/pitch limits of ±0.5 radians maintain safe locomotion performance
+- **Reward System Safety**: Verify reward scaling prevents excessive forces during stair climbing
+
 ### Hardware Considerations
-- **Actuator Limits**: Respect motor torque and velocity limits to prevent damage during aggressive stair climbing and gap traversal
+- **Actuator Limits**: Respect motor torque and velocity limits to prevent damage during stair climbing
 - **Safety Margins**: Conservative joint position limits protect hardware during training
 - **Power Management**: Efficient motor control reduces heat generation and power consumption
 - **Contact Sensor Optimization**: Enhanced contact force detection prevents damage to robot components
-- **Stability Monitoring**: Roll/pitch constraints prevent mechanical stress during complex maneuvers
-- **Reward System Safety**: Verify reward scaling prevents excessive forces during advanced locomotion
-- **Network Architecture**: Monitor ActorCriticScan memory usage and tensor operation efficiency
-- **Curriculum System**: Monitor enhanced curriculum serialization and parameter handling performance
+- **Stability Monitoring**: Roll/pitch constraints prevent mechanical stress during stair negotiation
 
 ## Troubleshooting Guide
-Common issues and solutions for ZSL1 advanced locomotion configuration with enhanced features:
+Common issues and solutions for ZSL1 stair climbing configuration with enhanced features:
 
 ### Training Issues
 - **Poor Convergence**: Verify reward function balance and ensure adequate exploration through entropy regularization
 - **Instability**: Check action clipping parameters and reduce learning rate if oscillations occur
 - **Slow Learning**: Confirm proper randomization settings and sufficient training iterations
 - **Reward System Issues**: Verify modified reward weights and ensure proper reward scaling
-- **Command Generation Problems**: Check terrain detection algorithms and command restriction logic
-- **Neural Network Training**: Monitor ActorCriticScan architecture for proper multi-modal observation processing
-- **Environment Registration**: Verify all 14 environment configurations are properly registered
-- **Curriculum Serialization Issues**: Check empty params specification and parameter handling for serialization problems
+- **Neural Network Training**: Monitor standard ActorCritic architecture for proper policy processing
+- **Environment Registration**: Verify environment registration and configuration file paths
 
 ### Simulation Problems
 - **Contact Detection**: Enable contact sensors and verify collision geometry for accurate foothold detection
 - **Joint Limits**: Monitor joint position and velocity limits to prevent violations
-- **Terrain Generation**: Validate specialized terrain parameters and ensure proper mesh generation
-- **Gap Detection Accuracy**: Verify grid-based terrain detection and column allocation logic
-- **Command Restriction Effectiveness**: Check forward-only movement enforcement and heading control
-- **Mesh Terrain Generation**: Validate trimesh-based terrain generation parameters and safety features
-- **Curriculum System Issues**: Verify enhanced curriculum parameter handling and serialization compatibility
+- **Terrain Generation**: Validate stair terrain parameters and ensure proper mesh generation
+- **Reward System Safety**: Verify reward scaling prevents excessive forces during stair climbing
 
 ### Hardware Safety
 - **Torque Limits**: Monitor actuator efforts to prevent exceeding motor specifications
-- **Temperature Monitoring**: Track motor temperatures during intensive stair climbing and gap traversal training
-- **Mechanical Integrity**: Regular inspection of links and joints for wear during repetitive complex maneuvers
+- **Temperature Monitoring**: Track motor temperatures during intensive stair climbing training
+- **Mechanical Integrity**: Regular inspection of links and joints for wear during repetitive stair negotiation
 - **Stability Constraints**: Ensure roll/pitch limits are properly configured to prevent mechanical failure
-- **Reward System Safety**: Verify reward scaling prevents excessive forces during advanced locomotion
-- **Network Architecture**: Monitor ActorCriticScan memory usage and tensor operation efficiency
-- **Curriculum System**: Monitor enhanced curriculum serialization and parameter handling for stability
+- **Reward System Safety**: Verify reward scaling prevents excessive forces during stair climbing
 
 **Section sources**
 - [stair_env_cfg.py:94-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L94-L98)
 - [stair_env_cfg.py:110-122](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L110-L122)
 - [stair_env_cfg.py:202-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/stair_env_cfg.py#L202-L206)
-- [gap_env_cfg.py:198-202](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L198-L202)
-- [parkour_env_cfg.py:208-214](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/parkour_env_cfg.py#L208-L214)
+- [rsl_rl_ppo_cfg.py:49-78](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/agents/rsl_rl_ppo_cfg.py#L49-L78)
 - [zsibot.py:47-115](file://source/robot_lab/robot_lab/assets/zsibot.py#L47-L115)
-- [rewards.py:616-732](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L616-L732)
-- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py#L31-L98)
-- [actor_critic_scan.py:198-206](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/agents/actor_critic_scan.py#L198-L206)
-- [rough_env_cfg.py:445-453](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L445-L453)
 
 ## Conclusion
-The ZSIBOT ZSL1 Advanced Locomotion Configuration represents a comprehensive approach to quadruped locomotion within the Isaac Lab framework, enhanced with increased abductor joint scaling from 0.15 to 0.2, enhanced action scaling for hip and knee joints, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions. Through careful engineering of robot dynamics, environment design, and reinforcement learning parameters, the system achieves robust stair climbing, gap traversal, and parkour-style navigation capabilities while maintaining training efficiency and safety.
+The ZSIBOT ZSL1 Stair Climbing Configuration represents a focused approach to quadruped stair negotiation within the Isaac Lab framework, with the current state reflecting the consolidation of specialized environments into the unified G1 system. The stair climbing environment remains in its dedicated location with increased abductor joint scaling from 0.15 to 0.2, enhanced action scaling for hip and knee joints, stability constraints with roll/pitch limits, modified reward weights prioritizing controlled climbing, and enhanced termination conditions.
 
-The recent enhancements include increased abductor joint scaling from 0.15 to 0.2 to support gap traversal capabilities, increased action scaling from 0.4 to 0.6 for hip and knee joints to support 0.23m step heights, stability constraints limiting roll and pitch to ±0.5 radians, modified reward weights with climbing progress prioritized at 2.5, and enhanced termination conditions focusing on stability rather than illegal contact. These improvements enable the system to adapt dynamically to different stair configurations, gap widths, and complex parkour obstacles while maintaining stable locomotion performance.
+Through careful engineering of robot dynamics, environment design, and reinforcement learning parameters, the system achieves robust stair climbing capabilities while maintaining training efficiency and safety. The recent enhancements include increased abductor joint scaling from 0.15 to 0.2 to support stair climbing capabilities, increased action scaling from 0.4 to 0.6 for hip and knee joints to support 0.23m step heights, stability constraints limiting roll and pitch to ±0.5 radians, modified reward weights with climbing progress prioritized at 2.5, and enhanced termination conditions focusing on stability rather than illegal contact.
 
-The most significant enhancement is the introduction of the comprehensive parkour training system featuring the ActorCriticScan neural network architecture, mesh-based terrain generation, and advanced reward systems. This new system provides 14 different environment configurations for thorough evaluation and systematic analysis of different observation modalities and training approaches. The integration of privileged observations, custom reward functions, and manager-based environment architecture represents a major advancement in quadruped locomotion training capabilities.
+The most significant change is the consolidation of specialized environments into the unified G1 system, where the stair climbing environment remains in the dedicated `zsibot_zsl1/` directory while advanced parkour capabilities have been moved to the `zsibot_zsl1_parkour/` directory. This represents a strategic shift from Unitree G1-specific implementations to a unified G1 system architecture, enabling better maintainability and scalability across different robot models.
 
-The modular architecture continues to enable easy adaptation for different locomotion challenges and robot variants, while the well-tuned reward functions and actuator specifications provide the foundation for successful advanced locomotion. Future enhancements could include dynamic gap width adjustment, multi-modal terrain adaptation, advanced gait pattern learning for improved gap traversal performance, and integration with more complex parkour obstacle courses.
+The modular architecture continues to enable easy adaptation for different locomotion challenges and robot variants, while the well-tuned reward functions and actuator specifications provide the foundation for successful stair climbing performance. Future enhancements could include dynamic stair height adjustment, multi-modal terrain adaptation, and integration with more complex obstacle courses.
 
-The removal of experimental reward system and temporary debug features ensures a cleaner, more maintainable codebase while preserving the core functionality that makes the ZSL1 effective for advanced locomotion applications including stair climbing, gap traversal, and parkour-style navigation.
+The current documentation reflects the consolidated state where stair climbing remains accessible through the dedicated configuration while advanced locomotion capabilities are maintained in the unified system, ensuring both specialized stair training and broader locomotion research capabilities are preserved.
 
-**Updated** The documentation has been updated to reflect the comprehensive ZSL1 parkour training system with new ActorCriticScan neural network architecture, mesh terrains, and advanced reward systems. The new system now covers both stair climbing and parkour navigation capabilities for the ZSL1 robot, featuring enhanced observation processing, custom reward functions, and manager-based environment configuration. Key enhancements include improved curriculum management with streamlined parameter specifications using empty params to avoid serialization issues, enhanced terrain generation capabilities with new parkour_step_terrain function, and comprehensive environment registration for multiple training scenarios.
+**Updated** The documentation has been updated to reflect the current consolidated state where the stair climbing environment remains in the dedicated `zsibot_zsl1/` directory while specialized gap and parkour environments have been moved to the unified `zsibot_zsl1_parkour/` directory as part of the transition to the Isaaclab G1 framework. The stair environment retains its enhanced features including increased action scaling, stability constraints, and modified reward system, while the unified system provides comprehensive parkour capabilities through the separate directory structure.

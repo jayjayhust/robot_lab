@@ -3,8 +3,13 @@
 <cite>
 **Referenced Files in This Document**
 - [velocity_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py)
-- [unitree_g1/rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/rough_env_cfg.py)
-- [unitree_g1/flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/flat_env_cfg.py)
+- [g1/flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py)
+- [g1/rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py)
+- [g1/__init__.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/__init__.py)
+- [navigation/mdp/commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py)
+- [navigation/mdp/curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py)
+- [navigation/mdp/utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py)
+- [locomotion/velocity/mdp/commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py)
 - [opendoge_apx/rough_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/rough_env_cfg.py)
 - [opendoge_apx/flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/opendoge_apx/flat_env_cfg.py)
 - [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py)
@@ -25,11 +30,12 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive documentation for new manipulation task categories including DexSuite, reach, lift, pick-place, and stack tasks
-- Integrated navigation task documentation with pre-trained policy action framework
-- Expanded MDP formulation coverage to include manipulation-specific reward engineering and observation preprocessing
-- Enhanced task configuration hierarchy documentation to reflect the new 160+ files across multiple task categories
-- Added advanced manipulation features including point cloud processing, contact force monitoring, and curriculum learning implementations
+- Added comprehensive documentation for the new G1 humanoid locomotion configuration system with flat and rough terrain environments
+- Integrated enhanced navigation MDP components including terrain-aware commands, curriculum learning, and utility functions
+- Updated velocity environment configuration to reflect simplified observation system and Isaaclab G1 framework transition
+- Documented new terrain-aware command system that automatically detects and adapts to pit terrain conditions
+- Added curriculum learning implementations for navigation tasks with adaptive command ranges and terrain progression
+- Enhanced task configuration hierarchy to support the new G1 humanoid robot variants
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -44,7 +50,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the task configuration framework for the ManagerBasedRLEnv-based locomotion, manipulation, and navigation systems with advanced MDP implementations. The framework now encompasses over 160 new files across multiple task categories including velocity-based locomotion, manipulation (DexSuite, reach, lift, pick-place, stack), and navigation capabilities. It focuses on comprehensive task configuration hierarchies, MDP formulation (state/action/reward/termination), and practical examples from the codebase. The framework supports curriculum learning, symmetry data augmentation, beyond mimic motion imitation, and advanced manipulation features like point cloud processing and contact force monitoring.
+This document explains the task configuration framework for the ManagerBasedRLEnv-based locomotion, manipulation, and navigation systems with advanced MDP implementations. The framework now encompasses over 160 new files across multiple task categories including velocity-based locomotion, manipulation (DexSuite, reach, lift, pick-place, stack), and navigation capabilities. The recent updates include a new G1 humanoid locomotion configuration system with flat and rough terrain environments, enhanced navigation MDP components with terrain-aware command generation, and simplified velocity environment observation system. The framework supports curriculum learning, symmetry data augmentation, beyond mimic motion imitation, and advanced manipulation features like point cloud processing and contact force monitoring.
 
 ## Project Structure
 The task configuration is organized around a base environment configuration that defines scenes, commands, actions, observations, rewards, events, and terminations. The framework now includes specialized categories for locomotion, manipulation, and navigation, each with their own configuration hierarchies and MDP components. Robot-specific variants inherit from base configurations and override scene assets, observation scaling, action scales, reward weights, and curriculum settings.
@@ -54,6 +60,16 @@ graph TB
 subgraph "Base Locomotion"
 VCFG["velocity_env_cfg.py<br/>Base Env Config"]
 end
+subgraph "G1 Humanoid Locomotion"
+G1FLAT["g1/flat_env_cfg.py<br/>Flat Terrain G1"]
+G1ROUGH["g1/rough_env_cfg.py<br/>Rough Terrain G1"]
+G1INIT["g1/__init__.py<br/>Environment Registration"]
+end
+subgraph "Enhanced Navigation MDP"
+NAVCMDS["navigation/mdp/commands.py<br/>Terrain-aware Commands"]
+NAVCURR["navigation/mdp/curriculums.py<br/>Adaptive Curriculum"]
+NAVUTILS["navigation/mdp/utils.py<br/>Terrain Utilities"]
+END
 subgraph "Manipulation Tasks"
 DEX["dexsuite_env_cfg.py<br/>Multi-object Manipulation"]
 REACH["reach_env_cfg.py<br/>End-effector Pose Tracking"]
@@ -61,52 +77,59 @@ LIFT["lift_env_cfg.py<br/>Object Lifting"]
 PICKPLACE["pickplace_gr1t2_env_cfg.py<br/>Humanoid Manipulation"]
 STACK["stack_env_cfg.py<br/>Block Stacking"]
 end
-subgraph "Navigation Tasks"
-NAV["navigation_env_cfg.py<br/>Pose-based Navigation"]
-end
 subgraph "MDP Modules"
 OBS["mdp/observations.py<br/>Manipulation Observations"]
 REW["mdp/rewards.py<br/>Manipulation Rewards"]
 CMD["mdp/commands/<br/>Pose Commands"]
 PTP["pre_trained_policy_action.py<br/>Low-level Policy Action"]
-end
+END
 subgraph "Variants"
-UGR["unitree_g1/rough_env_cfg.py"]
 OAR["opendoge_apx/rough_env_cfg.py"]
-end
-VCFG --> UGR
-VCFG --> OAR
+END
+VCFG --> G1FLAT
+VCFG --> G1ROUGH
+G1FLAT --> G1INIT
+G1ROUGH --> G1INIT
+NAVCMDS --> NAVCURR
+NAVCMDS --> NAVUTILS
 DEX --> OBS
 DEX --> REW
 DEX --> CMD
-NAV --> PTP
 REACH --> OBS
 LIFT --> REW
 PICKPLACE --> OBS
 STACK --> REW
+OAR --> VCFG
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py:696-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
-- [dexsuite_env_cfg.py:390-467](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L390-L467)
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
-- [reach_env_cfg.py:189-230](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/reach/reach_env_cfg.py#L189-L230)
-- [lift_env_cfg.py:194-223](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/lift/lift_env_cfg.py#L194-L223)
-- [pickplace_gr1t2_env_cfg.py:298-416](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/pick_place/pickplace_gr1t2_env_cfg.py#L298-L416)
-- [stack_env_cfg.py:164-200](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/stack/stack_env_cfg.py#L164-L200)
+- [velocity_env_cfg.py:700-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L700-L798)
+- [g1/flat_env_cfg.py:1-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L1-L57)
+- [g1/rough_env_cfg.py:1-182](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L1-L182)
+- [g1/__init__.py:14-70](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/__init__.py#L14-L70)
+- [navigation/mdp/commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)
 
 **Section sources**
-- [velocity_env_cfg.py:696-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L696-L744)
-- [dexsuite_env_cfg.py:390-467](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L390-L467)
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
+- [velocity_env_cfg.py:700-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L700-L798)
+- [g1/flat_env_cfg.py:1-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L1-L57)
+- [g1/rough_env_cfg.py:1-182](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L1-L182)
+- [g1/__init__.py:14-70](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/__init__.py#L14-L70)
 
 ## Core Components
-The framework now encompasses three major task categories:
+The framework now encompasses four major task categories:
 
 ### Locomotion Components
 - Base environment configuration defines the ManagerBasedRLEnv base class, scene, commands, actions, observations, rewards, events, and curriculum.
+- **G1 Humanoid Variants**: Specialized configurations for Unitree G1 robot with terrain-aware command generation and reward shaping.
 - Robot-specific configurations inherit from the base and specialize assets, observation scaling, action scales, reward weights, and curriculum.
 - MDP modules provide reusable functions for observations, rewards, events, and utilities.
+
+### Enhanced Navigation Components
+- **Terrain-aware Commands**: Automatic detection and adaptation to pit terrain conditions with forward-only movement restrictions.
+- **Adaptive Curriculum**: Dynamic command range adjustment based on performance metrics and terrain difficulty progression.
+- **Utility Functions**: Terrain type checking and robot position mapping for terrain-aware operations.
 
 ### Manipulation Components
 - **DexSuite**: Multi-object manipulation with pose tracking, object point cloud processing, and contact force monitoring.
@@ -115,39 +138,42 @@ The framework now encompasses three major task categories:
 - **Pick-place**: Humanoid manipulation with inverse kinematics and XR retargeting support.
 - **Stack**: Block stacking with multi-cube observation and success criteria.
 
-### Navigation Components
-- **Pose-based Navigation**: Low-level policy integration with pre-trained policy action framework.
-- **Command Management**: Uniform 2D pose commands with resampling and visualization.
-- **Reward Engineering**: Position and orientation tracking with termination conditions.
+### Legacy Components
+- **Quadruped Variants**: Opendoge APX and other quadruped configurations with specialized reward shaping and action scaling.
+- **Beyond Mimic**: Motion imitation with pose/velocity/joint-position command ranges.
 
 **Section sources**
-- [velocity_env_cfg.py:42-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L744)
-- [dexsuite_env_cfg.py:27-467](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L27-L467)
-- [navigation_env_cfg.py:24-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L24-L161)
+- [velocity_env_cfg.py:12-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L798)
+- [g1/flat_env_cfg.py:12-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L12-L57)
+- [g1/rough_env_cfg.py:19-182](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L19-L182)
+- [navigation/mdp/commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)
 
 ## Architecture Overview
-The ManagerBasedRLEnv orchestrates the MDP pipeline across all task categories:
+The ManagerBasedRLEnv orchestrates the MDP pipeline across all task categories with enhanced terrain awareness:
 - Scene initializes terrain/robot/assets, sensors, and lighting for each task domain.
-- Command manager generates per-step targets specific to the task (velocity, pose, object pose).
+- **Terrain-aware Command Manager**: Generates per-step targets with automatic terrain adaptation for pit detection.
 - Action manager applies domain-specific actions (joint positions, inverse kinematics, pre-trained policies).
 - Observation manager computes policy/critic tensors from sensors and asset data.
 - Reward manager aggregates per-term rewards and penalties specific to each task category.
 - Event manager triggers randomized perturbations during startup/reset/interval.
 - Termination manager checks episode-ending conditions for each task domain.
-- Curriculum adjusts difficulty dynamically for manipulation tasks.
+- **Adaptive Curriculum**: Dynamically adjusts difficulty based on performance metrics and terrain progression.
 
 ```mermaid
 sequenceDiagram
 participant Env as "ManagerBasedRLEnv"
 participant Scene as "InteractiveSceneCfg"
-participant Cmd as "Task-specific Commands"
+participant Cmd as "Terrain-aware Commands"
 participant Act as "Domain-specific Actions"
 participant Obs as "ObservationsCfg"
 participant Rew as "RewardsCfg"
 participant Ev as "EventCfg"
 participant Term as "TerminationsCfg"
 Env->>Scene : Initialize task-specific scene
-Env->>Cmd : Sample/resample task commands
+Env->>Cmd : Generate commands with terrain awareness
+Cmd->>Cmd : Detect pit terrain and adjust commands
 Env->>Act : Apply domain actions (joint/IK/policy)
 Env->>Obs : Compute policy/critic observations
 Env->>Rew : Aggregate task-specific rewards
@@ -157,9 +183,9 @@ Env-->>Env : Step and repeat
 ```
 
 **Diagram sources**
-- [dexsuite_env_cfg.py:390-467](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L390-L467)
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
-- [reach_env_cfg.py:189-230](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/reach/reach_env_cfg.py#L189-L230)
+- [navigation/mdp/commands.py:61-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L61-L98)
+- [g1/rough_env_cfg.py:107-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L107-L153)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
 
 ## Detailed Component Analysis
 
@@ -230,38 +256,91 @@ LocomotionVelocityRoughEnvCfg --> CurriculumCfg
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py:42-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L744)
+- [velocity_env_cfg.py:12-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L798)
 
 **Section sources**
-- [velocity_env_cfg.py:42-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L744)
+- [velocity_env_cfg.py:12-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L798)
 
-### Humanoid Variant: Unitree G1
-The Unitree G1 variant specializes:
-- Robot asset and link names for base and feet.
-- Observation scaling adjustments and removal of certain observations.
-- Action scaling tailored to the robot's degrees-of-freedom.
-- Reward emphasis on velocity tracking in the body frame, joint deviation penalties, and upward orientation reward.
-- Termination tuned to base-link illegal contacts.
-- Curriculum disabled for command levels.
+### G1 Humanoid Locomotion Configuration System
+The G1 humanoid configuration system provides specialized locomotion for Unitree G1 robots with terrain-aware capabilities:
+
+#### Flat Terrain Configuration
+The flat terrain variant inherits from the rough terrain configuration and makes minimal modifications:
+- **Terrain Setup**: Changes terrain type to plane, disables terrain generator, removes height scanner.
+- **Observation Simplification**: Removes height scan from policy observations.
+- **Curriculum Adjustment**: Disables terrain-level curriculum.
+- **Reward Shaping**: Emphasizes angular velocity tracking and air time rewards.
+- **Command Ranges**: Adjusts lateral velocity ranges for stable walking.
+
+#### Rough Terrain Configuration  
+The rough terrain variant provides comprehensive G1-specific configurations:
+- **Robot Asset**: Uses G1_MINIMAL_CFG with proper prim path configuration.
+- **Height Scanner**: Positions ray caster on torso_link for terrain sensing.
+- **Randomization**: Reduces push_robot and base_mass randomization for stability.
+- **Reward Weighting**: Emphasizes orientation, joint deviations, and action regularization.
+- **Termination**: Uses torso_link contact for illegal contact detection.
 
 ```mermaid
 flowchart TD
-Start(["UnitreeG1RoughEnvCfg.post_init"]) --> Assets["Set robot asset and sensor prim paths"]
-Assets --> Obs["Adjust observation scales and remove base_lin_vel/height_scan"]
-Obs --> Actions["Set action scale and clip"]
-Actions --> Events["Tune mass/COM/gains and reset/base perturbations"]
-Events --> Rewards["Weight velocity tracking, joint deviations, upward reward"]
-Rewards --> Terms["Tune illegal contact termination"]
-Terms --> Curri["Disable command-level curriculum"]
-Curri --> End(["Ready for training"])
+Start(["G1RoughEnvCfg.post_init"]) --> Assets["Load G1_MINIMAL_CFG asset"]
+Assets --> HeightScan["Position height scanner on torso_link"]
+HeightScan --> Randomization["Reduce randomization for stability"]
+Randomization --> Rewards["Weight orientation, joint deviations, action rate"]
+Rewards --> Commands["Set terrain-aware command ranges"]
+Commands --> Termination["Use torso_link contact termination"]
+Termination --> End(["Ready for training"])
 ```
 
 **Diagram sources**
-- [unitree_g1/rough_env_cfg.py:47-168](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/rough_env_cfg.py#L47-L168)
+- [g1/rough_env_cfg.py:107-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L107-L153)
 
 **Section sources**
-- [unitree_g1/rough_env_cfg.py:15-168](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/rough_env_cfg.py#L15-L168)
-- [unitree_g1/flat_env_cfg.py:9-38](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/flat_env_cfg.py#L9-L38)
+- [g1/flat_env_cfg.py:12-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L12-L57)
+- [g1/rough_env_cfg.py:19-182](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L19-L182)
+
+### Enhanced Navigation MDP Components
+The navigation system now includes advanced terrain-aware components:
+
+#### Terrain-aware Command System
+The UniformThresholdVelocityCommand automatically detects and adapts to pit terrain conditions:
+- **Pit Detection**: Real-time terrain type checking using is_robot_on_terrain utility.
+- **Command Restriction**: For robots on pit terrain, restricts movement to forward-only with speed limits.
+- **Heading Control**: Sets heading to zero for robots on pit terrain to prevent rotation.
+- **Dynamic Adaptation**: Resamples commands when robots leave pit terrain.
+
+#### Adaptive Curriculum System
+The curriculum system provides dynamic difficulty adjustment:
+- **Command Level Adjustment**: Gradually increases/decreases command ranges based on performance.
+- **Terrain Progression**: Adjusts terrain difficulty based on distance traveled.
+- **Performance-based Scaling**: Uses 80% threshold of maximum reward to determine curriculum progression.
+
+#### Utility Functions
+Terrain-aware utility functions enable sophisticated terrain operations:
+- **Environment Assignment**: Identifies which environments are initially assigned to specific terrain types.
+- **Robot Position Mapping**: Determines which terrain grid cells robots are currently standing on.
+- **Column Range Calculation**: Calculates terrain type column ranges for multi-terrain generators.
+
+```mermaid
+flowchart TD
+Start(["UniformThresholdVelocityCommand.update"]) --> ParentUpdate["Call parent update command"]
+ParentUpdate --> PitDetection["Detect pit terrain using is_robot_on_terrain"]
+PitDetection --> LeftPits["Find robots leaving pit terrain"]
+LeftPits --> Resample["Resample commands for robots leaving pits"]
+Resample --> OnPits["Check robots currently on pits"]
+OnPits --> Restrict["Restrict to forward-only movement"]
+Restrict --> SpeedLimits["Apply min/max speed limits"]
+SpeedLimits --> ZeroHeading["Set heading to zero"]
+ZeroHeading --> UpdateState["Update tracking state"]
+UpdateState --> End(["Command updated"])
+```
+
+**Diagram sources**
+- [navigation/mdp/commands.py:61-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L61-L98)
+
+**Section sources**
+- [navigation/mdp/commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)
 
 ### Quadruped Variant: Opendoge APX
 The Opendoge APX variant specializes:
@@ -425,6 +504,8 @@ The stack task enables block manipulation with multi-cube observation:
 ## Dependency Analysis
 The framework maintains clear separation between task categories while enabling cross-domain integration:
 - Base locomotion depends on MDP modules for observations and rewards.
+- **G1 Humanoid variants** depend on base velocity configuration with terrain-aware enhancements.
+- **Enhanced navigation** depends on terrain-aware command system and adaptive curriculum.
 - Manipulation tasks depend on specialized MDP modules for pose commands, observations, and rewards.
 - Navigation tasks depend on pre-trained policy action framework and pose-based commands.
 - Robot-specific variants depend on base configurations and override only necessary fields.
@@ -432,30 +513,33 @@ The framework maintains clear separation between task categories while enabling 
 
 ```mermaid
 graph LR
-VCFG["velocity_env_cfg.py"] --> OBS["mdp/observations.py"]
-VCFG --> REW["mdp/rewards.py"]
+VCFG["velocity_env_cfg.py"] --> G1FLAT["g1/flat_env_cfg.py"]
+VCFG --> G1ROUGH["g1/rough_env_cfg.py"]
+G1FLAT --> G1INIT["g1/__init__.py"]
+G1ROUGH --> G1INIT
+NAVCMDS["navigation/mdp/commands.py"] --> NAVCURR["navigation/mdp/curriculums.py"]
+NAVCMDS --> NAVUTILS["navigation/mdp/utils.py"]
 DEX["dexsuite_env_cfg.py"] --> DEX_OBS["dexsuite/observations.py"]
 DEX --> DEX_REW["dexsuite/rewards.py"]
 DEX --> DEX_CMD["dexsuite/commands/pose_commands.py"]
-NAV["navigation_env_cfg.py"] --> NAV_ACT["navigation/pre_trained_policy_action.py"]
-NAV --> NAV_REW["navigation/rewards.py"]
 REACH["reach_env_cfg.py"] --> REACH_OBS["reach/observations.py"]
 LIFT["lift_env_cfg.py"] --> LIFT_REW["lift/rewards.py"]
 PICKPLACE["pickplace_gr1t2_env_cfg.py"] --> PICKPLACE_OBS["pick_place/observations.py"]
 STACK["stack_env_cfg.py"] --> STACK_REW["stack/rewards.py"]
-UGR["unitree_g1/rough_env_cfg.py"] --> VCFG
 OAR["opendoge_apx/rough_env_cfg.py"] --> VCFG
 ```
 
 **Diagram sources**
-- [velocity_env_cfg.py:12-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
-- [dexsuite_env_cfg.py:23-24](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L23-L24)
-- [navigation_env_cfg.py:18-19](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L18-L19)
+- [velocity_env_cfg.py:700-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L700-L798)
+- [g1/flat_env_cfg.py:12-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L12-L57)
+- [g1/rough_env_cfg.py:107-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L107-L153)
+- [g1/__init__.py:14-70](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/__init__.py#L14-L70)
 
 **Section sources**
-- [velocity_env_cfg.py:12-29](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L12-L29)
-- [dexsuite_env_cfg.py:23-24](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L23-L24)
-- [navigation_env_cfg.py:18-19](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L18-L19)
+- [velocity_env_cfg.py:700-798](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L700-L798)
+- [g1/flat_env_cfg.py:12-57](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L12-L57)
+- [g1/rough_env_cfg.py:107-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L107-L153)
+- [g1/__init__.py:14-70](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/__init__.py#L14-L70)
 
 ## Performance Considerations
 The framework implements several optimization strategies across task categories:
@@ -465,6 +549,8 @@ The framework implements several optimization strategies across task categories:
 - **Curriculum Efficiency**: Dynamic difficulty adjustment for manipulation tasks.
 - **Point Cloud Optimization**: Efficient sampling and caching for DexSuite tasks.
 - **Policy Execution**: Optimized pre-trained policy loading and inference for navigation tasks.
+- **Terrain-aware Operations**: Efficient terrain type checking and robot position mapping.
+- **Command Restriction**: Minimal computational overhead for pit terrain detection and adaptation.
 
 Practical tips:
 - Tune decimation and dt for target FPS while preserving control bandwidth across all task domains.
@@ -472,11 +558,12 @@ Practical tips:
 - Use curriculum to gradually increase command ranges and task complexity.
 - Optimize point cloud sampling parameters for manipulation tasks.
 - Cache frequently accessed policy weights for navigation tasks.
+- Leverage terrain-aware commands for improved stability on challenging terrains.
 
 **Section sources**
-- [velocity_env_cfg.py:711-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L711-L744)
-- [dexsuite_env_cfg.py:425-434](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L425-L434)
-- [navigation_env_cfg.py:135-149](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L135-L149)
+- [velocity_env_cfg.py:706-744](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L706-L744)
+- [g1/flat_env_cfg.py:18-26](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/flat_env_cfg.py#L18-L26)
+- [navigation/mdp/commands.py:73-97](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L73-L97)
 
 ## Troubleshooting Guide
 Common issues and resolutions across task categories:
@@ -485,6 +572,12 @@ Common issues and resolutions across task categories:
 - **Excessive joint torques/accelerations**: Reduce action scales and increase joint acceleration penalties in robot-specific configurations.
 - **Instability on rough terrain**: Increase base height and upward orientation rewards; reduce push intervals and magnitudes.
 - **Poor velocity tracking**: Adjust velocity-tracking reward standard deviations and frame selection.
+- **G1 Robot instability**: Verify G1_MINIMAL_CFG asset loading and height scanner positioning.
+
+### Enhanced Navigation Issues
+- **Terrain-aware command failures**: Check terrain generator configuration and is_robot_on_terrain utility function.
+- **Pit terrain detection errors**: Verify terrain type definitions and column range calculations.
+- **Curriculum adaptation problems**: Adjust performance thresholds and reward term weights.
 
 ### Manipulation Issues
 - **Object manipulation failures**: Verify point cloud sampling parameters and contact sensor configurations.
@@ -492,29 +585,37 @@ Common issues and resolutions across task categories:
 - **Success detection problems**: Fine-tune success thresholds and visualization markers.
 - **XR integration issues**: Check device configuration and retargeting parameters.
 
-### Navigation Issues
-- **Policy execution errors**: Verify policy file paths and compatibility with low-level actions.
-- **Base contact false positives**: Adjust contact sensor thresholds and filtering parameters.
-- **Command tracking errors**: Check pose command ranges and visualization settings.
+### Performance Issues
+- **High computational overhead**: Disable unused observations and sensors in flat environments.
+- **Memory usage spikes**: Reduce terrain generator complexity and cache frequently accessed data.
+- **Training instability**: Adjust reward scaling and curriculum progression rates.
 
 **Section sources**
-- [rewards.py:609-637](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py#L609-L637)
-- [dexsuite_env_cfg.py:357-370](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L357-L370)
-- [navigation_env_cfg.py:115-118](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L115-L118)
+- [g1/rough_env_cfg.py:114-130](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L114-L130)
+- [navigation/mdp/commands.py:73-97](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L73-L97)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)
 
 ## Conclusion
-The expanded task configuration framework provides a comprehensive, modular foundation for locomotion, manipulation, and navigation tasks across diverse robot types and scenarios. With over 160 new files integrated, the framework now supports advanced capabilities including multi-object manipulation, humanoid manipulation with XR integration, and navigation with pre-trained policy execution. The MDP modules encapsulate reusable components that simplify customization and ensure consistent behavior across all task categories. Developers can rapidly adapt tasks for new robots, stabilize training with curriculum and symmetry terms, and leverage advanced manipulation features like point cloud processing and contact force monitoring.
+The expanded task configuration framework provides a comprehensive, modular foundation for locomotion, manipulation, and navigation tasks across diverse robot types and scenarios. The recent updates introduce a sophisticated G1 humanoid locomotion system with terrain-aware capabilities, enhanced navigation components with adaptive curriculum learning, and simplified velocity environment configurations. With over 160 new files integrated, the framework now supports advanced capabilities including multi-object manipulation, humanoid manipulation with XR integration, navigation with pre-trained policy execution, and terrain-aware command generation. The MDP modules encapsulate reusable components that simplify customization and ensure consistent behavior across all task categories. Developers can rapidly adapt tasks for new robots, stabilize training with curriculum and symmetry terms, leverage terrain-aware navigation features, and utilize advanced manipulation features like point cloud processing and contact force monitoring.
 
 ## Appendices
 
 ### MDP Formulation Summary
-The framework encompasses three major task categories with distinct MDP formulations:
+The framework encompasses four major task categories with distinct MDP formulations:
 
 #### Locomotion MDP
 - **State Representation**: Base linear/angular velocities, projected gravity, commanded base velocity, joint positions/velocities, last action, height scan.
 - **Action Space**: Joint position commands with per-joint scaling and clipping.
 - **Reward Function**: Composite of velocity tracking, contact dynamics, joint penalties, symmetry terms, and task-specific shaping.
 - **Termination Conditions**: Timeout, terrain bounds, and illegal contacts.
+- **Terrain Awareness**: Automatic pit terrain detection and command restriction for G1 humanoid variants.
+
+#### Enhanced Navigation MDP
+- **State Representation**: Base linear velocity, projected gravity, pose commands.
+- **Action Space**: Pre-trained policy action with low-level decimation.
+- **Reward Function**: Position and orientation tracking with terrain-aware adaptation.
+- **Termination Conditions**: Time-based and base contact detection.
+- **Adaptive Curriculum**: Dynamic command range adjustment based on performance metrics.
 
 #### Manipulation MDP
 - **State Representation**: 
@@ -527,29 +628,30 @@ The framework encompasses three major task categories with distinct MDP formulat
 - **Reward Function**: Task-specific reward engineering with success detection and curriculum learning.
 - **Termination Conditions**: Time-based, object dropping, and success detection.
 
-#### Navigation MDP
-- **State Representation**: Base linear velocity, projected gravity, pose commands.
-- **Action Space**: Pre-trained policy action with low-level decimation.
-- **Reward Function**: Position and orientation tracking with termination penalties.
-- **Termination Conditions**: Time-based and base contact detection.
+#### Advanced Features
+- **Terrain-aware Commands**: Automatic detection and adaptation to pit terrain conditions.
+- **Adaptive Curriculum**: Dynamic difficulty adjustment based on performance metrics.
+- **Utility Functions**: Terrain type checking and robot position mapping for terrain-aware operations.
 
 **Section sources**
-- [velocity_env_cfg.py:130-255](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L130-L255)
-- [dexsuite_env_cfg.py:120-181](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L120-L181)
-- [navigation_env_cfg.py:58-120](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L58-L120)
+- [velocity_env_cfg.py:124-200](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L124-L200)
+- [g1/rough_env_cfg.py:20-101](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L20-L101)
+- [navigation/mdp/commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)
 
 ### Advanced Features
 The framework implements several advanced features across task categories:
 
-#### Curriculum Learning
-- **DexSuite**: Adaptive Difficulty Rating (ADR) curriculum with position/rotation tolerance adjustment.
-- **Reach**: Progressive reward weighting for action and joint velocity penalties.
-- **Lift**: Gradual increase in reward weights for action regularization.
-- **Stack**: Multi-stage success detection with progressive complexity.
+#### Terrain-aware Command Generation
+- **Automatic Pit Detection**: Real-time terrain type checking using robot position mapping.
+- **Dynamic Command Restriction**: Forward-only movement with speed limits for pit terrain.
+- **Heading Control**: Automatic heading adjustment to zero for stability on challenging terrains.
 
-#### Symmetry Data Augmentation
-- **Locomotion**: Joint mirroring and action synchronization for symmetric motion.
-- **Manipulation**: Symmetric object handling and multi-hand coordination.
+#### Adaptive Curriculum Learning
+- **Performance-based Scaling**: Dynamic command range adjustment based on 80% reward threshold.
+- **Terrain Progression**: Distance-based terrain difficulty adjustment for locomotion tasks.
+- **Cross-domain Integration**: Unified curriculum system across navigation and locomotion tasks.
 
 #### Advanced Manipulation Features
 - **Point Cloud Processing**: Efficient sampling and transformation for object observation.
@@ -558,16 +660,16 @@ The framework implements several advanced features across task categories:
 - **XR Integration**: Immersive device support with retargeting capabilities.
 
 **Section sources**
-- [dexsuite_env_cfg.py:404-434](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L404-L434)
-- [reach_env_cfg.py:171-181](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/reach/reach_env_cfg.py#L171-L181)
-- [observations.py:99-176](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/mdp/observations.py#L99-L176)
-- [pose_commands.py:126-180](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/mdp/commands/pose_commands.py#L126-L180)
+- [navigation/mdp/commands.py:61-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L61-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:73-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L73-L128)
 
 ### Task Customization and Extension Guidelines
 The framework provides comprehensive guidelines for extending task configurations:
 
 #### New Robot Type Integration
 - **Locomotion**: Create variant inheriting from base configuration, override scene assets and reward weights.
+- **Terrain-aware Features**: Implement is_robot_on_terrain utility for new robot types.
 - **Manipulation**: Implement task-specific observation processing and reward engineering.
 - **Navigation**: Integrate pre-trained policy action with custom command generation.
 
@@ -582,8 +684,10 @@ The framework provides comprehensive guidelines for extending task configuration
 - **Hybrid Tasks**: Combine locomotion and manipulation with coordinated action execution.
 - **Shared Resources**: Utilize common MDP modules across task categories.
 - **Unified Curriculum**: Implement cross-domain difficulty progression.
+- **Terrain Integration**: Leverage terrain-aware components for enhanced realism.
 
 **Section sources**
-- [dexsuite_env_cfg.py:390-467](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/dexsuite/dexsuite_env_cfg.py#L390-L467)
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
-- [reach_env_cfg.py:189-230](file://source/robot_lab/robot_lab/tasks/manager_based/manipulation/reach/reach_env_cfg.py#L189-L230)
+- [g1/rough_env_cfg.py:107-153](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/g1/rough_env_cfg.py#L107-L153)
+- [navigation/mdp/commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation/mdp/curriculums.py:24-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L175)
+- [navigation/mdp/utils.py:43-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L128)

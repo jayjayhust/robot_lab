@@ -12,23 +12,23 @@ from . import agents
 ##
 
 gym.register(
-    id="RobotLab-Isaac-Navigation-Anymal-C-v0",
+    id="RobotLab-Isaac-Navigation-Rough-Unitree-Go2-Rough-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.navigation_env_cfg:NavigationEnvCfg",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:NavigationEnvPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.navigation_env_cfg:NavigationGo2RoughEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:NavigationGo2RoughEnvPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )
 
 gym.register(
-    id="RobotLab-Isaac-Navigation-Anymal-C-Play-v0",
+    id="RobotLab-Isaac-Navigation-Flat-Unitree-Go2-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.navigation_env_cfg:NavigationEnvCfg_PLAY",
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:NavigationEnvPPORunnerCfg",
+        "env_cfg_entry_point": f"{__name__}.navigation_env_cfg:NavigationGo2FlatEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:NavigationGo2FlatEnvPPORunnerCfg",
         "skrl_cfg_entry_point": f"{agents.__name__}:skrl_flat_ppo_cfg.yaml",
     },
 )

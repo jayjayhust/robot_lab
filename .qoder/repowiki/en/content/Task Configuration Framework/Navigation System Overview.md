@@ -5,82 +5,108 @@
 - [navigation_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py)
 - [pre_trained_policy_action.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py)
 - [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py)
+- [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py)
+- [curriculums.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py)
+- [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py)
 - [navigation_mdp_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py)
 - [navigation_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/__init__.py)
 - [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced command generation system with terrain-aware velocity commands
+- Added discrete command controller for specialized navigation scenarios
+- Implemented sophisticated curriculum management with terrain-level progression
+- Introduced comprehensive utility functions for terrain detection and assignment
+- Updated reward system with pose-based tracking capabilities
+- Modernized navigation architecture with enhanced policy translation
 
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [System Architecture](#system-architecture)
 3. [Core Components](#core-components)
 4. [Environment Configuration](#environment-configuration)
-5. [Pre-Trained Policy Action System](#pre-trained-policy-action-system)
-6. [Reward Functions](#reward-functions)
-7. [Command Generation](#command-generation)
-8. [Integration Architecture](#integration-architecture)
-9. [Performance Considerations](#performance-considerations)
-10. [Troubleshooting Guide](#troubleshooting-guide)
-11. [Conclusion](#conclusion)
+5. [Enhanced Command Generation System](#enhanced-command-generation-system)
+6. [Curriculum Management](#curriculum-management)
+7. [Terrain-Aware Utilities](#terrain-aware-utilities)
+8. [Pre-Trained Policy Action System](#pre-trained-policy-action-system)
+9. [Reward Functions](#reward-functions)
+10. [Integration Architecture](#integration-architecture)
+11. [Performance Considerations](#performance-considerations)
+12. [Troubleshooting Guide](#troubleshooting-guide)
+13. [Conclusion](#conclusion)
 
 ## Introduction
 
-The Navigation System in this robot lab repository provides a comprehensive framework for training and deploying navigation capabilities on quadruped robots, specifically designed for the ANYmal-C platform. This system leverages a hierarchical approach where high-level navigation commands are translated into low-level joint control through a pre-trained policy network, enabling efficient and robust navigation in complex environments.
+The Navigation System in this robot lab repository provides a comprehensive framework for training and deploying navigation capabilities on quadruped robots, specifically designed for the ANYmal-C platform. This system leverages a sophisticated hierarchical approach where advanced navigation commands are translated into low-level joint control through enhanced policy networks, enabling efficient and robust navigation in complex, terrain-aware environments.
 
-The system is built upon the Isaac Lab framework and utilizes a manager-based reinforcement learning architecture that separates concerns between high-level navigation decisions and low-level motor control. This separation allows for modular development, easier debugging, and more maintainable code structure.
+The system is built upon the Isaac Lab framework and utilizes an enhanced manager-based reinforcement learning architecture that separates concerns between high-level navigation decisions and low-level motor control. This separation allows for modular development, easier debugging, and more maintainable code structure while providing terrain-level curriculum progression and sophisticated command generation capabilities.
 
 ## System Architecture
 
-The navigation system follows a layered architecture pattern that promotes separation of concerns and modularity:
+The navigation system follows an enhanced layered architecture pattern that promotes separation of concerns and modularity with terrain-aware capabilities:
 
 ```mermaid
 graph TB
-subgraph "High-Level Navigation"
+subgraph "Advanced Navigation Layer"
 NAVCFG[NavigationEnvCfg]
-CMD[Command Generator]
+CMD[Enhanced Command Generator]
 RW[Reward Functions]
+CUR[Curriculum Manager]
 end
-subgraph "Policy Layer"
+subgraph "Terrain-Aware Policy Layer"
 PTAP[PreTrainedPolicyAction]
 POL[PPO Policy]
+UTIL[Terrain Utils]
 end
-subgraph "Low-Level Control"
+subgraph "Low-Level Control Layer"
 LLACT[Low-Level Actions]
 OBS[Low-Level Observations]
 end
-subgraph "Robot Interface"
+subgraph "Robot Interface Layer"
 ROBOT[ANYmal-C Robot]
 SENS[Sensor Data]
+TERRAIN[Terrain Detection]
 end
 NAVCFG --> CMD
 NAVCFG --> RW
+NAVCFG --> CUR
 NAVCFG --> PTAP
 PTAP --> POL
+PTAP --> UTIL
+UTIL --> TERRAIN
 POL --> LLACT
 LLACT --> ROBOT
 CMD --> NAVCFG
 RW --> NAVCFG
+CUR --> NAVCFG
 OBS --> PTAP
 SENS --> OBS
+TERRAIN --> CMD
+TERRAIN --> CUR
 ROBOT --> SENS
 ```
 
 **Diagram sources**
 - [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
 - [pre_trained_policy_action.py:24-101](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L24-L101)
+- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
 
-The architecture consists of four main layers:
+The architecture consists of five main layers with enhanced capabilities:
 
-1. **Environment Configuration Layer**: Defines the overall navigation environment setup
-2. **Policy Translation Layer**: Bridges high-level commands to low-level actions
-3. **Control Execution Layer**: Implements the actual robot control mechanisms
-4. **Robot Interface Layer**: Handles physical robot interaction and sensor feedback
+1. **Environment Configuration Layer**: Defines the overall navigation environment setup with curriculum integration
+2. **Enhanced Command Generation Layer**: Provides terrain-aware command generation with adaptive restrictions
+3. **Curriculum Management Layer**: Implements terrain-level difficulty progression and command adaptation
+4. **Policy Translation Layer**: Bridges high-level commands to low-level actions with terrain awareness
+5. **Robot Interface Layer**: Handles physical robot interaction and terrain-aware sensor feedback
 
 ## Core Components
 
-### Navigation Environment Configuration
+### Enhanced Navigation Environment Configuration
 
-The navigation environment is configured through a comprehensive configuration class that defines all aspects of the navigation task:
+The navigation environment is configured through an enhanced configuration class that defines all aspects of the navigation task with curriculum integration:
 
 ```mermaid
 classDiagram
@@ -91,6 +117,7 @@ class NavigationEnvCfg {
 +CommandsCfg commands
 +RewardsCfg rewards
 +TerminationsCfg terminations
++CurriculumCfg curriculum
 +EventCfg events
 +__post_init__()
 +decimation : int
@@ -111,62 +138,69 @@ class RewardsCfg {
 +RewTerm position_tracking_fine_grained
 +RewTerm orientation_tracking
 }
+class CurriculumCfg {
++CurriculumTermCfg terrain_levels
++CurriculumTermCfg command_levels_lin_vel
++CurriculumTermCfg command_levels_ang_vel
+}
 NavigationEnvCfg --> ActionsCfg
 NavigationEnvCfg --> ObservationsCfg
 NavigationEnvCfg --> CommandsCfg
 NavigationEnvCfg --> RewardsCfg
+NavigationEnvCfg --> TerminationsCfg
+NavigationEnvCfg --> CurriculumCfg
 ActionsCfg --> PreTrainedPolicyActionCfg
+CurriculumCfg --> CurriculumTermCfg
 ```
 
 **Diagram sources**
-- [navigation_env_cfg.py:122-133](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L133)
-- [navigation_env_cfg.py:46-56](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L46-L56)
-- [navigation_env_cfg.py:76-95](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L76-L95)
+- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
+- [navigation_env_cfg.py:47-58](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L47-L58)
+- [navigation_env_cfg.py:77-97](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L77-L97)
+- [navigation_env_cfg.py:122-147](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L147)
 
 **Section sources**
 - [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
 
-### Pre-Trained Policy Action System
+### Enhanced Command Generation System
 
-The pre-trained policy action system serves as the core bridge between high-level navigation commands and low-level robot control:
+The navigation system now features sophisticated command generation with terrain-aware capabilities:
 
 ```mermaid
 sequenceDiagram
 participant ENV as Environment
-participant PTAP as PreTrainedPolicyAction
-participant POL as Policy Network
-participant LLAT as LowLevelActionTerm
+participant CMD as UniformThresholdVelocityCommand
+participant UTIL as Terrain Utils
 participant ROBOT as Robot
-ENV->>PTAP : process_actions(raw_actions)
-PTAP->>PTAP : store raw_actions
-PTAP->>PTAP : check decimation counter
-alt Decimation Trigger
-PTAP->>PTAP : compute low_level_obs
-PTAP->>POL : policy(low_level_obs)
-POL-->>PTAP : low_level_actions
-PTAP->>LLAT : process_actions(low_level_actions)
-PTAP->>LLAT : apply_actions()
-else Normal Step
-PTAP->>LLAT : apply_actions()
+ENV->>CMD : _update_command()
+CMD->>UTIL : is_robot_on_terrain("pits")
+UTIL-->>CMD : on_pits mask
+CMD->>CMD : Check terrain conditions
+alt On Pit Terrain
+CMD->>CMD : Restrict to forward-only movement
+CMD->>CMD : Set lateral/yaw velocities to zero
+else Leaving Pit Terrain
+CMD->>CMD : Resample commands
 end
-LLAT->>ROBOT : execute joint commands
+CMD->>ROBOT : Apply restricted commands
 ```
 
 **Diagram sources**
-- [pre_trained_policy_action.py:90-101](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L90-L101)
+- [commands.py:61-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L61-L98)
+- [utils.py:73-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L73-L128)
 
-The system operates on a decimation-based schedule where high-level policy inference occurs less frequently than low-level action application, optimizing computational resources while maintaining responsive control.
+The system implements real-time terrain-aware command restrictions with pit detection and adaptive movement limitations.
 
 **Section sources**
-- [pre_trained_policy_action.py:24-189](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L24-L189)
+- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
 
 ## Environment Configuration
 
-The navigation environment configuration establishes the fundamental parameters and behaviors for the navigation task:
+The navigation environment configuration establishes the fundamental parameters and behaviors for the navigation task with enhanced curriculum integration:
 
 ### Simulation Parameters
 
-The environment configuration carefully balances simulation fidelity with computational efficiency:
+The environment configuration carefully balances simulation fidelity with computational efficiency and terrain awareness:
 
 | Parameter | Value | Description |
 |-----------|--------|-------------|
@@ -191,14 +225,155 @@ STABLE --> READY[Environment Ready]
 ```
 
 **Diagram sources**
-- [navigation_env_cfg.py:28-42](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L28-L42)
+- [navigation_env_cfg.py:28-44](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L28-L44)
 
 **Section sources**
 - [navigation_env_cfg.py:135-148](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L135-L148)
 
+## Enhanced Command Generation System
+
+The navigation system employs sophisticated command generation tailored for 2D pose control with terrain-aware restrictions:
+
+### Pose Command Configuration
+
+The command system generates 2D pose commands with comprehensive parameter control and terrain awareness:
+
+```mermaid
+classDiagram
+class UniformThresholdVelocityCommand {
++cfg : UniformThresholdVelocityCommandCfg
++was_on_pit : Tensor[bool]
++_resample_command(env_ids)
++_update_command()
+}
+class UniformThresholdVelocityCommandCfg {
++class_type : type
+}
+class DiscreteCommandController {
++available_commands : list[int]
++command_buffer : Tensor[int32]
++current_commands : list[int]
++_resample_command(env_ids)
++_update_command()
+}
+class DiscreteCommandControllerCfg {
++available_commands : list[int]
++class_type : type
+}
+UniformThresholdVelocityCommand --> UniformThresholdVelocityCommandCfg
+DiscreteCommandController --> DiscreteCommandControllerCfg
+```
+
+**Diagram sources**
+- [commands.py:31-105](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L105)
+- [commands.py:107-198](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L107-L198)
+
+### Command Generation Process
+
+The command generation process ensures smooth, predictable navigation behavior with terrain-aware restrictions:
+
+1. **Resampling Interval**: Commands are resampled every 8 seconds for consistent exploration
+2. **Pose Space**: 2D position (±3m range) plus heading (±π radians) control
+3. **Terrain-Aware Restrictions**: Real-time pit detection with forward-only movement limitation
+4. **Discrete Command Support**: Optional discrete command assignment for specialized scenarios
+5. **Adaptive Speed Control**: Minimum/maximum speed limits (0.3-0.6 m/s) on pit terrain
+
+**Section sources**
+- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [commands.py:107-198](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L107-L198)
+
+## Curriculum Management
+
+The navigation system implements sophisticated curriculum progression with terrain-level difficulty adjustment:
+
+### Command-Based Curriculum Progression
+
+The system dynamically adjusts command ranges based on performance metrics:
+
+```mermaid
+flowchart TD
+START[Episode Start] --> CHECK{First Episode?}
+CHECK --> |Yes| INIT[Initialize Command Ranges]
+CHECK --> |No| UPDATE[Update Command Ranges]
+INIT --> STORE[Store Original Ranges]
+STORE --> APPLY[Apply Initial Ranges]
+UPDATE --> EVAL[Evaluate Performance]
+EVAL --> PERF{Performance > 80%?}
+PERF --> |Yes| INCREASE[Increase Command Range]
+PERF --> |No| DECREASE[Decrease Command Range]
+INCREASE --> CLAMP[Clamp to Final Ranges]
+DECREASE --> CLAMP
+CLAMP --> NEXT[Next Episode]
+NEXT --> EVAL
+```
+
+**Diagram sources**
+- [curriculums.py:24-65](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L65)
+- [curriculums.py:66-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L66-L106)
+
+### Terrain-Based Curriculum Progression
+
+The system adapts terrain difficulty based on robot performance:
+
+| Curriculum Type | Performance Metric | Difficulty Adjustment |
+|----------------|-------------------|----------------------|
+| `terrain_levels_vel` | Distance walked vs. commanded distance | Increase difficulty when walking far enough, decrease when walking less than half required distance |
+| `command_levels_lin_vel` | Linear velocity tracking performance | Expand command ranges when 80%+ of maximum reward achieved |
+| `command_levels_ang_vel` | Angular velocity tracking performance | Expand command ranges when 80%+ of maximum reward achieved |
+
+**Section sources**
+- [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
+
+## Terrain-Aware Utilities
+
+The navigation system provides comprehensive utility functions for terrain detection and assignment:
+
+### Terrain Detection Functions
+
+The utility system offers sophisticated terrain-aware operations:
+
+```mermaid
+graph LR
+subgraph "Terrain Detection"
+ASSIGNED[is_env_assigned_to_terrain]
+CURRENT[is_robot_on_terrain]
+COLUMN[_get_terrain_column_range]
+end
+subgraph "Terrain Information"
+TYPES[terrain_types]
+ORIGINS[terrain_origins]
+CONFIG[terrain_generator]
+end
+subgraph "Output"
+MASK[Boolean Tensor]
+POSITION[Position Calculation]
+end
+ASSIGNED --> MASK
+CURRENT --> MASK
+COLUMN --> POSITION
+TYPES --> ASSIGNED
+ORIGINS --> CURRENT
+CONFIG --> COLUMN
+```
+
+**Diagram sources**
+- [utils.py:43-71](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L43-L71)
+- [utils.py:73-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L73-L128)
+
+### Utility Function Capabilities
+
+| Function | Purpose | Input Parameters | Output |
+|----------|---------|------------------|--------|
+| `is_env_assigned_to_terrain` | Check initial terrain assignment | `env`, `terrain_name` | Boolean tensor mask |
+| `is_robot_on_terrain` | Detect current terrain position | `env`, `terrain_name`, `asset_name` | Boolean tensor mask |
+| `_get_terrain_column_range` | Calculate terrain column allocation | `terrain_cfg`, `terrain_name`, `device` | Column range tuple |
+
+**Section sources**
+- [utils.py:16-128](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py#L16-L128)
+
 ## Pre-Trained Policy Action System
 
-The pre-trained policy action system represents the most sophisticated component of the navigation architecture, implementing a hierarchical control approach:
+The pre-trained policy action system represents the most sophisticated component of the navigation architecture, implementing a hierarchical control approach with enhanced policy translation:
 
 ### Policy Loading and Initialization
 
@@ -235,7 +410,7 @@ The action processing pipeline implements a sophisticated decimation mechanism:
 
 ## Reward Functions
 
-The reward system employs a multi-faceted approach to guide navigation learning:
+The reward system employs a multi-faceted approach to guide navigation learning with pose-based tracking:
 
 ### Position Tracking Rewards
 
@@ -265,70 +440,24 @@ WEIGHT --> SUM
 ```
 
 **Diagram sources**
-- [rewards.py:15-27](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L27)
+- [rewards.py:15-28](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L28)
 
 ### Reward Configuration
 
 | Reward Type | Weight | Function | Purpose |
 |-------------|--------|----------|---------|
 | `termination_penalty` | -400.0 | `is_terminated` | Episode termination penalty |
-| `position_tracking` | 0.5 | `tanh(std=2.0)` | Coarse position tracking |
-| `position_tracking_fine_grained` | 0.5 | `tanh(std=0.2)` | Fine-grained position tracking |
-| `orientation_tracking` | -0.2 | `heading_error_abs` | Heading error penalty |
+| `position_tracking` | 0.5 | `position_command_error_tanh(std=2.0)` | Coarse position tracking |
+| `position_tracking_fine_grained` | 0.5 | `position_command_error_tanh(std=0.2)` | Fine-grained position tracking |
+| `orientation_tracking` | -0.2 | `heading_command_error_abs` | Heading error penalty |
 
 **Section sources**
-- [navigation_env_cfg.py:79-94](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L79-L94)
-- [rewards.py:15-27](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L27)
-
-## Command Generation
-
-The navigation system employs sophisticated command generation tailored for 2D pose control:
-
-### Pose Command Configuration
-
-The command system generates 2D pose commands with comprehensive parameter control:
-
-```mermaid
-classDiagram
-class UniformPose2dCommandCfg {
-+asset_name : str
-+simple_heading : bool
-+resampling_time_range : tuple
-+debug_vis : bool
-+ranges : PoseRanges
-}
-class PoseRanges {
-+pos_x : tuple[-3.0, 3.0]
-+pos_y : tuple[-3.0, 3.0]
-+heading : tuple[-π, π]
-}
-class CommandBuffer {
-+pose_command : Tensor[batch, 4]
-+update_frequency : float
-+last_update : Tensor[batch]
-}
-UniformPose2dCommandCfg --> PoseRanges
-UniformPose2dCommandCfg --> CommandBuffer
-```
-
-**Diagram sources**
-- [navigation_env_cfg.py:101-107](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L101-L107)
-
-### Command Generation Process
-
-The command generation process ensures smooth and predictable navigation behavior:
-
-1. **Resampling Interval**: Commands are resampled every 8 seconds for consistent exploration
-2. **Pose Space**: 2D position (±3m range) plus heading (±π radians) control
-3. **Simple Heading Mode**: Prevents complex heading calculations for stable navigation
-4. **Debug Visualization**: Optional visual feedback for command targets
-
-**Section sources**
-- [navigation_env_cfg.py:98-107](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L98-L107)
+- [navigation_env_cfg.py:79-96](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L79-L96)
+- [rewards.py:15-28](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L28)
 
 ## Integration Architecture
 
-The navigation system integrates seamlessly with the broader robot lab ecosystem:
+The navigation system integrates seamlessly with the broader robot lab ecosystem with enhanced module organization:
 
 ### Module Organization
 
@@ -340,9 +469,12 @@ CFG[config/anymal_c]
 MDP[mdp/]
 INIT[__init__.py]
 end
-subgraph "MDP Submodules"
+subgraph "Enhanced MDP Submodules"
 PRETRAINED[pre_trained_policy_action.py]
 REWARDS[rewards.py]
+COMMANDS[commands.py]
+CURRICULUM[curriculums.py]
+UTILS[utils.py]
 MDPINIT[__init__.py]
 end
 subgraph "Configuration"
@@ -355,6 +487,9 @@ NAVPKG --> MDP
 NAVPKG --> INIT
 MDP --> PRETRAINED
 MDP --> REWARDS
+MDP --> COMMANDS
+MDP --> CURRICULUM
+MDP --> UTILS
 MDP --> MDPINIT
 CFG --> NAVCFG
 CFG --> AGENTS
@@ -363,7 +498,7 @@ CFG --> NAVINIT
 
 **Diagram sources**
 - [navigation_init.py:6-9](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/__init__.py#L6-L9)
-- [navigation_mdp_init.py:8-12](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py#L8-L12)
+- [navigation_mdp_init.py:8-15](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py#L8-L15)
 
 ### Cross-Platform Compatibility
 
@@ -377,18 +512,19 @@ The system maintains compatibility with various robot platforms through standard
 | Boston Dynamics Spot | ❓ Future | Planned |
 
 **Section sources**
-- [navigation_mdp_init.py:8-12](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py#L8-L12)
+- [navigation_mdp_init.py:8-15](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py#L8-L15)
 
 ## Performance Considerations
 
-The navigation system is optimized for efficient operation in both simulation and real-world scenarios:
+The navigation system is optimized for efficient operation in both simulation and real-world scenarios with enhanced computational efficiency:
 
 ### Computational Efficiency
 
 | Component | Optimization Strategy | Performance Impact |
 |-----------|----------------------|-------------------|
 | Policy Decimation | 4-step cycle reduces inference frequency | ~75% reduction in policy computations |
-| Batch Processing | Vectorized operations across all environments | Linear scaling with environment count |
+| Terrain Detection | Vectorized operations across all environments | Linear scaling with environment count |
+| Curriculum Updates | Episode-based updates prevent frequent recalculations | Minimal computational overhead |
 | Memory Management | Efficient tensor reuse and minimal allocations | Reduced memory footprint |
 | Device Utilization | GPU acceleration for policy inference | 10x+ speedup over CPU |
 
@@ -400,10 +536,11 @@ The system implements several resource optimization strategies:
 2. **Memory Pooling**: Reused tensors minimize allocation overhead
 3. **Asynchronous Updates**: Non-blocking operations prevent simulation stalls
 4. **Selective Visualization**: Debug markers disabled in production runs
+5. **Terrain-Aware Optimization**: Terrain detection optimized for batch processing
 
 ## Troubleshooting Guide
 
-Common issues and their solutions when working with the navigation system:
+Common issues and their solutions when working with the enhanced navigation system:
 
 ### Policy Loading Issues
 
@@ -415,15 +552,25 @@ Common issues and their solutions when working with the navigation system:
 **Solution**: Ensure policy matches expected input dimensions
 **Diagnostic**: Compare observation space with policy training conditions
 
-### Action Execution Problems
+### Enhanced Command Generation Problems
 
-**Problem**: Robot not responding to navigation commands
-**Solution**: Check low-level action term configuration
-**Diagnostic**: Verify joint limits and actuator capabilities
+**Problem**: Terrain-aware commands not working properly
+**Solution**: Check terrain configuration and detection functions
+**Diagnostic**: Verify terrain types and column ranges are correctly configured
 
-**Problem**: Stuttering or jerky movements
-**Solution**: Adjust decimation factors and smoothing parameters
-**Diagnostic**: Monitor action frequency and control loop timing
+**Problem**: Pit terrain restrictions not applied
+**Solution**: Ensure `is_robot_on_terrain` function returns correct masks
+**Diagnostic**: Check robot position detection and terrain origin calculations
+
+### Curriculum Management Issues
+
+**Problem**: Curriculum progression not occurring
+**Solution**: Verify reward term names match configuration
+**Diagnostic**: Check episode sum calculations and reward term configurations
+
+**Problem**: Terrain difficulty not adjusting appropriately
+**Solution**: Review distance calculations and command comparisons
+**Diagnostic**: Analyze robot displacement and commanded velocity relationships
 
 ### Training Instability
 
@@ -437,17 +584,22 @@ Common issues and their solutions when working with the navigation system:
 
 **Section sources**
 - [pre_trained_policy_action.py:42-46](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L42-L46)
-- [navigation_env_cfg.py:114-118](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L114-L118)
+- [commands.py:73-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L73-L98)
+- [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
 
 ## Conclusion
 
-The Navigation System provides a robust, scalable framework for quadruped robot navigation that effectively bridges high-level command generation with low-level control execution. Through its hierarchical architecture, sophisticated reward design, and efficient policy translation mechanisms, the system enables reliable navigation performance across diverse environments.
+The Enhanced Navigation System provides a robust, scalable framework for quadruped robot navigation that effectively bridges high-level command generation with low-level control execution through sophisticated terrain-aware capabilities. Through its enhanced hierarchical architecture, terrain-aware command generation, sophisticated reward design, and efficient policy translation mechanisms, the system enables reliable navigation performance across diverse, challenging environments.
 
-Key strengths of the system include:
+Key strengths of the enhanced system include:
 
-- **Modular Design**: Clear separation between navigation, policy, and control layers
-- **Efficient Computation**: Strategic decimation reduces computational overhead
-- **Robust Integration**: Seamless compatibility with the broader Isaac Lab ecosystem
-- **Extensible Architecture**: Foundation for supporting additional robot platforms
+- **Terrain-Aware Command Generation**: Real-time adaptation to environmental conditions with pit detection and movement restrictions
+- **Sophisticated Curriculum Management**: Terrain-level difficulty progression and adaptive command ranges based on performance metrics
+- **Enhanced Policy Translation**: Improved policy loading, decimation scheduling, and action processing pipelines
+- **Comprehensive Utility Functions**: Advanced terrain detection, assignment, and position calculation capabilities
+- **Modular Design**: Clear separation between navigation, policy, and control layers with enhanced integration
+- **Efficient Computation**: Strategic decimation and vectorized operations reduce computational overhead
+- **Robust Integration**: Seamless compatibility with the broader Isaac Lab ecosystem and enhanced cross-platform support
+- **Extensible Architecture**: Foundation for supporting additional robot platforms and navigation scenarios
 
-The system's design principles and implementation patterns serve as a foundation for developing advanced navigation capabilities in robotic systems, with clear pathways for future enhancements and platform expansion.
+The system's enhanced design principles and implementation patterns serve as a foundation for developing advanced navigation capabilities in robotic systems, with clear pathways for future enhancements, platform expansion, and specialized navigation scenarios including discrete command assignment and terrain-level curriculum progression.
