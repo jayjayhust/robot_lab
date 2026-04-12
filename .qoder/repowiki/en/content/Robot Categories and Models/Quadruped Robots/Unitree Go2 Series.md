@@ -21,11 +21,11 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive documentation for the new Go2 parkour training system
-- Documented the custom ActorCriticScan neural network architecture
-- Added terrain generation capabilities with 15+ different terrain types
-- Included custom MDP observations and rewards for parkour training
-- Documented ablation study configurations and training methodologies
+- Enhanced Go2 parkour configuration with new terrain-level curriculum support
+- Improved observation system documentation with comprehensive comments explaining dimensional characteristics
+- Added enhanced curriculum parameter specifications for terrain generation
+- Documented new terrain types with curriculum-based difficulty progression
+- Updated neural network architecture documentation with detailed observation dimension explanations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,17 +34,19 @@
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
 6. [Go2 Parkour Training System](#go2-parkour-training-system)
-7. [Dependency Analysis](#dependency-analysis)
-8. [Performance Considerations](#performance-considerations)
-9. [Troubleshooting Guide](#troubleshooting-guide)
-10. [Conclusion](#conclusion)
-11. [Appendices](#appendices)
+7. [Enhanced Terrain Curriculum System](#enhanced-terrain-curriculum-system)
+8. [Improved Observation System](#improved-observation-system)
+9. [Dependency Analysis](#dependency-analysis)
+10. [Performance Considerations](#performance-considerations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
+13. [Appendices](#appendices)
 
 ## Introduction
-This document provides comprehensive technical documentation for the Unitree Go2 series, covering both the standard quadruped Go2 and the wheeled Go2W variants. It explains motor configurations, actuator distributions, joint setups, initial poses, simulation parameters, and environment configurations used in reinforcement learning tasks. The document now includes the newly added comprehensive Go2 parkour training system with advanced neural network architecture and enhanced terrain generation capabilities. It also compares the two variants and offers selection guidance based on terrain and mobility requirements.
+This document provides comprehensive technical documentation for the Unitree Go2 series, covering both the standard quadruped Go2 and the wheeled Go2W variants. It explains motor configurations, actuator distributions, joint setups, initial poses, simulation parameters, and environment configurations used in reinforcement learning tasks. The document now includes the newly enhanced Go2 parkour training system with advanced neural network architecture, terrain-level curriculum support, and improved observation system documentation with detailed dimensional characteristics explanations. It also compares the two variants and offers selection guidance based on terrain and mobility requirements.
 
 ## Project Structure
-The repository integrates the Go2 and Go2W robots into the Isaac Lab ecosystem. The robot assets and URDF definitions are located under the data directory, while the robot configurations and environment setups are defined in the assets and task configuration modules. The new Go2 parkour system is organized as a self-contained package with custom RL configuration and advanced neural network architecture.
+The repository integrates the Go2 and Go2W robots into the Isaac Lab ecosystem. The robot assets and URDF definitions are located under the data directory, while the robot configurations and environment setups are defined in the assets and task configuration modules. The enhanced Go2 parkour system is organized as a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support.
 
 ```mermaid
 graph TB
@@ -60,10 +62,11 @@ QGO2["Quadruped Go2 Configs"]
 WGO2W["Wheeled Go2W Configs"]
 GOPARKOUR["Go2 Parkour System"]
 end
-subgraph "Parkour Components"
+subgraph "Enhanced Parkour Components"
 ACTNET["ActorCriticScan<br/>Custom NN Architecture"]
-TERRAINS["Enhanced Terrain<br/>Generation"]
-MDP["Custom MDP<br/>Observations & Rewards"]
+TERRAINS["Enhanced Terrain<br/>Curriculum System"]
+MDP["Improved MDP<br/>Observations & Rewards"]
+CURRICULUM["Terrain-Level<br/>Curriculum Support"]
 end
 UCFG --> GO2
 UCFG --> GO2W
@@ -72,6 +75,7 @@ GO2W --> WGO2W
 GOPARKOUR --> ACTNET
 GOPARKOUR --> TERRAINS
 GOPARKOUR --> MDP
+GOPARKOUR --> CURRICULUM
 ```
 
 **Diagram sources**
@@ -95,10 +99,11 @@ GOPARKOUR --> MDP
 - Environment configurations:
   - Separate flat and rough environments for both variants.
   - Observation/action scaling and reward shaping tuned for locomotion tasks.
-- **New**: Go2 Parkour System:
+- **Enhanced**: Go2 Parkour System:
   - Custom ActorCriticScan neural network with scan and privileged observation encoders.
-  - Advanced terrain generation with 15+ different terrain types.
-  - Specialized MDP observations and rewards for parkour training.
+  - Advanced terrain generation with 15+ different terrain types and curriculum-based difficulty progression.
+  - Specialized MDP observations and rewards for parkour training with detailed dimensional characteristics.
+  - Enhanced curriculum parameter specifications for terrain generation.
 
 **Section sources**
 - [unitree.py:107-116](file://source/robot_lab/robot_lab/assets/unitree.py#L107-L116)
@@ -107,22 +112,24 @@ GOPARKOUR --> MDP
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
 
 ## Architecture Overview
-The system architecture connects environment configurations to robot assets and actuators. The environment defines observations, actions, rewards, and terminations, while the assets module provides robot-specific configurations and URDF definitions. The new Go2 parkour system introduces a self-contained package with custom RL configuration and advanced neural network architecture.
+The system architecture connects environment configurations to robot assets and actuators. The environment defines observations, actions, rewards, and terminations, while the assets module provides robot-specific configurations and URDF definitions. The enhanced Go2 parkour system introduces a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support.
 
 ```mermaid
 graph TB
 Env["Environment Configs<br/>Go2 Flat/Rough & Go2W Flat/Rough"]
-Parkour["Go2 Parkour System<br/>Custom RL Package"]
+Parkour["Enhanced Go2 Parkour System<br/>Custom RL Package"]
 Assets["Robot Assets<br/>unitree.py"]
 URDF["URDF Models<br/>go2/go2w"]
 NN["ActorCriticScan<br/>Neural Network"]
-Terrains["Enhanced Terrains<br/>15+ Types"]
-MDP["Custom MDP<br/>Observations & Rewards"]
+Terrains["Enhanced Terrains<br/>15+ Types with Curriculum"]
+MDP["Improved MDP<br/>Observations & Rewards"]
+Curriculum["Terrain-Level<br/>Curriculum Support"]
 Env --> Assets
 Assets --> URDF
 Parkour --> NN
 Parkour --> Terrains
 Parkour --> MDP
+Parkour --> Curriculum
 ```
 
 **Diagram sources**
@@ -264,8 +271,10 @@ Env-->>Robot : Step simulation with actions
 
 ## Go2 Parkour Training System
 
-### Custom Neural Network Architecture
-The Go2 parkour system introduces a sophisticated custom neural network architecture called ActorCriticScan, designed specifically for complex parkour locomotion tasks.
+### Enhanced Neural Network Architecture
+The Go2 parkour system introduces a sophisticated custom neural network architecture called ActorCriticScan, designed specifically for complex parkour locomotion tasks with enhanced observation processing capabilities.
+
+**Updated** Enhanced with improved observation dimension handling and curriculum-aware architecture
 
 ```mermaid
 classDiagram
@@ -285,6 +294,10 @@ class ActorCriticScan {
 +critic : nn.Sequential
 +std : nn.Parameter
 +noise_std_type : str
++obs_groups : dict
++num_actor_scan : int
++num_critic_scan : int
++num_priv : int
 +update_distribution()
 +act()
 +evaluate()
@@ -292,14 +305,16 @@ class ActorCriticScan {
 ```
 
 **Diagram sources**
-- [actor_critic_scan.py:20-133](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L133)
+- [actor_critic_scan.py:20-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L280)
 
 ### Advanced Terrain Generation Capabilities
-The system provides comprehensive terrain generation with 15+ different terrain types, enabling diverse parkour training scenarios.
+The system provides comprehensive terrain generation with 15+ different terrain types and enhanced curriculum support for progressive difficulty scaling.
 
-#### Available Terrain Types
+**Updated** Enhanced with terrain-level curriculum support and improved parameter specifications
+
+#### Available Terrain Types with Curriculum Support
 - **Basic Terrains**: Plane, Pyramid Stairs, Inverted Pyramid Stairs
-- **Grid Systems**: Random Grid, Repeated Objects (Cylinders, Boxes, Pyramids)
+- **Grid Systems**: Random Grid, Repeated Objects (Cylinders, Boxes, Pyramids) with curriculum parameters
 - **Obstacle Courses**: Rails, Pit, Box Terrain, Gap Terrain
 - **Linear Obstacles**: Gap Strip, Hurdle Strip, Stairs Strip
 - **Parkour-Specific**: Parkour Step, Floating Ring, Star Pattern, Debris Field
@@ -322,57 +337,142 @@ Terrains --> Parkour
 **Diagram sources**
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
 
-### Custom MDP Observations and Rewards
-The parkour system includes specialized observations and rewards tailored for complex locomotion tasks.
+### Enhanced Custom MDP Observations and Rewards
+The parkour system includes specialized observations and rewards tailored for complex locomotion tasks with detailed dimensional characteristics.
 
-#### Custom Observations
-- **Foot Contacts**: Binary contact flags from contact sensors
+**Updated** Improved documentation with comprehensive comments explaining sensor input dimensions
+
+#### Enhanced Custom Observations with Dimensional Characteristics
+- **Foot Contacts**: Binary contact flags from contact sensors, shape: (num_envs, num_feet)
 - **Physical Properties**: Base mass, center of mass, friction coefficients
 - **Control Parameters**: P-gain and D-gain scaling factors
 
-#### Custom Rewards
-- **Mechanical Work**: Positive mechanical work with regeneration clamping
+#### Enhanced Custom Rewards with Dimensional Specifications
+- **Mechanical Work**: Positive mechanical work with regeneration clamping, shape: (num_envs,)
 - **Joint Deviations**: L2 penalty on joint positions from defaults
 - **Stumble Detection**: Penalizes horizontal forces dominating vertical forces
-- **Torque Sum**: Sum of applied joint torques
+- **Torque Sum**: Sum of applied joint torques, shape: (num_envs,)
 - **Stop Penalties**: Exponential penalties for linear and angular velocity
 
 ```mermaid
 sequenceDiagram
-participant Env as "Parkour Environment"
+participant Env as "Enhanced Parkour Environment"
 participant Sensor as "Contact Sensors"
 participant Asset as "Robot Asset"
 participant MDP as "Custom MDP"
-Env->>Sensor : Collect Contact Data
+Env->>Sensor : Collect Contact Data (Shape : (N, num_feet, 3))
 Sensor->>MDP : Process Foot Contacts
 Env->>Asset : Monitor Joint States
-MDP->>MDP : Calculate Custom Rewards
-MDP->>Env : Return Enhanced Observations
+MDP->>MDP : Calculate Custom Rewards with Dimensions
+MDP->>Env : Return Enhanced Observations with Shapes
 ```
 
 **Diagram sources**
-- [observations.py:33-110](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L110)
-- [rewards.py:35-130](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/rewards.py#L35-L130)
+- [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L111)
+- [rewards.py:35-131](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/rewards.py#L35-L131)
 
-### Ablation Study Configurations
-The system supports comprehensive ablation studies with multiple runner configurations:
+### Enhanced Ablation Study Configurations
+The system supports comprehensive ablation studies with multiple runner configurations and enhanced curriculum parameter specifications:
 
 - **Baseline**: Standard ActorCritic network
 - **Scan Encoder Ablations**: Different scan encoder configurations
 - **Privileged Observation Ablations**: Various privileged observation setups
-- **Training Variants**: Flat vs Rough terrain training
+- **Training Variants**: Flat vs Rough terrain training with curriculum support
+- **Curriculum Parameter Ablations**: Enhanced difficulty progression controls
 
 **Section sources**
-- [actor_critic_scan.py:20-263](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L263)
-- [rsl_rl_ppo_cfg.py:128-237](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L237)
+- [actor_critic_scan.py:20-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L280)
+- [rsl_rl_ppo_cfg.py:128-242](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L242)
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
-- [observations.py:33-110](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L110)
-- [rewards.py:35-130](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/rewards.py#L35-L130)
+- [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L111)
+- [rewards.py:35-131](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/rewards.py#L35-L131)
+
+## Enhanced Terrain Curriculum System
+
+### Terrain-Level Curriculum Support
+The enhanced terrain system provides progressive difficulty scaling with comprehensive parameter specifications for each terrain type.
+
+**Updated** Added terrain-level curriculum support with detailed parameter explanations
+
+#### Curriculum Parameter Specifications
+- **Difficulty Range**: 0.0 to 1.0 representing minimum to maximum difficulty
+- **Parameter Interpolation**: Linear interpolation between start and end parameters based on difficulty
+- **Terrain-Specific Parameters**: Each terrain type defines its own difficulty-dependent parameters
+
+#### Enhanced Terrain Configuration Classes
+- **MeshPyramidStairsTerrainCfg**: step_height_range, step_width, platform_width
+- **MeshRandomGridTerrainCfg**: grid_width, grid_height_range, platform_width
+- **MeshRepeatedObjectsTerrainCfg**: object_type, object_params_start/end, height noise parameters
+- **MeshParkourStepTerrainCfg**: step_height_range, step_length_base_range, steps
+
+```mermaid
+graph LR
+Difficulty["Difficulty Scale<br/>0.0 to 1.0"]
+StartParams["Start Parameters<br/>At Difficulty=0"]
+EndParams["End Parameters<br/>At Difficulty=1"]
+Interpolated["Interpolated Parameters<br/>Linear Combination"]
+Difficulty --> StartParams
+Difficulty --> EndParams
+StartParams --> Interpolated
+EndParams --> Interpolated
+```
+
+**Diagram sources**
+- [terrains_cfg.py:76-87](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L76-L87)
+- [terrains_cfg.py:264-277](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L264-L277)
+
+**Section sources**
+- [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
+- [mesh_terrains.py:74-81](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mesh_terrains.py#L74-L81)
+
+## Improved Observation System
+
+### Enhanced Observation Dimension Documentation
+The observation system now includes comprehensive comments explaining the dimensional characteristics of sensor inputs and processing pipeline.
+
+**Updated** Added detailed dimensional characteristics documentation for sensor inputs
+
+#### Observation Pipeline with Dimensional Characteristics
+- **Proprioceptive Observations**: Shape (num_envs, num_prop_obs)
+- **Scan Observations**: Shape (num_envs, num_scan_obs) processed through scan encoders
+- **Privileged Observations**: Shape (num_envs, num_priv_obs) processed through privileged encoders
+- **Combined Observations**: Concatenated tensors with explicit dimension calculations
+
+#### Enhanced Sensor Input Documentation
+- **Contact Sensors**: Net forces with shape (num_envs, num_feet, 3)
+- **Articulation Sensors**: Joint positions, velocities, torques with shape (num_envs, num_joints)
+- **IMU Sensors**: Orientation, angular velocity, linear acceleration with shape (num_envs, 10)
+
+```mermaid
+graph TD
+PropObs["Proprioceptive<br/>Shape: (N, 52)"]
+ScanObs["Scan Observations<br/>Shape: (N, 187)"]
+PrivObs["Privileged Observations<br/>Shape: (N, ?)"]
+ContactSensors["Contact Sensors<br/>Shape: (N, num_feet, 3)"]
+Articulation["Articulation Data<br/>Shape: (N, num_joints)"]
+IMU["IMU Data<br/>Shape: (N, 10)"]
+PropObs --> ActorInput["Actor Input<br/>Shape: (N, ?)"]
+ScanObs --> ScanEncoder["Scan Encoder<br/>Shape: (N, latent_dim)"]
+PrivObs --> CriticInput["Critic Input<br/>Shape: (N, ?)"]
+ContactSensors --> PropObs
+Articulation --> PropObs
+IMU --> PropObs
+ScanEncoder --> ActorInput
+PrivObs --> CriticInput
+```
+
+**Diagram sources**
+- [actor_critic_scan.py:62-71](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L62-L71)
+- [observations.py:33-47](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L47)
+
+**Section sources**
+- [actor_critic_scan.py:54-71](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L54-L71)
+- [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L111)
 
 ## Dependency Analysis
 - Environment configurations depend on robot assets for spawning and actuator definitions.
 - Go2W introduces a dual-actuator strategy: implicit actuators for legs and wheels, altering dynamics compared to pure DC motors.
-- **New Dependencies**: Go2 parkour system introduces dependencies on custom neural networks, terrain generation utilities, and specialized MDP components.
+- **Enhanced Dependencies**: Go2 parkour system introduces dependencies on custom neural networks, terrain generation utilities, specialized MDP components, and curriculum parameter systems.
 
 ```mermaid
 graph LR
@@ -380,9 +480,10 @@ QCfg["Quadruped Go2 Configs"] --> UAsset["unitree.py"]
 WCfg["Wheeled Go2W Configs"] --> UAsset
 UAsset --> URDFG["go2_description.urdf"]
 UAsset --> URDFGW["go2w_description.urdf"]
-GOParkour["Go2 Parkour System"] --> ActorNet["ActorCriticScan"]
+GOParkour["Enhanced Go2 Parkour System"] --> ActorNet["ActorCriticScan"]
 GOParkour --> TerrainGen["Enhanced Terrains"]
-GOParkour --> CustomMDP["Custom MDP"]
+GOParkour --> CustomMDP["Improved MDP"]
+GOParkour --> Curriculum["Terrain Curriculum"]
 ```
 
 **Diagram sources**
@@ -402,7 +503,7 @@ GOParkour --> CustomMDP["Custom MDP"]
   - Go2W's higher center of mass (0.45 m vs 0.38 m) affects stability and energy consumption; reward targets and penalties reflect this.
 - Actuator modeling:
   - Go2W's wheels use implicit actuators with zero stiffness, emphasizing compliant rolling contact and reduced control complexity for wheel joints.
-- **New Considerations**: Go2 parkour system requires additional computational resources for custom neural networks and terrain generation, but enables more sophisticated training scenarios.
+- **Enhanced Considerations**: Go2 parkour system requires additional computational resources for custom neural networks, terrain generation, and curriculum management, but enables more sophisticated training scenarios with progressive difficulty scaling.
 
 ## Troubleshooting Guide
 - Validation of motor limits:
@@ -411,10 +512,11 @@ GOParkour --> CustomMDP["Custom MDP"]
   - Ensure base height and joint positions align with configuration files for the chosen variant.
 - Environment mismatch:
   - Verify the environment registration and configuration correspond to the intended variant (Go2 vs Go2W).
-- **New Issues**: For Go2 parkour system:
+- **Enhanced Issues**: For Go2 parkour system:
   - Ensure custom neural network dependencies are properly installed.
-  - Verify terrain generation parameters are within valid ranges.
-  - Check ablation study configurations for proper parameter combinations.
+  - Verify terrain generation parameters are within valid ranges and curriculum specifications are correct.
+  - Check ablation study configurations for proper parameter combinations and observation dimension compatibility.
+  - Validate observation dimension calculations and tensor shape compatibility in the neural network architecture.
 
 **Section sources**
 - [unitree.py:107-116](file://source/robot_lab/robot_lab/assets/unitree.py#L107-L116)
@@ -423,22 +525,25 @@ GOParkour --> CustomMDP["Custom MDP"]
 - [rough_env_cfg.go2w:76-77](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/unitree_go2w/rough_env_cfg.py#L76-L77)
 
 ## Conclusion
-The Unitree Go2 series integrates seamlessly with the Isaac Lab RL framework. Go2 relies on DC motors across all joints, while Go2W employs implicit actuators for legs and wheels, reflecting distinct locomotion strategies. The newly added Go2 parkour training system provides a comprehensive self-contained package with custom RL configuration, advanced neural network architecture, and enhanced terrain generation capabilities. The documented configurations, limits, and environment parameters enable reproducible simulations and informed selection between variants depending on terrain and mobility requirements.
+The Unitree Go2 series integrates seamlessly with the Isaac Lab RL framework. Go2 relies on DC motors across all joints, while Go2W employs implicit actuators for legs and wheels, reflecting distinct locomotion strategies. The enhanced Go2 parkour training system provides a comprehensive self-contained package with custom RL configuration, advanced neural network architecture, enhanced terrain generation capabilities with curriculum support, and improved observation system documentation with detailed dimensional characteristics. The documented configurations, limits, and environment parameters enable reproducible simulations and informed selection between variants depending on terrain and mobility requirements.
 
 ## Appendices
 
-### Selection Guidance: Go2 vs Go2W vs Go2 Parkour
+### Selection Guidance: Go2 vs Go2W vs Enhanced Go2 Parkour
 - Choose Go2 when:
   - Terrain requires robust foothold adaptability and dynamic balance.
   - Emphasis on bipedal-like legged locomotion with articulated feet.
 - Choose Go2W when:
   - Smooth, efficient transport on relatively flat surfaces is prioritized.
   - Reduced actuator count for wheels lowers control complexity and power consumption.
-- Choose Go2 Parkour when:
+- Choose Enhanced Go2 Parkour when:
   - Complex parkour and obstacle navigation training is required.
-  - Advanced neural network architectures and terrain generation capabilities are needed.
-  - Comprehensive ablation studies and custom MDP components are beneficial.
-- Comparison highlights:
+  - Advanced neural network architectures with curriculum support are beneficial.
+  - Comprehensive ablation studies and enhanced observation system are needed.
+  - Progressive difficulty scaling and terrain-level curriculum support are essential.
+- **Enhanced Comparison Highlights**:
   - Effort/velocity/stiffness/damping limits are consistent between variants for fair comparisons.
   - Go2W's higher center of mass improves ground clearance but may increase overturning risk on uneven terrain.
-  - Go2 parkour system provides the most sophisticated training capabilities but requires additional computational resources.
+  - Enhanced Go2 parkour system provides the most sophisticated training capabilities with curriculum support but requires additional computational resources.
+  - Improved observation system documentation enables better debugging and parameter tuning.
+  - Terrain-level curriculum support enables progressive skill development with systematic difficulty scaling.

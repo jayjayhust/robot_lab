@@ -216,6 +216,7 @@ python scripts/tools/zero_agent.py --task=<ENV_NAME>
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Zsibot-ZSL1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Isaac-Navigation-Flat-Anymal-C-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):

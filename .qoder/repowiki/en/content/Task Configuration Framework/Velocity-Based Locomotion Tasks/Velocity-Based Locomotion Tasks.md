@@ -19,15 +19,17 @@
 - [fftai_flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/fftai_gr1t1/flat_env_cfg.py)
 - [unitree_h1_flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_h1/flat_env_cfg.py)
 - [deeprobotics_m20_flat_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/deeprobotics_m20/flat_env_cfg.py)
+- [unitree_go2_parkour_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/__init__.py)
+- [zsibot_zsl1_parkour_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced documentation to reflect environment observation improvements including disabled height_scan observations for computational efficiency
-- Updated observation processing section to explain the systematic disabling of height_scan in flat environments
-- Added detailed explanation of computational overhead reduction and training stability improvements
-- Expanded flat environment configuration examples to demonstrate height_scan disabling patterns
-- Updated performance considerations to include observation processing optimization strategies
+- Enhanced documentation to reflect new terrain-level curriculum functionality with automatic terrain difficulty adjustment
+- Updated task naming conventions section to clarify that `-Play` suffixes are no longer used in task naming
+- Added detailed explanation of the `terrain_levels_vel` curriculum function and its implementation
+- Updated environment registration examples to show current naming conventions
+- Enhanced curriculum learning section with terrain-level progression mechanisms
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -43,7 +45,7 @@
 11. [Appendices](#appendices)
 
 ## Introduction
-This document explains the velocity-based locomotion task configurations implemented in the repository. It focuses on the ManagerBasedRLEnv architecture, velocity command generation and tracking, MDP formulation (state representation, action space, rewards, and terminations), terrain configuration options, observation preprocessing and corruption, and practical task parameterization for quadrupeds, wheeled robots, and humanoid variants. The framework now includes enhanced support for specialized locomotion scenarios through improved observation processing that reduces computational overhead and improves training stability by systematically disabling height_scan observations in flat environments.
+This document explains the velocity-based locomotion task configurations implemented in the repository. It focuses on the ManagerBasedRLEnv architecture, velocity command generation and tracking, MDP formulation (state representation, action space, rewards, and terminations), terrain configuration options, observation preprocessing and corruption, and practical task parameterization for quadrupeds, wheeled robots, and humanoid variants. The framework now includes enhanced support for specialized locomotion scenarios through improved observation processing that reduces computational overhead and includes sophisticated terrain-level curriculum functionality that automatically adjusts terrain difficulty based on robot performance.
 
 ## Project Structure
 The velocity-based locomotion tasks are organized under a manager-based RL environment framework with enhanced support for specialized locomotion scenarios. Key elements include:
@@ -52,6 +54,7 @@ The velocity-based locomotion tasks are organized under a manager-based RL envir
 - Advanced terrain generation for gap and parkour environments
 - Specialized reward functions for climbing and gap traversal
 - Flat vs rough terrain variants per robot family with optimized observation processing
+- Terrain-level curriculum functionality for adaptive difficulty progression
 
 ```mermaid
 graph TB
@@ -113,7 +116,7 @@ Ev --> BaseCfg
 - Observations: Concatenated policy and critic groups with noise and clipping, optimized with selective height_scan disabling for computational efficiency.
 - Rewards: Velocity tracking, stability, contact-based, gait-related, and climbing progress terms.
 - Events: Physics and kinematic randomization, resets, and perturbations.
-- Curriculum: Command range progression based on reward performance.
+- Curriculum: Command range progression and terrain-level difficulty progression based on robot performance.
 - Terrain: Generator-based rough terrains and plane-based flat scenes with advanced gap and parkour terrain generation.
 
 **Section sources**
@@ -130,7 +133,7 @@ The ManagerBasedRLEnv orchestrates the RL loop with enhanced support for special
 - Observations module constructs concatenated tensors for policy and critic with optimized processing.
 - Rewards module computes shaped feedback for velocity tracking, stability, contact dynamics, and climbing progress.
 - Events module injects robustness via parameter randomization and controlled perturbations.
-- Curriculum module progressively increases command difficulty.
+- Curriculum module progressively increases command difficulty and terrain complexity based on performance.
 
 ```mermaid
 sequenceDiagram
@@ -146,7 +149,7 @@ Env->>Cmd : Sample/resample velocity commands
 Env->>Obs : Build policy/critic observations (optimized)
 Env->>Env : Step physics and sensors
 Env->>Rew : Evaluate reward terms (including climbing progress)
-Env->>Cur : Update command ranges based on performance
+Env->>Cur : Update command ranges and terrain difficulty
 Env->>Ev : Apply randomization/reset/perturbations
 Env-->>Env : Repeat until termination
 ```
@@ -167,7 +170,7 @@ Env-->>Env : Repeat until termination
 - Observations: Policy and critic groups with base velocities, gravity projection, commands, joint positions/velocities, actions, and height scans; includes noise injection and corruption toggles with optimized processing.
 - Rewards: Comprehensive set covering velocity tracking, stability, joint limits/power, contact dynamics, gait, and climbing progress.
 - Terminations: Episode timeouts and terrain bounds; contact-based illegal contact.
-- Curriculum: Terrain levels and command range progression.
+- Curriculum: Terrain levels and command range progression with automatic difficulty adjustment.
 
 **Section sources**
 - [velocity_env_cfg.py:42-95](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L42-L95)
@@ -408,10 +411,14 @@ RewardsCfg --> ClimbingProgress : "uses"
 - [README.md:32-42](file://README.md#L32-L42)
 
 ### Curriculum Learning Implementation
-- Terrain levels curriculum: Progressive difficulty for generator-based terrains.
+- Terrain levels curriculum: **NEW** Automatic difficulty progression based on robot performance using the `terrain_levels_vel` function.
 - Command range curriculum:
   - Linear and angular velocity ranges are progressively increased when tracking reward exceeds a threshold.
   - Updates occur at episode boundaries to avoid frequent resampling.
+
+**Updated** Enhanced curriculum learning with terrain-level progression functionality.
+
+The terrain-level curriculum automatically adjusts terrain difficulty based on how far the robot travels when commanded to move at a desired velocity. This provides adaptive difficulty progression that responds to actual robot performance rather than fixed schedules.
 
 ```mermaid
 flowchart TD
@@ -443,6 +450,7 @@ Next --> Loop
 - Leverage specialized reward functions for climbing scenarios to improve training efficiency.
 - **Systematic height_scan disabling**: Disable height_scan observations in flat environments to reduce computational overhead and improve training stability.
 - **Observation processing optimization**: Use optimized observation groups with selective feature inclusion based on terrain complexity.
+- **Terrain-level curriculum**: Enable automatic difficulty progression that adapts to robot performance for more efficient training.
 
 **Updated** Enhanced timing optimization strategies based on improved documentation of simulation parameters and systematic height_scan disabling for computational efficiency.
 
@@ -489,6 +497,10 @@ The parkour environment provides advanced obstacle navigation capabilities:
 - **Enhanced Stability Controls**: Modified base height penalties and angular velocity constraints.
 - **Advanced Gait Control**: Reduced feet contact rewards to encourage dynamic stepping.
 
+**Updated** Enhanced parkour environment with terrain-level curriculum functionality.
+
+The parkour environments now include terrain-level curriculum functionality that automatically adjusts difficulty based on robot performance, providing adaptive training progression.
+
 ```mermaid
 flowchart TD
 ParkourStart["Parkour Environment Init"] --> StepGen["Generate Parkour Steps"]
@@ -496,7 +508,8 @@ StepGen --> HeightRange["Configure Step Height Range"]
 HeightRange --> RewardSetup["Setup Climbing Progress Rewards"]
 RewardSetup --> StabilityCfg["Configure Stability Parameters"]
 StabilityCfg --> GaitControl["Adjust Gait Rewards"]
-GaitControl --> Ready["Ready for Training"]
+GaitControl --> TerrainCurriculum["Enable Terrain-Level Curriculum"]
+TerrainCurriculum --> Ready["Ready for Training"]
 ```
 
 **Diagram sources**
@@ -570,6 +583,7 @@ Stair["stair_env_cfg.py"] --> Base
 - Use advanced terrain generation for complex locomotion scenarios to enhance generalization.
 - **Systematic height_scan disabling**: Disable height_scan observations in flat environments to reduce computational overhead and improve training stability.
 - **Observation processing optimization**: Use optimized observation groups with selective feature inclusion based on terrain complexity and computational requirements.
+- **Terrain-level curriculum**: Enable automatic difficulty progression that adapts to robot performance for more efficient training.
 
 **Updated** Added guidance on simulation timing optimization and decimation factor tuning, plus systematic height_scan disabling for computational efficiency.
 
@@ -583,12 +597,13 @@ Stair["stair_env_cfg.py"] --> Base
 - Advanced terrain issues: Ensure proper mesh generation parameters for gap and parkour terrains.
 - Reward balance: Monitor climbing progress rewards to ensure proper balance between forward progress and elevation gain.
 - **Observation processing issues**: If experiencing high computational overhead, verify that height_scan observations are properly disabled in flat environments.
+- **Curriculum adaptation**: If terrain difficulty isn't adjusting appropriately, check that terrain-level curriculum is enabled and the robot is making sufficient progress.
 
 **Section sources**
 - [README.md:291-312](file://README.md#L291-L312)
 
 ## Conclusion
-The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework now includes enhanced support for specialized locomotion scenarios through improved observation processing that systematically disables height_scan observations in flat environments to reduce computational overhead and improve training stability. These enhancements provide advanced terrain generation capabilities and specialized reward functions that improve training efficiency and generalization for complex locomotion tasks. The modular architecture supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough/advanced), with practical training optimizations and terrain-aware behaviors to improve stability and generalization.
+The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configuration with robust command generation, comprehensive reward shaping, and curriculum-driven difficulty progression. The framework now includes enhanced support for specialized locomotion scenarios through improved observation processing that systematically disables height_scan observations in flat environments to reduce computational overhead and improve training stability. **NEW** The framework includes sophisticated terrain-level curriculum functionality that automatically adjusts terrain difficulty based on robot performance, providing adaptive training progression that responds to actual learning rather than fixed schedules. These enhancements provide advanced terrain generation capabilities and specialized reward functions that improve training efficiency and generalization for complex locomotion tasks. The modular architecture supports diverse robot types (quadrupeds, wheeled, humanoids) and terrain regimes (flat/rough/advanced), with practical training optimizations and terrain-aware behaviors to improve stability and generalization.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -598,9 +613,12 @@ The velocity-based locomotion tasks leverage a modular ManagerBasedRLEnv configu
 - Environments are registered with ManagerBasedRLEnv entry points and robot-specific configuration modules.
 - Training and evaluation scripts are provided for RSL-RL and SKRL.
 - Advanced environment configurations support specialized training scenarios.
+- **Updated** Task naming conventions now use `RobotLab-Isaac-Velocity-<Robot>-<Terrain>-<Variant>-v0` format without `-Play` suffixes.
 
 **Section sources**
 - [README.md:193-332](file://README.md#L193-L332)
+- [unitree_go2_parkour_init.py:19-162](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/__init__.py#L19-L162)
+- [zsibot_zsl1_parkour_init.py:19-161](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/__init__.py#L19-L161)
 
 ### Appendix B: Simulation Timing Configuration Reference
 
@@ -631,6 +649,7 @@ The velocity-based locomotion framework supports advanced terrain generation for
 - **Stair Terrains**: Inverted pyramid designs with adjustable step dimensions.
 - **Mesh Generation**: Custom terrain generation functions for complex geometries.
 - **Difficulty Scaling**: Procedural terrain generation with difficulty-based parameter variation.
+- **Terrain-Level Curriculum**: Automatic difficulty progression based on robot performance.
 
 **Section sources**
 - [gap_env_cfg.py:27-104](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/gap_env_cfg.py#L27-L104)
@@ -660,3 +679,28 @@ Common flat environment configurations that disable height_scan:
 - [fftai_flat_env_cfg.py:20-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/fftai_gr1t1/flat_env_cfg.py#L20-L23)
 - [unitree_h1_flat_env_cfg.py:20-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_h1/flat_env_cfg.py#L20-L23)
 - [deeprobotics_m20_flat_env_cfg.py:20-23](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/deeprobotics_m20/flat_env_cfg.py#L20-L23)
+
+### Appendix E: Terrain-Level Curriculum Functionality
+
+**Updated** Added comprehensive documentation for terrain-level curriculum implementation.
+
+The velocity-based locomotion framework includes sophisticated terrain-level curriculum functionality that automatically adjusts terrain difficulty based on robot performance:
+
+- **terrain_levels_vel Function**: Core curriculum function that monitors robot progress and adjusts terrain difficulty
+- **Performance-Based Difficulty**: Increases terrain difficulty when robots travel far enough and decreases it when they fall behind
+- **Generator-Based Only**: Works exclusively with generator-type terrains, not with plane-based flat terrains
+- **Automatic Enable/Disable**: Curriculum automatically enables/disables terrain generator curriculum based on configuration
+- **Mean Terrain Level Output**: Returns average terrain level for monitoring and debugging
+
+Implementation Details:
+- Distance calculation uses robot's 2D position relative to environment origins
+- Movement threshold: Robot must travel more than half the terrain size to advance difficulty
+- Regression threshold: Robot must travel less than half of commanded velocity distance to decrease difficulty
+- Terrain update occurs through `terrain.update_env_origins()` method
+
+**Section sources**
+- [curriculums.py:103-134](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/curriculums.py#L103-L134)
+- [velocity_env_cfg.py:787-813](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L787-L813)
+- [velocity_env_cfg.py:853-859](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/velocity_env_cfg.py#L853-L859)
+- [zsibot_zsl1_parkour_rough_env_cfg.py:512-518](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1_parkour/rough_env_cfg.py#L512-L518)
+- [unitree_go2_parkour_rough_env_cfg.py:510-513](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/rough_env_cfg.py#L510-L513)
