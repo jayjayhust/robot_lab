@@ -42,16 +42,6 @@ class G1Rewards(RewardsCfg):
         weight=-0.2,  # weight -0.2, it penalizes the robot for having non-zero heading error
         params={"command_name": "pose_command"},
     )
-    # Segmented reward: standing when near target
-    standing_near_target = RewTerm(
-        func=robot_lab_nav_mdp.standing_reward_near_target,
-        weight=2.0,
-        params={
-            "command_name": "pose_command",
-            "near_target_threshold": 0.1,  # 0.1m radius
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
-        },
-    )
 
     ### Locomotion rewards
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
@@ -175,7 +165,9 @@ class ObservationsCfg:
             clip=(-100.0, 100.0),
             scale=1.0,
         )
-        pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "pose_command"})
+        pose_command = ObsTerm(func=mdp.generated_commands, 
+            params={"command_name": "pose_command"}
+        )
         base_ang_vel = ObsTerm(
             func=vel_mdp.base_ang_vel,
             noise=Unoise(n_min=-0.2, n_max=0.2),
@@ -332,7 +324,7 @@ class NavigationG1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # Randomization
         self.events.push_robot = None
         self.events.add_base_mass = None
-        self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
+        self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)  # Randomize joint positions
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["torso_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
@@ -348,13 +340,13 @@ class NavigationG1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.events.base_com = None
 
         # ------------------------------Observations------------------------------
-        self.observations.policy.velocity_commands = None
-        self.observations.policy.base_lin_vel.scale = 2.0
-        self.observations.policy.base_ang_vel.scale = 0.25
-        self.observations.policy.joint_pos.scale = 1.0
-        self.observations.policy.joint_vel.scale = 0.05
+        self.observations.policy.base_lin_vel.scale = 2.0  # Linear velocity scale
+        self.observations.policy.base_ang_vel.scale = 0.25  # Angular velocity scale
+        self.observations.policy.joint_pos.scale = 1.0  # Joint position scale
+        self.observations.policy.joint_vel.scale = 0.05  # Joint velocity scale
         self.observations.policy.joint_pos.params["asset_cfg"].joint_names = self.joint_names
         self.observations.policy.joint_vel.params["asset_cfg"].joint_names = self.joint_names
+        self.observations.policy.velocity_commands = None
         self.observations.policy.base_lin_vel = None
         self.observations.policy.height_scan = None
         self.observations.critic.velocity_commands = None
@@ -366,16 +358,15 @@ class NavigationG1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.action_rate_l2.weight = -0.005
         self.rewards.dof_acc_l2.weight = -1.25e-7
         self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_hip_.*", ".*_knee_joint"]
+            "robot", joint_names=[".*_hip_.*", ".*_knee_joint"]  # 惩罚髋关节和膝关节的加速度（平滑运动、减少抖动）
         )
         self.rewards.dof_torques_l2.weight = -1.5e-7
         self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"]
+            "robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"]  # 惩罚髋关节、膝关节和踝关节的力矩（节能、柔顺控制）
         )
         # Navigation rewards
-        self.rewards.position_tracking.weight = 3.0  # Position tracking
+        self.rewards.position_tracking.weight = 1.0  # Position tracking
         self.rewards.orientation_tracking.weight = -0.2  # Orientation tracking
-        self.rewards.standing_near_target.weight = 2.0
         # Velocity-tracking rewards(disabled for navigation)
         self.rewards.track_lin_vel_xy_exp.weight = 0.0
         self.rewards.track_ang_vel_z_exp.weight = 0.0
@@ -416,6 +407,9 @@ class NavigationG1FlatEnvCfg(NavigationG1RoughEnvCfg):
         self.observations.critic.height_scan = None
         # no terrain curriculum
         self.curriculum.terrain_levels = None
+
+        # Flat terrain: reduce feet_air_time threshold for easier reward
+        self.rewards.feet_air_time.params["threshold"] = 0.2
 
         # If the weight of rewards is 0, set rewards to None
         if self.__class__.__name__ == "NavigationG1FlatEnvCfg":

@@ -241,6 +241,8 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Anymal-C-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Flat-Unitree-Go2-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-Go2-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Flat-Unitree-G1-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-G1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-G1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-G1-v0
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
@@ -284,12 +286,16 @@ BeyondMimic for Unitree G1:
 
   ```bash
   python scripts/tools/beyondmimic/csv_to_npz.py -f path_to_input.csv --input_fps 60 --headless
+
+  python scripts/tools/beyondmimic/csv_to_npz.py -f datasets/LAFAN1/dance1_subject1.csv --input_fps 60 --headless
   ```
 
 - Replaying the motion in Isaac Sim:
 
   ```bash
   python scripts/tools/beyondmimic/replay_npz.py -f path_to_motion.npz
+
+  python scripts/tools/beyondmimic/replay_npz.py -f datasets/LAFAN1/dance1_subject1.npz
   ```
 
 - Training and Evaluation
@@ -347,8 +353,7 @@ Others (**Experimental**)
   python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-Anymal-D-v0 --num_envs 64 --agent rsl_rl_distillation_cfg_entry_point
   ```
 
-- Train navigation for Anymal C(using original isaaclab files)
-  Navigation info is configured in: navigation_env_cfg.py->CommandsCfg->pose_command
+- Train navigation for Anymal C(using original isaaclab files). Navigation info is configured in: navigation_env_cfg.py->CommandsCfg->pose_command
   ```bash
   python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Isaac-Navigation-Flat-Anymal-C-v0 --headless
   ```
