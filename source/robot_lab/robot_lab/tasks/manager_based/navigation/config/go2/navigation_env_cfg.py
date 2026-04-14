@@ -21,8 +21,8 @@ import isaaclab_tasks.manager_based.navigation.mdp as mdp
 import robot_lab.tasks.manager_based.locomotion.velocity.mdp as vel_mdp
 import robot_lab.tasks.manager_based.navigation.mdp as nav_mdp
 from isaaclab_tasks.manager_based.locomotion.velocity.config.go2.flat_env_cfg import UnitreeGo2FlatEnvCfg
-from source.robot_lab.robot_lab.assets.unitree import UNITREE_GO2_CFG
-from source.robot_lab.robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import MySceneCfg
+from robot_lab.assets.unitree import UNITREE_GO2_CFG  # isort: skip
+from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import MySceneCfg
 
 LOW_LEVEL_ENV_CFG = UnitreeGo2FlatEnvCfg()
 
@@ -741,7 +741,9 @@ class NavigationGo2RoughEnvCfg(ManagerBasedRLEnvCfg):
 
         # Navigation rewards
         self.rewards.position_tracking.weight = 3.0
-
+        # self.rewards.position_tracking_fine_grained.weight = 0.0  # No fine-grained position tracking
+        # self.rewards.orientation_tracking.weight = 0.0  # No orientation tracking
+        
         # Root penalties
         self.rewards.lin_vel_z_l2.weight = -2.0
         self.rewards.ang_vel_xy_l2.weight = -0.05
@@ -777,9 +779,9 @@ class NavigationGo2RoughEnvCfg(ManagerBasedRLEnvCfg):
         self.rewards.contact_forces.weight = -1.5e-4
         self.rewards.contact_forces.params["sensor_cfg"].body_names = [self.foot_link_name]
 
-        # Velocity-tracking rewards
-        self.rewards.track_lin_vel_xy_exp.weight = 3.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.5
+        # Velocity-tracking rewards(disabled for navigation)
+        self.rewards.track_lin_vel_xy_exp.weight = 0.0
+        self.rewards.track_ang_vel_z_exp.weight = 0.0
 
         # Others
         self.rewards.feet_air_time.weight = 0.1
@@ -851,23 +853,6 @@ class NavigationGo2FlatEnvCfg(NavigationGo2RoughEnvCfg):
         self.observations.critic.height_scan = None
         # no terrain curriculum
         self.curriculum.terrain_levels = None
-
-        # -------------------------------Commands--------------------------------
-        # self.commands.pose_command = None  # No navigation pose command
-
-        # --------------------------------Rewards--------------------------------
-        # Navigation rewards
-        self.rewards.position_tracking.weight = 3.0
-        # self.rewards.position_tracking_fine_grained.weight = 0.0  # No fine-grained position tracking
-        # self.rewards.orientation_tracking.weight = 0.0  # No orientation trackin
-        # Locomotion rewards
-        self.rewards.track_lin_vel_xy_exp.weight = 0.0
-        self.rewards.track_ang_vel_z_exp.weight = 0.0
-
-        # ------------------------------Observations------------------------------
-        # Navigation observation
-        # self.observations.policy.pose_command = None  # No pose command in policy observation
-        # self.observations.critic.pose_command = None  # No pose command in critic observation
 
         # If the weight of rewards is 0, set rewards to None
         if self.__class__.__name__ == "NavigationGo2FlatEnvCfg":

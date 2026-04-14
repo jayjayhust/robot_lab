@@ -107,6 +107,7 @@ class G1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
+        
         # Scene
         self.scene.robot = G1_MINIMAL_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/torso_link"
