@@ -31,12 +31,15 @@ class G1Rewards(RewardsCfg):
     ### Navigation rewards
     position_tracking = RewTerm(
         func=nav_mdp.position_command_error_tanh,
+        # weight=0.5 means the scaling factor applied to this reward term when calculating the total reward
         weight=0.5,
+        # std=2.0 controls sensitivity - larger std = smoother reward curve, 
+        # robot gets reward even when not very close
         params={"std": 2.0, "command_name": "pose_command"},
     )
     orientation_tracking = RewTerm(
         func=nav_mdp.heading_command_error_abs,
-        weight=-0.2,
+        weight=-0.2,  # weight -0.2, it penalizes the robot for having non-zero heading error
         params={"command_name": "pose_command"},
     )
     # Segmented reward: standing when near target
@@ -371,7 +374,7 @@ class NavigationG1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         )
         # Navigation rewards
         self.rewards.position_tracking.weight = 3.0  # Position tracking
-        self.rewards.orientation_tracking.weight = 1.0  # Orientation tracking
+        self.rewards.orientation_tracking.weight = -0.2  # Orientation tracking
         self.rewards.standing_near_target.weight = 2.0
         # Velocity-tracking rewards(disabled for navigation)
         self.rewards.track_lin_vel_xy_exp.weight = 0.0
