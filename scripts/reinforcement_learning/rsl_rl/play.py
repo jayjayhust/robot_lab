@@ -170,7 +170,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     env_cfg.log_dir = log_dir
 
     # enable height scanner debug visualization when not headless
-    if env_cfg.scene.height_scanner is not None:
+    if hasattr(env_cfg.scene, 'height_scanner') and env_cfg.scene.height_scanner is not None:
         env_cfg.scene.height_scanner.debug_vis = not args_cli.headless
 
     # create isaac environment

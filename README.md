@@ -288,6 +288,8 @@ BeyondMimic for Unitree G1:
   python scripts/tools/beyondmimic/csv_to_npz.py -f path_to_input.csv --input_fps 60 --headless
 
   python scripts/tools/beyondmimic/csv_to_npz.py -f datasets/LAFAN1/dance1_subject1.csv --input_fps 60 --headless
+  python scripts/tools/beyondmimic/csv_to_npz.py -f datasets/beyondmimic/G1_Take_102.bvh_60hz.csv --input_fps 60 --headless
+  python scripts/tools/beyondmimic/csv_to_npz.py -f datasets/beyondmimic/G1_gangnam_style_V01.bvh_60hz.csv --input_fps 60 --headless
   ```
 
 - Replaying the motion in Isaac Sim:
@@ -302,6 +304,7 @@ BeyondMimic for Unitree G1:
 
   ```bash
   # Train
+  # Update the npz file directory in source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/config/g1/flat_env_cfg.py
   python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-BeyondMimic-Flat-Unitree-G1-v0 --headless
 
   # Play
