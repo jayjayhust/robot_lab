@@ -204,6 +204,8 @@ python scripts/tools/list_envs.py
 # e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Parkour-Zsibot-ZSL1-v0
 # e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Go2-Parkour-Rough-Abl3_5-Play-v0
 # e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-ZSL1-Parkour-Rough-Abl3_5-Play-v0
+# e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-Flat-MirrorRobotics-BPX-v0
+# e.g.: python scripts/tools/zero_agent.py --task=RobotLab-Isaac-Velocity-BPX-Parkour-Rough-Abl3_5-v0
 python scripts/tools/zero_agent.py --task=<ENV_NAME>
 
 # Train
@@ -223,6 +225,9 @@ python scripts/tools/zero_agent.py --task=<ENV_NAME>
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-G1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-G1-v0 --headless
 # e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-G1-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Flat-MirrorRobotics-BPX-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-MirrorRobotics-BPX-v0 --headless
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-BPX-Parkour-Rough-Abl3_5-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
 
 # *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):
@@ -245,11 +250,15 @@ python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headle
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Navigation-Rough-Unitree-G1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-G1-v0
 # e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-G1-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Flat-MirrorRobotics-BPX-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-Rough-MirrorRobotics-BPX-v0
+# e.g.: python scripts/reinforcement_learning/rsl_rl/play.py --task=RobotLab-Isaac-Velocity-BPX-Parkour-Rough-Abl3_5-v0
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME>
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<TASK_NAME> --num_envs=<NUM_ENVS> --keyboard
 
 # View tensorboard
 # e.g.: tensorboard --logdir=logs/rsl_rl/sdog_sdog2_flat/2026-03-05_10-05-10
+# e.g.: tensorboard --logdir=logs/rsl_rl/mirrormerobotic_bpx_flat/2026-06-24_15-47-20
 tensorboard --logdir=logs
 ```
 
@@ -474,6 +483,11 @@ gym.register(
         "cusrl_cfg_entry_point": f"{agents.__name__}.cusrl_ppo_cfg:UnitreeA1RoughTrainerCfg",
     },
 )
+```
+
+Remember to reinstall the sourcecode after adding your new robot logic
+```bash
+pip install -e source/robot_lab
 ```
 
 ## Tensorboard

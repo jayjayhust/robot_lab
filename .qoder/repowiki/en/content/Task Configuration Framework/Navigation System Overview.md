@@ -3,6 +3,9 @@
 <cite>
 **Referenced Files in This Document**
 - [navigation_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py)
+- [navigation_env_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py)
+- [rsl_rl_ppo_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/rsl_rl_ppo_cfg.py)
+- [skrl_flat_ppo_cfg.yaml](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/skrl_flat_ppo_cfg.yaml)
 - [pre_trained_policy_action.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py)
 - [rewards.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py)
 - [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py)
@@ -10,17 +13,19 @@
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/utils.py)
 - [navigation_mdp_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py)
 - [navigation_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/__init__.py)
+- [unitree.py](file://source/robot_lab/robot_lab/assets/unitree.py)
+- [unitree_go2_init.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2/__init__.py)
 - [commands.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/commands.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced command generation system with terrain-aware velocity commands
-- Added discrete command controller for specialized navigation scenarios
-- Implemented sophisticated curriculum management with terrain-level progression
-- Introduced comprehensive utility functions for terrain detection and assignment
-- Updated reward system with pose-based tracking capabilities
-- Modernized navigation architecture with enhanced policy translation
+- Added comprehensive navigation training framework for Unitree Go2 robots
+- Expanded navigation capabilities beyond existing Anymal-C implementation
+- Integrated Unitree Go2 robot configuration with navigation system
+- Enhanced policy translation layer with Unitree-specific actuator models
+- Updated curriculum management with terrain-level progression for Go2 platform
+- Modernized navigation architecture with enhanced policy translation and reward systems
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -39,16 +44,22 @@
 
 ## Introduction
 
-The Navigation System in this robot lab repository provides a comprehensive framework for training and deploying navigation capabilities on quadruped robots, specifically designed for the ANYmal-C platform. This system leverages a sophisticated hierarchical approach where advanced navigation commands are translated into low-level joint control through enhanced policy networks, enabling efficient and robust navigation in complex, terrain-aware environments.
+The Navigation System in this robot lab repository provides a comprehensive framework for training and deploying navigation capabilities on quadruped robots, significantly expanded to include Unitree Go2 robots alongside the existing Anymal-C platform. This system leverages a sophisticated hierarchical approach where advanced navigation commands are translated into low-level joint control through enhanced policy networks, enabling efficient and robust navigation in complex, terrain-aware environments.
 
-The system is built upon the Isaac Lab framework and utilizes an enhanced manager-based reinforcement learning architecture that separates concerns between high-level navigation decisions and low-level motor control. This separation allows for modular development, easier debugging, and more maintainable code structure while providing terrain-level curriculum progression and sophisticated command generation capabilities.
+The system is built upon the Isaac Lab framework and utilizes an enhanced manager-based reinforcement learning architecture that separates concerns between high-level navigation decisions and low-level motor control. This separation allows for modular development, easier debugging, and more maintainable code structure while providing terrain-level curriculum progression and sophisticated command generation capabilities for multiple robot platforms.
+
+**Updated** Added comprehensive navigation training framework for Unitree Go2 robots, expanding navigation capabilities beyond existing Anymal-C implementation with enhanced policy translation and terrain-aware utilities.
 
 ## System Architecture
 
-The navigation system follows an enhanced layered architecture pattern that promotes separation of concerns and modularity with terrain-aware capabilities:
+The navigation system follows an enhanced layered architecture pattern that promotes separation of concerns and modularity with terrain-aware capabilities across multiple robot platforms:
 
 ```mermaid
 graph TB
+subgraph "Multi-Platform Navigation Layer"
+ANYPATH[Anymal-C Navigation]
+GOPATH[Unitree Go2 Navigation]
+end
 subgraph "Advanced Navigation Layer"
 NAVCFG[NavigationEnvCfg]
 CMD[Enhanced Command Generator]
@@ -65,10 +76,12 @@ LLACT[Low-Level Actions]
 OBS[Low-Level Observations]
 end
 subgraph "Robot Interface Layer"
-ROBOT[ANYmal-C Robot]
+ROBOT[Quadruped Robots]
 SENS[Sensor Data]
 TERRAIN[Terrain Detection]
 end
+ANYPATH --> NAVCFG
+GOPATH --> NAVCFG
 NAVCFG --> CMD
 NAVCFG --> RW
 NAVCFG --> CUR
@@ -89,24 +102,28 @@ ROBOT --> SENS
 ```
 
 **Diagram sources**
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
+- [navigation_env_cfg.py:151-186](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L151-L186)
+- [navigation_env_cfg.py:644-690](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L690)
 - [pre_trained_policy_action.py:24-101](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L24-L101)
 - [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
 - [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
 
-The architecture consists of five main layers with enhanced capabilities:
+The architecture consists of six main layers with enhanced capabilities:
 
-1. **Environment Configuration Layer**: Defines the overall navigation environment setup with curriculum integration
-2. **Enhanced Command Generation Layer**: Provides terrain-aware command generation with adaptive restrictions
-3. **Curriculum Management Layer**: Implements terrain-level difficulty progression and command adaptation
-4. **Policy Translation Layer**: Bridges high-level commands to low-level actions with terrain awareness
-5. **Robot Interface Layer**: Handles physical robot interaction and terrain-aware sensor feedback
+1. **Multi-Platform Configuration Layer**: Supports both Anymal-C and Unitree Go2 navigation environments
+2. **Environment Configuration Layer**: Defines the overall navigation environment setup with curriculum integration
+3. **Enhanced Command Generation Layer**: Provides terrain-aware command generation with adaptive restrictions
+4. **Curriculum Management Layer**: Implements terrain-level difficulty progression and command adaptation
+5. **Policy Translation Layer**: Bridges high-level commands to low-level actions with terrain awareness
+6. **Robot Interface Layer**: Handles physical robot interaction and terrain-aware sensor feedback
+
+**Updated** Enhanced architecture now supports multiple robot platforms with shared navigation components and platform-specific configurations.
 
 ## Core Components
 
-### Enhanced Navigation Environment Configuration
+### Multi-Platform Navigation Environment Configuration
 
-The navigation environment is configured through an enhanced configuration class that defines all aspects of the navigation task with curriculum integration:
+The navigation environment is configured through enhanced configuration classes that define all aspects of the navigation task with curriculum integration for multiple robot platforms:
 
 ```mermaid
 classDiagram
@@ -123,14 +140,31 @@ class NavigationEnvCfg {
 +decimation : int
 +episode_length_s : float
 }
+class NavigationGo2RoughEnvCfg {
++base_link_name : str
++foot_link_name : str
++joint_names : list[str]
++scene : MySceneCfg
++actions : ActionsCfg
++observations : ObservationsCfg
++events : EventCfg
++commands : CommandsCfg
++rewards : RewardsCfg
++terminations : TerminationsCfg
++curriculum : CurriculumCfg
++__post_init__()
+}
 class ActionsCfg {
 +PreTrainedPolicyActionCfg pre_trained_policy_action
++JointPositionActionCfg joint_pos
 }
 class ObservationsCfg {
 +PolicyCfg policy
++CriticCfg critic
 }
 class CommandsCfg {
 +UniformPose2dCommandCfg pose_command
++UniformVelocityCommandCfg base_velocity
 }
 class RewardsCfg {
 +RewTerm termination_penalty
@@ -149,22 +183,26 @@ NavigationEnvCfg --> CommandsCfg
 NavigationEnvCfg --> RewardsCfg
 NavigationEnvCfg --> TerminationsCfg
 NavigationEnvCfg --> CurriculumCfg
+NavigationGo2RoughEnvCfg --> NavigationEnvCfg
 ActionsCfg --> PreTrainedPolicyActionCfg
+ActionsCfg --> JointPositionActionCfg
 CurriculumCfg --> CurriculumTermCfg
 ```
 
 **Diagram sources**
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
+- [navigation_env_cfg.py:151-186](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L151-L186)
+- [navigation_env_cfg.py:644-690](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L690)
 - [navigation_env_cfg.py:47-58](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L47-L58)
 - [navigation_env_cfg.py:77-97](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L77-L97)
 - [navigation_env_cfg.py:122-147](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L147)
 
 **Section sources**
-- [navigation_env_cfg.py:122-161](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L122-L161)
+- [navigation_env_cfg.py:151-186](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L151-L186)
+- [navigation_env_cfg.py:644-690](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L690)
 
 ### Enhanced Command Generation System
 
-The navigation system now features sophisticated command generation with terrain-aware capabilities:
+The navigation system now features sophisticated command generation with terrain-aware capabilities for multiple robot platforms:
 
 ```mermaid
 sequenceDiagram
@@ -196,7 +234,7 @@ The system implements real-time terrain-aware command restrictions with pit dete
 
 ## Environment Configuration
 
-The navigation environment configuration establishes the fundamental parameters and behaviors for the navigation task with enhanced curriculum integration:
+The navigation environment configuration establishes the fundamental parameters and behaviors for the navigation task with enhanced curriculum integration across multiple robot platforms:
 
 ### Simulation Parameters
 
@@ -209,9 +247,11 @@ The environment configuration carefully balances simulation fidelity with comput
 | `decimation` | Low-level decimation × 10 | Overall environment decimation |
 | `episode_length_s` | Command resampling time | Episode duration in seconds |
 
-### Reset Mechanisms
+### Unitree Go2 Specific Configuration
 
-The system implements sophisticated reset mechanisms to ensure consistent training conditions:
+**Updated** Added Unitree Go2 specific environment configuration with enhanced actuator models and joint specifications:
+
+The Unitree Go2 navigation environment includes platform-specific configurations:
 
 ```mermaid
 flowchart TD
@@ -229,10 +269,11 @@ STABLE --> READY[Environment Ready]
 
 **Section sources**
 - [navigation_env_cfg.py:135-148](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/anymal_c/navigation_env_cfg.py#L135-L148)
+- [navigation_env_cfg.py:691-735](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L691-L735)
 
 ## Enhanced Command Generation System
 
-The navigation system employs sophisticated command generation tailored for 2D pose control with terrain-aware restrictions:
+The navigation system employs sophisticated command generation tailored for 2D pose control with terrain-aware restrictions across multiple platforms:
 
 ### Pose Command Configuration
 
@@ -284,7 +325,7 @@ The command generation process ensures smooth, predictable navigation behavior w
 
 ## Curriculum Management
 
-The navigation system implements sophisticated curriculum progression with terrain-level difficulty adjustment:
+The navigation system implements sophisticated curriculum progression with terrain-level difficulty adjustment across multiple platforms:
 
 ### Command-Based Curriculum Progression
 
@@ -457,7 +498,7 @@ WEIGHT --> SUM
 
 ## Integration Architecture
 
-The navigation system integrates seamlessly with the broader robot lab ecosystem with enhanced module organization:
+The navigation system integrates seamlessly with the broader robot lab ecosystem with enhanced module organization across multiple platforms:
 
 ### Module Organization
 
@@ -465,7 +506,8 @@ The navigation system integrates seamlessly with the broader robot lab ecosystem
 graph TB
 subgraph "Navigation Package"
 NAVPKG[robot_lab/tasks/manager_based/navigation]
-CFG[config/anymal_c]
+ANYPATH[config/anymal_c]
+GOPATH[config/go2]
 MDP[mdp/]
 INIT[__init__.py]
 end
@@ -478,11 +520,13 @@ UTILS[utils.py]
 MDPINIT[__init__.py]
 end
 subgraph "Configuration"
-NAVCFG[navigation_env_cfg.py]
-AGENTS[agents/]
+ANAVCFG[anymal_c/navigation_env_cfg.py]
+GOCFG[go2/navigation_env_cfg.py]
+GOAGENTS[agents/]
 NAVINIT[__init__.py]
 end
-NAVPKG --> CFG
+NAVPKG --> ANYPATH
+NAVPKG --> GOPATH
 NAVPKG --> MDP
 NAVPKG --> INIT
 MDP --> PRETRAINED
@@ -491,9 +535,12 @@ MDP --> COMMANDS
 MDP --> CURRICULUM
 MDP --> UTILS
 MDP --> MDPINIT
-CFG --> NAVCFG
-CFG --> AGENTS
-CFG --> NAVINIT
+ANYPATH --> ANAVCFG
+ANYPATH --> GOAGENTS
+ANYPATH --> NAVINIT
+GOPATH --> GOCFG
+GOPATH --> GOAGENTS
+GOPATH --> NAVINIT
 ```
 
 **Diagram sources**
@@ -504,15 +551,19 @@ CFG --> NAVINIT
 
 The system maintains compatibility with various robot platforms through standardized interfaces:
 
-| Platform | Supported | Configuration Path |
-|----------|-----------|-------------------|
-| ANYmal-C | ✅ Primary | `anymal_c/navigation_env_cfg.py` |
-| ANYmal-D | ❓ Future | Planned |
-| Unitree Go1 | ❓ Future | Planned |
-| Boston Dynamics Spot | ❓ Future | Planned |
+| Platform | Supported | Configuration Path | Key Features |
+|----------|-----------|-------------------|--------------|
+| ANYmal-C | ✅ Primary | `anymal_c/navigation_env_cfg.py` | Pre-trained policy integration |
+| ANYmal-D | ❓ Future | Planned | Enhanced locomotion capabilities |
+| Unitree Go2 | ✅ New | `go2/navigation_env_cfg.py` | DC motor actuators, terrain-aware |
+| Unitree Go1 | ❓ Future | Planned | Simplified actuator model |
+| Boston Dynamics Spot | ❓ Future | Planned | Wheeled locomotion support |
+
+**Updated** Added comprehensive Unitree Go2 platform support with enhanced actuator models and terrain-aware navigation capabilities.
 
 **Section sources**
 - [navigation_mdp_init.py:8-15](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/__init__.py#L8-L15)
+- [unitree.py:71-117](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L117)
 
 ## Performance Considerations
 
@@ -537,6 +588,8 @@ The system implements several resource optimization strategies:
 3. **Asynchronous Updates**: Non-blocking operations prevent simulation stalls
 4. **Selective Visualization**: Debug markers disabled in production runs
 5. **Terrain-Aware Optimization**: Terrain detection optimized for batch processing
+
+**Updated** Enhanced performance considerations now include Unitree Go2-specific optimizations for DC motor actuator models and terrain-aware navigation.
 
 ## Troubleshooting Guide
 
@@ -582,6 +635,8 @@ Common issues and their solutions when working with the enhanced navigation syst
 **Solution**: Adjust termination thresholds and safety margins
 **Diagnostic**: Review contact force sensors and collision detection
 
+**Updated** Added troubleshooting guidance for Unitree Go2-specific issues including actuator configuration and terrain-aware navigation problems.
+
 **Section sources**
 - [pre_trained_policy_action.py:42-46](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/pre_trained_policy_action.py#L42-L46)
 - [commands.py:73-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L73-L98)
@@ -591,12 +646,15 @@ Common issues and their solutions when working with the enhanced navigation syst
 
 The Enhanced Navigation System provides a robust, scalable framework for quadruped robot navigation that effectively bridges high-level command generation with low-level control execution through sophisticated terrain-aware capabilities. Through its enhanced hierarchical architecture, terrain-aware command generation, sophisticated reward design, and efficient policy translation mechanisms, the system enables reliable navigation performance across diverse, challenging environments.
 
+**Updated** Significantly expanded to include comprehensive navigation training framework for Unitree Go2 robots, providing enhanced capabilities beyond the existing Anymal-C implementation with improved policy translation, terrain-aware utilities, and multi-platform support.
+
 Key strengths of the enhanced system include:
 
-- **Terrain-Aware Command Generation**: Real-time adaptation to environmental conditions with pit detection and movement restrictions
-- **Sophisticated Curriculum Management**: Terrain-level difficulty progression and adaptive command ranges based on performance metrics
+- **Multi-Platform Architecture**: Support for both Anymal-C and Unitree Go2 navigation environments with shared components
 - **Enhanced Policy Translation**: Improved policy loading, decimation scheduling, and action processing pipelines
 - **Comprehensive Utility Functions**: Advanced terrain detection, assignment, and position calculation capabilities
+- **Terrain-Aware Command Generation**: Real-time adaptation to environmental conditions with pit detection and movement restrictions
+- **Sophisticated Curriculum Management**: Terrain-level difficulty progression and adaptive command ranges based on performance metrics
 - **Modular Design**: Clear separation between navigation, policy, and control layers with enhanced integration
 - **Efficient Computation**: Strategic decimation and vectorized operations reduce computational overhead
 - **Robust Integration**: Seamless compatibility with the broader Isaac Lab ecosystem and enhanced cross-platform support

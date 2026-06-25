@@ -17,15 +17,21 @@
 - [terrains_cfg.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py)
 - [mesh_terrains.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mesh_terrains.py)
 - [utils.py](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/utils.py)
+- [navigation_env_cfg.py (Go2 Navigation)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py)
+- [rsl_rl_ppo_cfg.py (Go2 Navigation Agents)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/rsl_rl_ppo_cfg.py)
+- [skrl_flat_ppo_cfg.yaml (Go2 Navigation Agents)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/skrl_flat_ppo_cfg.yaml)
+- [rewards.py (Navigation MDP)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py)
+- [commands.py (Navigation MDP)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py)
+- [curriculums.py (Navigation MDP)](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced Go2 parkour configuration with new terrain-level curriculum support
-- Improved observation system documentation with comprehensive comments explaining dimensional characteristics
-- Added enhanced curriculum parameter specifications for terrain generation
-- Documented new terrain types with curriculum-based difficulty progression
-- Updated neural network architecture documentation with detailed observation dimension explanations
+- Added comprehensive navigation training capabilities for Unitree Go2 robots
+- Integrated navigation environments with pose command tracking and terrain curriculum support
+- Added specialized navigation reward functions and command generators
+- Included navigation-specific agent configurations for both rough and flat terrains
+- Enhanced documentation with navigation training system architecture and capabilities
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -36,17 +42,21 @@
 6. [Go2 Parkour Training System](#go2-parkour-training-system)
 7. [Enhanced Terrain Curriculum System](#enhanced-terrain-curriculum-system)
 8. [Improved Observation System](#improved-observation-system)
-9. [Dependency Analysis](#dependency-analysis)
-10. [Performance Considerations](#performance-considerations)
-11. [Troubleshooting Guide](#troubleshooting-guide)
-12. [Conclusion](#conclusion)
-13. [Appendices](#appendices)
+9. [Navigation Training Capabilities](#navigation-training-capabilities)
+10. [Navigation Environment Configuration](#navigation-environment-configuration)
+11. [Navigation Reward System](#navigation-reward-system)
+12. [Navigation Agent Configurations](#navigation-agent-configurations)
+13. [Dependency Analysis](#dependency-analysis)
+14. [Performance Considerations](#performance-considerations)
+15. [Troubleshooting Guide](#troubleshooting-guide)
+16. [Conclusion](#conclusion)
+17. [Appendices](#appendices)
 
 ## Introduction
-This document provides comprehensive technical documentation for the Unitree Go2 series, covering both the standard quadruped Go2 and the wheeled Go2W variants. It explains motor configurations, actuator distributions, joint setups, initial poses, simulation parameters, and environment configurations used in reinforcement learning tasks. The document now includes the newly enhanced Go2 parkour training system with advanced neural network architecture, terrain-level curriculum support, and improved observation system documentation with detailed dimensional characteristics explanations. It also compares the two variants and offers selection guidance based on terrain and mobility requirements.
+This document provides comprehensive technical documentation for the Unitree Go2 series, covering both the standard quadruped Go2 and the wheeled Go2W variants. It explains motor configurations, actuator distributions, joint setups, initial poses, simulation parameters, and environment configurations used in reinforcement learning tasks. The document now includes the newly enhanced Go2 parkour training system with advanced neural network architecture, terrain-level curriculum support, and improved observation system documentation with detailed dimensional characteristics. Additionally, it covers the newly added navigation training capabilities that enable pose command tracking and terrain navigation with curriculum support. The document compares the two variants and offers selection guidance based on terrain and mobility requirements.
 
 ## Project Structure
-The repository integrates the Go2 and Go2W robots into the Isaac Lab ecosystem. The robot assets and URDF definitions are located under the data directory, while the robot configurations and environment setups are defined in the assets and task configuration modules. The enhanced Go2 parkour system is organized as a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support.
+The repository integrates the Go2 and Go2W robots into the Isaac Lab ecosystem. The robot assets and URDF definitions are located under the data directory, while the robot configurations and environment setups are defined in the assets and task configuration modules. The enhanced Go2 parkour system is organized as a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support. The newly added navigation training system provides pose command tracking capabilities with terrain-level curriculum support.
 
 ```mermaid
 graph TB
@@ -61,12 +71,19 @@ subgraph "Environments"
 QGO2["Quadruped Go2 Configs"]
 WGO2W["Wheeled Go2W Configs"]
 GOPARKOUR["Go2 Parkour System"]
+NAVIGATION["Navigation Training System"]
 end
 subgraph "Enhanced Parkour Components"
 ACTNET["ActorCriticScan<br/>Custom NN Architecture"]
 TERRAINS["Enhanced Terrain<br/>Curriculum System"]
 MDP["Improved MDP<br/>Observations & Rewards"]
 CURRICULUM["Terrain-Level<br/>Curriculum Support"]
+end
+subgraph "Navigation Components"
+NAVCFG["Navigation Config<br/>Pose Command Tracking"]
+NAVRWD["Navigation Rewards<br/>Position & Orientation"]
+NAVCMD["Navigation Commands<br/>Terrain-Aware"]
+NAVCUR["Navigation Curriculum<br/>Terrain Levels"]
 end
 UCFG --> GO2
 UCFG --> GO2W
@@ -76,6 +93,10 @@ GOPARKOUR --> ACTNET
 GOPARKOUR --> TERRAINS
 GOPARKOUR --> MDP
 GOPARKOUR --> CURRICULUM
+NAVIGATION --> NAVCFG
+NAVIGATION --> NAVRWD
+NAVIGATION --> NAVCMD
+NAVIGATION --> NAVCUR
 ```
 
 **Diagram sources**
@@ -84,6 +105,7 @@ GOPARKOUR --> CURRICULUM
 - [go2w_description.urdf:1-764](file://source/robot_lab/data/Robots/unitree/go2w_description/urdf/go2w_description.urdf#L1-L764)
 - [actor_critic_scan.py:20-133](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L133)
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
+- [navigation_env_cfg.go2:644-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L875)
 
 **Section sources**
 - [README.md:18-31](file://README.md#L18-L31)
@@ -104,15 +126,21 @@ GOPARKOUR --> CURRICULUM
   - Advanced terrain generation with 15+ different terrain types and curriculum-based difficulty progression.
   - Specialized MDP observations and rewards for parkour training with detailed dimensional characteristics.
   - Enhanced curriculum parameter specifications for terrain generation.
+- **New**: Navigation Training System:
+  - Pose command tracking with position and orientation error minimization.
+  - Terrain-level curriculum support for progressive navigation difficulty.
+  - Specialized reward functions for navigation tasks with curriculum adaptation.
+  - Terrain-aware command generators with pit terrain restrictions.
 
 **Section sources**
 - [unitree.py:107-116](file://source/robot_lab/robot_lab/assets/unitree.py#L107-L116)
 - [unitree.py:157-174](file://source/robot_lab/robot_lab/assets/unitree.py#L157-L174)
 - [actor_critic_scan.py:20-133](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L133)
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
+- [navigation_env_cfg.go2:644-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L875)
 
 ## Architecture Overview
-The system architecture connects environment configurations to robot assets and actuators. The environment defines observations, actions, rewards, and terminations, while the assets module provides robot-specific configurations and URDF definitions. The enhanced Go2 parkour system introduces a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support.
+The system architecture connects environment configurations to robot assets and actuators. The environment defines observations, actions, rewards, and terminations, while the assets module provides robot-specific configurations and URDF definitions. The enhanced Go2 parkour system introduces a self-contained package with custom RL configuration, advanced neural network architecture, and comprehensive terrain generation capabilities with curriculum support. The newly added navigation training system provides pose command tracking capabilities with terrain-level curriculum support and specialized reward functions.
 
 ```mermaid
 graph TB
@@ -124,19 +152,27 @@ NN["ActorCriticScan<br/>Neural Network"]
 Terrains["Enhanced Terrains<br/>15+ Types with Curriculum"]
 MDP["Improved MDP<br/>Observations & Rewards"]
 Curriculum["Terrain-Level<br/>Curriculum Support"]
+NavEnv["Navigation Environments<br/>Pose Command Tracking"]
+NavRewards["Navigation Rewards<br/>Position & Orientation"]
+NavCommands["Navigation Commands<br/>Terrain-Aware"]
+NavCurriculum["Navigation Curriculum<br/>Terrain Levels"]
 Env --> Assets
 Assets --> URDF
 Parkour --> NN
 Parkour --> Terrains
 Parkour --> MDP
 Parkour --> Curriculum
+NavEnv --> NavRewards
+NavEnv --> NavCommands
+NavEnv --> NavCurriculum
 ```
 
 **Diagram sources**
 - [rough_env_cfg.go2:34-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2/rough_env_cfg.py#L34-L35)
 - [rough_env_cfg.go2w:76-77](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/unitree_go2w/rough_env_cfg.py#L76-L77)
 - [unitree.py:71-177](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L177)
-- [rsl_rl_ppo_cfg.py:128-193](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L193)
+- [rsl_rl_ppo_cfg.go2_parkour:128-193](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L193)
+- [navigation_env_cfg.go2:644-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L875)
 
 ## Detailed Component Analysis
 
@@ -382,7 +418,7 @@ The system supports comprehensive ablation studies with multiple runner configur
 
 **Section sources**
 - [actor_critic_scan.py:20-280](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L20-L280)
-- [rsl_rl_ppo_cfg.py:128-242](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L242)
+- [rsl_rl_ppo_cfg.go2_parkour:128-242](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L128-L242)
 - [terrains_cfg.py:22-384](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/terrains_cfg.py#L22-L384)
 - [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L111)
 - [rewards.py:35-131](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/rewards.py#L35-L131)
@@ -469,10 +505,273 @@ PrivObs --> CriticInput
 - [actor_critic_scan.py:54-71](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/actor_critic_scan.py#L54-L71)
 - [observations.py:33-111](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/mdp/observations.py#L33-L111)
 
+## Navigation Training Capabilities
+
+### Navigation Environment Architecture
+The navigation training system provides comprehensive pose command tracking capabilities for Unitree Go2 robots with terrain-level curriculum support. The system integrates seamlessly with the existing locomotion infrastructure while providing specialized navigation rewards and command generators.
+
+**Updated** Added comprehensive navigation training system with pose command tracking and terrain curriculum support
+
+#### Navigation Environment Configuration
+- **Pose Command Tracking**: Position tracking with tanh kernel and orientation error penalization
+- **Terrain Curriculum**: Progressive difficulty scaling based on navigation performance
+- **Terrain-Aware Commands**: Specialized command generators with pit terrain restrictions
+- **Reward Shaping**: Balanced navigation rewards with curriculum adaptation
+
+```mermaid
+classDiagram
+class NavigationGo2RoughEnvCfg {
++base_link_name : "base"
++foot_link_name : ".*_foot"
++joint_names : list[str]
++scene : MySceneCfg
++actions : ActionsCfg
++observations : ObservationsCfg
++events : EventCfg
++commands : CommandsCfg
++rewards : RewardsCfg
++terminations : TerminationsCfg
++curriculum : CurriculumCfg
++__post_init__()
+}
+class NavigationGo2FlatEnvCfg {
++disable_zero_weight_rewards()
+}
+class NavigationCommandsCfg {
++pose_command : UniformPose2dCommandCfg
++base_velocity : UniformVelocityCommandCfg
+}
+class NavigationRewardsCfg {
++position_tracking : RewTerm
++position_tracking_fine_grained : RewTerm
++orientation_tracking : RewTerm
+}
+NavigationGo2RoughEnvCfg --> NavigationGo2FlatEnvCfg : "inherits"
+NavigationGo2RoughEnvCfg --> NavigationCommandsCfg : "uses"
+NavigationGo2RoughEnvCfg --> NavigationRewardsCfg : "uses"
+```
+
+**Diagram sources**
+- [navigation_env_cfg.go2:644-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L875)
+
+### Navigation Reward System
+The navigation system implements specialized reward functions for pose command tracking with curriculum support and terrain-aware adaptations.
+
+**Updated** Enhanced with navigation-specific reward functions and curriculum integration
+
+#### Position Tracking Rewards
+- **position_tracking**: Tanh-based position error with configurable standard deviation
+- **position_tracking_fine_grained**: High-resolution position tracking for precise navigation
+- **orientation_tracking**: Absolute heading error penalization for orientation control
+
+#### Terrain-Aware Reward Adaptations
+- **Base Height Control**: Target height adjustment for navigation stability
+- **Contact Force Management**: Foot contact optimization for navigation tasks
+- **Action Rate Penalties**: Smooth navigation with action rate regularization
+
+```mermaid
+sequenceDiagram
+participant Env as "Navigation Environment"
+participant Command as "Pose Command"
+participant Reward as "Navigation Rewards"
+participant Curriculum as "Terrain Curriculum"
+Env->>Command : Generate pose command (pos_x, pos_y, heading)
+Command->>Reward : Compute position tracking error
+Reward->>Env : Return reward with tanh kernel
+Env->>Curriculum : Evaluate navigation performance
+Curriculum->>Env : Adjust terrain difficulty
+```
+
+**Diagram sources**
+- [rewards.py:15-28](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L28)
+- [curriculums.py:144-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L144-L175)
+
+**Section sources**
+- [navigation_env_cfg.go2:296-482](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L296-L482)
+- [rewards.py:15-28](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/rewards.py#L15-L28)
+- [curriculums.py:144-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L144-L175)
+
+### Navigation Command Generators
+The navigation system provides specialized command generators with terrain-aware adaptations and pit terrain restrictions for safe navigation.
+
+**Updated** Added terrain-aware command generators with pit terrain detection and restrictions
+
+#### Pose Command Generator
+- **UniformPose2dCommandCfg**: 2D pose commands with configurable ranges and resampling intervals
+- **Simple Heading Control**: Optional simplified heading command for basic navigation
+- **Debug Visualization**: Interactive command visualization in Isaac Sim
+
+#### Terrain-Aware Velocity Commands
+- **UniformThresholdVelocityCommand**: Velocity commands with terrain restrictions
+- **Pit Terrain Detection**: Real-time pit terrain detection and command restriction
+- **Forward-Only Movement**: Restricted movement patterns for safe navigation on challenging terrain
+
+```mermaid
+flowchart TD
+Start(["Generate Navigation Command"]) --> PoseCmd["Pose Command<br/>pos_x, pos_y, heading"]
+PoseCmd --> VelocityCmd["Velocity Command<br/>lin_vel_x, lin_vel_y, ang_vel_z"]
+VelocityCmd --> TerrainCheck["Terrain Check<br/>Real-time pit detection"]
+TerrainCheck --> PitRestrict{"On Pit Terrain?"}
+PitRestrict --> |Yes| ForwardOnly["Forward-Only Movement<br/>No lateral/yaw movement"]
+PitRestrict --> |No| FullCmd["Full Velocity Command<br/>With heading control"]
+ForwardOnly --> End(["Execute Command"])
+FullCmd --> End
+```
+
+**Diagram sources**
+- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+
+**Section sources**
+- [commands.py:31-98](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/commands.py#L31-L98)
+- [navigation_env_cfg.go2:573-594](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L573-L594)
+
+### Navigation Curriculum System
+The navigation curriculum system provides progressive difficulty scaling based on navigation performance with terrain-level adaptation.
+
+**Updated** Enhanced with terrain-level curriculum support for navigation tasks
+
+#### Command Curriculum System
+- **command_levels_lin_vel**: Progressive linear velocity command scaling
+- **command_levels_ang_vel**: Angular velocity command adaptation
+- **Range Multiplier**: Configurable difficulty progression parameters
+
+#### Terrain Curriculum System
+- **terrain_levels_vel**: Terrain difficulty adaptation based on navigation distance
+- **Performance-Based Scaling**: Terrain complexity adjustment based on robot performance
+- **Episode-Based Updates**: Curriculum updates at episode boundaries
+
+```mermaid
+graph TB
+Performance["Navigation Performance<br/>Distance Traveled"]
+CommandCurriculum["Command Curriculum<br/>Linear & Angular Velocity"]
+TerrainCurriculum["Terrain Curriculum<br/>Difficulty Scaling"]
+Adaptation["Adaptation Logic<br/>Performance-Based Updates"]
+Performance --> CommandCurriculum
+Performance --> TerrainCurriculum
+CommandCurriculum --> Adaptation
+TerrainCurriculum --> Adaptation
+Adaptation --> Difficulty["Adjusted Difficulty Level"]
+```
+
+**Diagram sources**
+- [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
+- [curriculums.py:144-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L144-L175)
+
+**Section sources**
+- [curriculums.py:24-106](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L24-L106)
+- [curriculums.py:144-175](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/mdp/curriculums.py#L144-L175)
+
+## Navigation Environment Configuration
+
+### Environment Setup and Parameters
+The navigation environments provide comprehensive configuration options for both flat and rough terrain navigation with specialized parameters for pose command tracking.
+
+**Updated** Enhanced with navigation-specific environment parameters and curriculum integration
+
+#### Environment Parameters
+- **Simulation Settings**: Decimation, episode length, and physics parameters
+- **Scene Configuration**: Environment spacing and terrain setup
+- **Observation Scaling**: Specialized scaling for navigation tasks
+- **Action Clipping**: Joint position action scaling and clipping
+
+#### Navigation-Specific Parameters
+- **Pose Command Ranges**: Configurable position and heading command ranges
+- **Velocity Command Ranges**: Linear and angular velocity command specifications
+- **Reward Weighting**: Navigation-specific reward function weights
+- **Termination Conditions**: Terrain bounds and contact sensor termination
+
+```mermaid
+sequenceDiagram
+participant Env as "Navigation Environment"
+participant Config as "Environment Config"
+participant Robot as "Robot Asset"
+Config->>Env : Load navigation configuration
+Env->>Robot : Apply UNITREE_GO2_CFG
+Env->>Env : Configure pose command tracking
+Env->>Env : Set up terrain curriculum
+Env->>Env : Initialize navigation rewards
+Env-->>Robot : Ready for navigation training
+```
+
+**Diagram sources**
+- [navigation_env_cfg.go2:669-730](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L669-L730)
+
+**Section sources**
+- [navigation_env_cfg.go2:669-730](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L669-L730)
+- [navigation_env_cfg.go2:738-822](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L738-L822)
+
+### Flat vs Rough Terrain Navigation
+The navigation system provides both flat and rough terrain configurations with specialized adaptations for each environment type.
+
+**Updated** Enhanced with flat terrain navigation configuration and curriculum disabling
+
+#### Flat Terrain Configuration
+- **Plane Terrain**: Simple flat surface navigation
+- **Height Scanner Disabled**: No height scanning for flat terrain
+- **Terrain Curriculum Disabled**: No terrain difficulty progression
+- **Navigation Rewards Emphasis**: Pure pose command tracking without locomotion rewards
+
+#### Rough Terrain Configuration
+- **Complex Terrain**: Multi-level terrain with obstacles
+- **Height Scanning Enabled**: Height scanner for terrain navigation
+- **Terrain Curriculum Active**: Progressive difficulty scaling
+- **Hybrid Rewards**: Combined navigation and locomotion rewards
+
+```mermaid
+graph LR
+FlatNav["Flat Navigation<br/>Plane Terrain<br/>No Height Scanner<br/>Disabled Curriculum"]
+RoughNav["Rough Navigation<br/>Multi-Level Terrain<br/>Height Scanner<br/>Active Curriculum"]
+FlatNav --> PoseTracking["Pure Pose Command Tracking"]
+RoughNav --> HybridRewards["Hybrid Navigation/Locomotion Rewards"]
+```
+
+**Diagram sources**
+- [navigation_env_cfg.go2:837-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L837-L875)
+
+**Section sources**
+- [navigation_env_cfg.go2:837-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L837-L875)
+
+## Navigation Agent Configurations
+
+### Reinforcement Learning Agent Setup
+The navigation system provides specialized agent configurations for both RSL-RL and SKRL frameworks with different training approaches and hyperparameters.
+
+**Updated** Added comprehensive agent configurations for navigation training
+
+#### RSL-RL PPO Configuration
+- **Actor-Critic Architecture**: Custom hidden dimensions (512, 256, 128)
+- **Learning Hyperparameters**: Adaptive learning rate, KL divergence control
+- **Training Iterations**: 20,000 iterations for rough terrain, 5,000 for flat terrain
+- **Experiment Naming**: Unitree Go2 navigation experiments
+
+#### SKRL PPO Configuration
+- **Model Architecture**: Gaussian policy with deterministic value network
+- **Network Layers**: Two-layer MLP with ELU activations
+- **Training Parameters**: Sequential trainer with configurable timesteps
+- **Memory Management**: Random memory with automatic sizing
+
+```mermaid
+graph TB
+RSLAgent["RSL-RL PPO Agent<br/>Actor-Critic: 512,256,128<br/>Learning Rate: 1e-3<br/>Iterations: 20,000"]
+SKRLAgent["SKRL PPO Agent<br/>Gaussian Policy<br/>MLP: 128,128<br/>ELU Activations<br/>Timesteps: 12,000"]
+RSLAgent --> RoughTrain["Rough Terrain Training"]
+RSLAgent --> FlatTrain["Flat Terrain Training"]
+SKRLAgent --> FlatTrain
+```
+
+**Diagram sources**
+- [rsl_rl_ppo_cfg.go2:11-47](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/rsl_rl_ppo_cfg.py#L11-L47)
+- [skrl_flat_ppo_cfg.yaml:11-86](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/skrl_flat_ppo_cfg.yaml#L11-L86)
+
+**Section sources**
+- [rsl_rl_ppo_cfg.go2:11-47](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/rsl_rl_ppo_cfg.py#L11-L47)
+- [skrl_flat_ppo_cfg.yaml:11-86](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/agents/skrl_flat_ppo_cfg.yaml#L11-L86)
+
 ## Dependency Analysis
 - Environment configurations depend on robot assets for spawning and actuator definitions.
 - Go2W introduces a dual-actuator strategy: implicit actuators for legs and wheels, altering dynamics compared to pure DC motors.
 - **Enhanced Dependencies**: Go2 parkour system introduces dependencies on custom neural networks, terrain generation utilities, specialized MDP components, and curriculum parameter systems.
+- **New Dependencies**: Navigation training system depends on pose command generators, terrain-aware reward functions, and curriculum adaptation modules.
 
 ```mermaid
 graph LR
@@ -484,13 +783,18 @@ GOParkour["Enhanced Go2 Parkour System"] --> ActorNet["ActorCriticScan"]
 GOParkour --> TerrainGen["Enhanced Terrains"]
 GOParkour --> CustomMDP["Improved MDP"]
 GOParkour --> Curriculum["Terrain Curriculum"]
+NavEnv["Navigation Training System"] --> PoseCmd["Pose Command Generator"]
+NavEnv --> NavRewards["Navigation Rewards"]
+NavEnv --> NavCurriculum["Terrain Curriculum"]
+NavEnv --> NavCommands["Terrain-Aware Commands"]
 ```
 
 **Diagram sources**
 - [rough_env_cfg.go2:34-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2/rough_env_cfg.py#L34-L35)
 - [rough_env_cfg.go2w:76-77](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/unitree_go2w/rough_env_cfg.py#L76-L77)
 - [unitree.py:71-177](file://source/robot_lab/robot_lab/assets/unitree.py#L71-L177)
-- [rsl_rl_ppo_cfg.py:21-22](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L21-L22)
+- [rsl_rl_ppo_cfg.go2_parkour:21-22](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2_parkour/agents/rsl_rl_ppo_cfg.py#L21-L22)
+- [navigation_env_cfg.go2:644-875](file://source/robot_lab/robot_lab/tasks/manager_based/navigation/config/go2/navigation_env_cfg.py#L644-L875)
 
 **Section sources**
 - [rough_env_cfg.go2:34-35](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/unitree_go2/rough_env_cfg.py#L34-L35)
@@ -504,6 +808,7 @@ GOParkour --> Curriculum["Terrain Curriculum"]
 - Actuator modeling:
   - Go2W's wheels use implicit actuators with zero stiffness, emphasizing compliant rolling contact and reduced control complexity for wheel joints.
 - **Enhanced Considerations**: Go2 parkour system requires additional computational resources for custom neural networks, terrain generation, and curriculum management, but enables more sophisticated training scenarios with progressive difficulty scaling.
+- **New Considerations**: Navigation training system provides efficient pose command tracking with specialized reward functions and terrain-aware adaptations, suitable for both flat and rough terrain navigation tasks.
 
 ## Troubleshooting Guide
 - Validation of motor limits:
@@ -517,6 +822,11 @@ GOParkour --> Curriculum["Terrain Curriculum"]
   - Verify terrain generation parameters are within valid ranges and curriculum specifications are correct.
   - Check ablation study configurations for proper parameter combinations and observation dimension compatibility.
   - Validate observation dimension calculations and tensor shape compatibility in the neural network architecture.
+- **New Issues**: For navigation training system:
+  - Verify pose command ranges and terrain curriculum parameters are properly configured.
+  - Check terrain-aware command generators for pit terrain detection accuracy.
+  - Ensure navigation reward weights are balanced between position tracking and orientation control.
+  - Validate agent configuration compatibility with chosen RL framework (RSL-RL vs SKRL).
 
 **Section sources**
 - [unitree.py:107-116](file://source/robot_lab/robot_lab/assets/unitree.py#L107-L116)
@@ -525,11 +835,11 @@ GOParkour --> Curriculum["Terrain Curriculum"]
 - [rough_env_cfg.go2w:76-77](file://source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/unitree_go2w/rough_env_cfg.py#L76-L77)
 
 ## Conclusion
-The Unitree Go2 series integrates seamlessly with the Isaac Lab RL framework. Go2 relies on DC motors across all joints, while Go2W employs implicit actuators for legs and wheels, reflecting distinct locomotion strategies. The enhanced Go2 parkour training system provides a comprehensive self-contained package with custom RL configuration, advanced neural network architecture, enhanced terrain generation capabilities with curriculum support, and improved observation system documentation with detailed dimensional characteristics. The documented configurations, limits, and environment parameters enable reproducible simulations and informed selection between variants depending on terrain and mobility requirements.
+The Unitree Go2 series integrates seamlessly with the Isaac Lab RL framework. Go2 relies on DC motors across all joints, while Go2W employs implicit actuators for legs and wheels, reflecting distinct locomotion strategies. The enhanced Go2 parkour training system provides a comprehensive self-contained package with custom RL configuration, advanced neural network architecture, enhanced terrain generation capabilities with curriculum support, and improved observation system documentation with detailed dimensional characteristics. The newly added navigation training system enables pose command tracking with terrain-level curriculum support, specialized reward functions, and terrain-aware command generators. The documented configurations, limits, and environment parameters enable reproducible simulations and informed selection between variants depending on terrain and mobility requirements.
 
 ## Appendices
 
-### Selection Guidance: Go2 vs Go2W vs Enhanced Go2 Parkour
+### Selection Guidance: Go2 vs Go2W vs Enhanced Go2 Parkour vs Navigation System
 - Choose Go2 when:
   - Terrain requires robust foothold adaptability and dynamic balance.
   - Emphasis on bipedal-like legged locomotion with articulated feet.
@@ -541,9 +851,17 @@ The Unitree Go2 series integrates seamlessly with the Isaac Lab RL framework. Go
   - Advanced neural network architectures with curriculum support are beneficial.
   - Comprehensive ablation studies and enhanced observation system are needed.
   - Progressive difficulty scaling and terrain-level curriculum support are essential.
+- Choose Navigation Training System when:
+  - Pose command tracking and precise navigation are required.
+  - Terrain-level curriculum support for navigation tasks is beneficial.
+  - Specialized reward functions for position and orientation control are needed.
+  - Terrain-aware command generators with pit terrain restrictions are advantageous.
 - **Enhanced Comparison Highlights**:
   - Effort/velocity/stiffness/damping limits are consistent between variants for fair comparisons.
   - Go2W's higher center of mass improves ground clearance but may increase overturning risk on uneven terrain.
   - Enhanced Go2 parkour system provides the most sophisticated training capabilities with curriculum support but requires additional computational resources.
   - Improved observation system documentation enables better debugging and parameter tuning.
   - Terrain-level curriculum support enables progressive skill development with systematic difficulty scaling.
+  - Navigation training system provides specialized pose command tracking with terrain-aware adaptations.
+  - Navigation curriculum system enables progressive navigation difficulty scaling based on performance.
+  - Terrain-aware command generators ensure safe navigation on challenging terrains with pit detection and restrictions.
